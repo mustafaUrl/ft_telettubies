@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'applol',
+    #'applol',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'authlol',
+    'uimodule',
 ]
 
 REST_FRAMEWORK = {
@@ -70,7 +72,7 @@ MIDDLEWARE = [
 ]
 # settings.py dosyanızda kullanmak üzere özelleştirilmiş kimlik doğrulama sınıfını belirtin
 # settings.py
-AUTHENTICATION_BACKENDS = ['applol.models.EmailBackend']
+AUTHENTICATION_BACKENDS = ['authlol.models.EmailBackend']
 
 
 ROOT_URLCONF = 'testlol.urls'

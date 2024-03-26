@@ -12,7 +12,7 @@ function login() {
   const username_or_email = document.getElementById('login-username_or_email').value;
   const password = document.getElementById('login-password').value;
 
-  fetch('/api/login/', {
+  fetch('auth/login/', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ function register() {
   const email = document.getElementById('register-email').value;
   //const token = localStorage.getItem('jwt');
 
-  fetch('/api/register/', {
+  fetch('auth/register/', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json'
@@ -81,6 +81,8 @@ function fetchWithJwt(url, options = {}) {
 }
 
 function sendGetRequestWithJwt(url) {
+  checkAuthStatus();
+
   return fetchWithJwt(url, {
     method: 'GET',
     headers: {
@@ -93,7 +95,7 @@ const profileLink = document.getElementById('profile-link');
 
 profileLink.addEventListener('click', (event) => {
   event.preventDefault();
-  sendGetRequestWithJwt('/api/profile/')
+  sendGetRequestWithJwt('/guest/profile/')
     .then(response => {
       if (!response.ok) {
         throw new Error('Profil bilgileri alınamadı');
@@ -112,25 +114,21 @@ profileLink.addEventListener('click', (event) => {
     });
 });
 
-
-
   
-  async function changeContent(contentId) {
-    // HTML içeriğini JSON olarak iste
-    const response = await fetch(`http://127.0.0.1:8000/content/${contentId}`);
-    const jsonData = await response.json();
-  
-    // Gelen JSON'dan HTML içeriğini al
-    const htmlContent = jsonData.html_content;
-  
-    // Alınan HTML içeriğini main-content elementine ekle
-    document.getElementById('main-content').innerHTML = htmlContent;
-    
-    checkAuthStatus();
-    // History API kullanarak yeni bir durum ekle
-    history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
-   
+async function changeContent(contentId) {
+  if (localStorage.getItem('contentData') === null) {
+    const contentData = JSON.parse(document.getElementById('content-data').textContent);
+    localStorage.setItem('contentData', JSON.stringify(contentData));
   }
+  else {
+    var contentData = JSON.parse(localStorage.getItem('contentData'));
+  }
+  const htmlContent =contentData[contentId];
+  document.getElementById('main-content').innerHTML = htmlContent;
+  checkAuthStatus();
+  history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+ 
+}
 
   const homeLink = document.getElementById('home-link');
   const signInLink = document.getElementById('sign-in-link');
@@ -187,6 +185,8 @@ function checkAuthStatus() {
 
 document.addEventListener('DOMContentLoaded', (event) => {
   // Oturum durumunu kontrol etmek için bir fonksiyon
+  const contentData = JSON.parse(document.getElementById('content-data').textContent);
+  localStorage.setItem('contentData', JSON.stringify(contentData));
   checkAuthStatus();
 });
   // Sayfa yüklendiğinde oturum durumunu kontrol et
