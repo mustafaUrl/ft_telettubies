@@ -8,6 +8,7 @@ urlpatterns = [
     path('auth/', include('authlol.urls')),
    # path('', include('applol.urls')),
     path('',include('uimodule.urls')),
+    path('chat/', include('channellol.urls')),
 ]
 
 

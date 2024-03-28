@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'authlol',
     'uimodule',
+    'channels',
+    'channellol',
+    
 ]
 
 REST_FRAMEWORK = {
@@ -94,6 +98,13 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = 'testlol.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 WSGI_APPLICATION = 'testlol.wsgi.application'
 
