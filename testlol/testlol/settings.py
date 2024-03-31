@@ -54,7 +54,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    ]
+
 }
 
 from datetime import timedelta
@@ -74,8 +75,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-# settings.py dosyanızda kullanmak üzere özelleştirilmiş kimlik doğrulama sınıfını belirtin
-# settings.py
+
 AUTHENTICATION_BACKENDS = ['authlol.models.EmailBackend']
 
 

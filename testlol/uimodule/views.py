@@ -39,3 +39,8 @@ def user_profile(request):
         'email': request.user.email,
     }
     return JsonResponse(user_data)
+
+@api_view(['GET'])
+def test(request):
+    return render(request, 'test.html')
+
