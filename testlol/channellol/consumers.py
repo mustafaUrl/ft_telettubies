@@ -21,14 +21,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         username = text_data_json["username"]
-        await self.channel_layer.group_send(
-            self.roomGroupName,{
-                "type" : "sendMessage" ,
-                "message" : message , 
-                "username" : username ,
-            })
-    async def sendMessage(self , event) : 
+
+        # Eğer kullanıcı anonimse, hata mesajı gönder
+        if self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                "error": "UnauthorizedForChat",
+                "message": "You must be logged in to send messages."
+            }))
+        else:
+            # Kullanıcı anonim değilse, mesajı gönder
+            await self.channel_layer.group_send(
+                self.roomGroupName,{
+                    "type": "sendMessage",
+                    "message": message, 
+                    "username": username,
+                })
+    async def sendMessage(self, event):
         message = event["message"]
         username = event["username"]
-        await self.send(text_data = json.dumps({"message":message ,"username":username}))
+    
+        # Eğer kullanıcı anonimse, bu kısmı atla
+        if not self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                "message": message,
+                "username": username
+            }))
+    
+
+
+    # async def receive(self, text_data):
+    #     text_data_json = json.loads(text_data)
+    #     message = text_data_json["message"]
+    #     username = text_data_json["username"]
+    #     await self.channel_layer.group_send(
+    #         self.roomGroupName,{
+    #             "type" : "sendMessage" ,
+    #             "message" : message , 
+    #             "username" : username ,
+    #         })
+    # async def sendMessage(self , event) : 
+    #     message = event["message"]
+    #     username = event["username"]
+    #     await self.send(text_data = json.dumps({"message":message ,"username":username}))
       

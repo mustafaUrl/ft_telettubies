@@ -1,60 +1,145 @@
-function logout() {
-  // Sunucuya logout isteği gönder
-  fetch('auth/logout/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // JWT'nizi burada gönderin
-      'Authorization': 'Bearer ' + getCookie('accessToken')
-    }
-  }).then(response => {
-    // Gerekli temizlik işlemlerini yapın
-    // Örneğin, cookie'leri silin
-    deleteCookie('accessToken');
-    deleteCookie('refreshToken');
-    deleteCookie('username');
-    // Kullanıcıyı giriş sayfasına yönlendir
-    changeContent('sign-in');
+function logoutListener() {
+  document.getElementById('logout-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    fetch('auth/logout/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + getCookie('accessToken')
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(() => {
+      // Gerekli temizlik işlemlerini yapın
+      deleteCookie('accessToken');
+      deleteCookie('refreshToken');
+      deleteCookie('username');
+      closeSocket();
+
+      // Kullanıcıyı giriş sayfasına yönlendir
+      changeContent('sign-in');
+    })
+    .catch(error => {
+      console.error('There has been a problem with your fetch operation:', error);
+    });
   });
 }
 
+// document.addEventListener('logout-loaded', function() {
+//   // Logout içeriği için özel işlemler burada yapılır
+//   logoutListener();
+// });
 
 
-function login() {
-  const username_or_email = document.getElementById('login-username_or_email').value;
-  const password = document.getElementById('login-password').value;
+// 'sign-in' içeriği yüklendiğinde çalışacak olay dinleyicisi
+function signInListener() {
 
-  fetch('auth/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({username_or_email, password})
-  })
-  .then(response => response.json())
-  .then(data => {
-    if(data.access) {
-      // Access ve refresh token'ları cookie'ye kaydedin
-      console.log(data.access);
-      console.log(data.refresh);
-      console.log(data.username);
-      setCookie('accessToken', data.access, {secure: true});
-      setCookie('refreshToken', data.refresh, {secure: true});
-      setCookie('username', data.username, {secure: true});
-      // JavaScript tarafından erişilebilir cookie'ler için HttpOnly bayrağını kaldırın
-// setCookie('accessToken', data.access, {secure: true});
-// setCookie('refreshToken', data.refresh, {secure: true});
+    // Giriş formu işlevselliğini burada etkinleştir
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username_or_email = document.getElementById('InputUserOrEmail').value;
+      const password = document.getElementById('InputPassword').value;
 
-      // Login başarılı, ana sayfaya yönlendir
-      changeContent('user_profile'); // Örnek bir yönlendirme
-    } else {
-      // Hata mesajını göster
-      alert('Giriş başarısız: ' + data.error);
-    }
+      fetch('auth/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username_or_email, password })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.access) {
+          // Access ve refresh token'ları cookie'ye kaydedin
+          console.log(data.access);
+          console.log(data.refresh);
+          console.log(data.username);
+          // Cookie'leri güvenli bir şekilde ayarlayın
+          setCookie('accessToken', data.access, {secure: true});
+          setCookie('refreshToken', data.refresh, {secure: true});
+          setCookie('username', data.username, {secure: true});
+          openSocket();
+
+          // Login başarılı, ana sayfaya yönlendir
+          // window.location.href = '/user_profile'; // Örnek bir yönlendirme
+          changeContent('user_profile');
+        } else {
+          // Hata mesajını göster
+          alert('Giriş başarısız: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+      });
+    });
+  }
+
+  document.addEventListener('sign-in-loaded', function() {
+    // Sign-in içeriği için özel işlemler burada yapılır
+    signInListener();
   });
+
+
+  function registerListener() {
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.querySelector('[name="username"]').value;
+        const first_name = document.querySelector('[name="first_name"]').value;
+        const last_name = document.querySelector('[name="last_name"]').value;
+        const email = document.querySelector('[name="email"]').value;
+        const password = document.querySelector('[name="password"]').value;
+        const password_repeat = document.querySelector('[name="password_repeat"]').value;
+
+        // Şifrelerin eşleşip eşleşmediğini kontrol et
+        if(password !== password_repeat) {
+            alert('Passwords do not match.');
+            return;
+        }
+
+        fetch('auth/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, first_name, last_name, email, password })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data.success) {
+                // Kayıt başarılı, ana sayfaya yönlendir
+                changeContent('home');
+                console.log('Registration successful:', data.success);
+            } else {
+                // Hata mesajını göster
+                alert('Kayıt başarısız: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+    });
 }
 
-// Cookie ayarlama fonksiyonu
+document.addEventListener('sign-up-loaded', function() {
+  // Sign-in içeriği için özel işlemler burada yapılır
+  registerListener();
+});
+
 // Cookie ayarlama fonksiyonu
 function setCookie(name, value, options = {}) {
   options = {
@@ -101,32 +186,6 @@ function getCookie(name) {
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
   return null;
-}
-
-
-
-function register() {
-  const username = document.getElementById('register-username').value;
-  const password = document.getElementById('register-password').value;
-  const email = document.getElementById('register-email').value;
-  //const token = localStorage.getItem('jwt');
-
-  fetch('auth/register/', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({username, password, email})
-  })
-  .then(response => response.json())
-  .then(data => {
-      if(data.success) {
-        changeContent('home');
-        console.log(data.success);
-      } else {
-        console.log(data.error);
-      }
-  });
 }
 
 // JWT ile güvenli bir GET isteği gönderme fonksiyonu
@@ -194,34 +253,23 @@ async function changeContent(contentId) {
   else {
     var contentData = JSON.parse(localStorage.getItem('contentData'));
   }
-  const htmlContent =contentData[contentId];
-  document.getElementById('main-content').innerHTML = htmlContent;
+  if ( contentId !== 'logout' && contentData[contentId] === undefined) {
+    console.log('Content not found');
+    return;
+  }
+  if (contentId === 'logout') {
+    logoutListener();
+  }
+  else{
+
+    const htmlContent =contentData[contentId];
+    document.getElementById('main-content').innerHTML = htmlContent;
+    history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+    triggerContentLoad(contentId);
+  }
   checkAuthStatus();
-  history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
- 
+
 }
-
-  const homeLink = document.getElementById('home-link');
-  const signInLink = document.getElementById('sign-in-link');
-  const signUpLink = document.getElementById('sign-up-link');
-
-  homeLink.addEventListener('click', (event) => {
-    event.preventDefault();
-    changeContent('home');
-  });
-  
-  signInLink.addEventListener('click', (event) => {
-    event.preventDefault();
-    changeContent('sign-in');
-  });
-  
-  signUpLink.addEventListener('click', (event) => {
-    event.preventDefault();
-    changeContent('sign-up');
-  });
-
-
- 
 
 window.onpopstate = function(event) {
   if (event.state) {
@@ -231,38 +279,58 @@ window.onpopstate = function(event) {
 
 
 function checkAuthStatus() {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken =getCookie('accessToken');
   const signInLink = document.getElementById('sign-in-link');
   const signUpLink = document.getElementById('sign-up-link');
   const profileLink = document.getElementById('profile-link');
-  const logoutButton = document.querySelector('button[onclick="logout()"]');
-  const chat_boxlink = document.getElementById('chat_container');
+  const logoutLink = document.getElementById('logout-link');
+  const chat_boxlink = document.getElementById('chat_box');
 
-  // if (accessToken) {
-  //   // Kullanıcı oturum açmışsa, giriş ve kayıt linklerini gizle
-  //   signInLink.style.display = 'none';
-  //   signUpLink.style.display = 'none';
-  //   // Profil ve çıkış butonlarını göster
-  //   profileLink.style.display = 'block';
-  //   logoutButton.style.display = 'block';
-  //   chat_boxlink.style.display = 'block';
-  // } else {
-  //   // Kullanıcı oturum açmamışsa, profil ve çıkış butonlarını gizle
-  //   profileLink.style.display = 'none';
-  //   logoutButton.style.display = 'none';
-  //   chat_boxlink.style.display = 'block';
-  //   // Giriş ve kayıt linklerini göster
-  //   signInLink.style.display = 'block';
-  //   signUpLink.style.display = 'block';
-  // }
+  if (accessToken) {
+    // Kullanıcı oturum açmışsa, giriş ve kayıt linklerini gizle
+    signInLink.style.display = 'none';
+    signUpLink.style.display = 'none';
+    // Profil ve çıkış butonlarını göster
+    profileLink.style.display = 'block';
+    logoutLink.style.display = 'block';
+    chat_boxlink.style.display = 'block';
+  } else {
+    // Kullanıcı oturum açmamışsa, profil ve çıkış butonlarını gizle
+    profileLink.style.display = 'none';
+    logoutLink.style.display = 'none';
+    chat_boxlink.style.display = 'none';
+    // Giriş ve kayıt linklerini göster
+    signInLink.style.display = 'block';
+    signUpLink.style.display = 'block';
+  }
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-  // Oturum durumunu kontrol etmek için bir fonksiyon
+
+// JavaScript ile Dinamik İçerik Değiştirme
+document.addEventListener('DOMContentLoaded', function() {
+  // 'dynamic-content' sınıfına sahip tüm linkleri seç
   const contentData = JSON.parse(document.getElementById('content-data').textContent);
   localStorage.setItem('contentData', JSON.stringify(contentData));
   checkAuthStatus();
+  const dynamicLinks = document.querySelectorAll('.dynamic-content');
+
+  // Her bir link için olay dinleyici ekle
+  dynamicLinks.forEach(link => {
+    link.addEventListener('click', function(event) {
+      event.preventDefault();
+      const contentId = this.id.replace('-link', ''); // 'sign-in-link' -> 'sign-in'
+      changeContent(contentId);
+    });
+  });
 });
+
+
+// İçeriğin Yüklendiğini Belirten Özel Bir Olayı Tetikleyen Fonksiyon
+function triggerContentLoad(contentId) {
+  const event = new Event(contentId + '-loaded');
+  document.dispatchEvent(event);
+}
+
   // Sayfa yüklendiğinde oturum durumunu kontrol et
  // checkAuthStatus();
 
@@ -291,39 +359,107 @@ document.addEventListener('DOMContentLoaded', (event) => {
   // });
 
 //---websockets---
-const chatSocket = new WebSocket('ws://' + window.location.host + '/');
+// const chatSocket = new WebSocket('ws://' + window.location.host + '/');
 
-// Mesaj gönderme işlevi
+// // Mesaj gönderme işlevi
+// document.getElementById('chat_send').onclick = function() {
+//   const messageInput = document.getElementById('chat_input');
+//   const message = messageInput.value;
+//   // 'username' anahtarını mesaj objesine ekleyin.
+//   // const username = localStorage.getItem('username');
+//   const username = getCookie('username') // veya localStorage
+
+//   chatSocket.send(JSON.stringify({ 'message': message, 'username': username }));
+//   messageInput.value = '';
+// };
+
+
+// // Enter tuşu ile mesaj gönderme
+// document.getElementById('chat_input').onkeypress = function(e) {
+//     if (e.keyCode === 13) {  // Enter tuşu
+//         document.getElementById('chat_send').click();
+//     }
+// };
+
+// // Gelen mesajları işleme
+// chatSocket.onmessage = function(e) {
+// const data = JSON.parse(e.data);
+// const chatMessages = document.getElementById('chat_messages');
+// const messageDiv = document.createElement('div');
+// // Kullanıcı adını ve mesajı formatlayın.
+// messageDiv.textContent = data.username + ': ' + data.message;
+// chatMessages.appendChild(messageDiv);
+// chatMessages.scrollTop = chatMessages.scrollHeight;  // Otomatik kaydırma
+// };
+
+// chatSocket.onclose = function(e) {
+//     console.error('Chat socket closed unexpectedly');
+// };
+
+// Chatbox'ı açıp kapatma fonksiyonu
+// document.getElementById('chat_toggle').onclick = function() {
+//   var chatContainer = document.getElementById('chat_container');
+//   var isClosed = chatContainer.style.height === '0px';
+//   chatContainer.style.height = isClosed ? '400px' : '0px';
+//   chatContainer.style.overflow = isClosed ? 'auto' : 'hidden';
+// };
+
+
+
+  // JavaScript
+  document.getElementById('chat_bar').addEventListener('click', function() {
+    var chatContainer = document.getElementById('chat_container');
+    var chatBar = document.getElementById('chat_bar');
+    var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
+  
+    // Sohbet penceresinin yüksekliğini ve gri çubuğun alt pozisyonunu güncelle
+    chatContainer.style.height = isClosed ? '300px' : '0px';
+    chatBar.style.bottom = isClosed ? '310px' : '10px'; // Gri çubuğun alt pozisyonunu ayarla
+  });
+  
+  
+
+let chatSocket;
+
+function openSocket() {
+  // WebSocket bağlantısını açan fonksiyon
+  chatSocket = new WebSocket('ws://' + window.location.host + '/?token=' + getCookie('accessToken'));
+
+  chatSocket.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+    var chatMessages = document.getElementById('chat_messages');
+    var messageDiv = document.createElement('div');
+    messageDiv.textContent = data.username + ': ' + data.message;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  };
+
+  chatSocket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  };
+}
+
+function closeSocket() {
+  // WebSocket bağlantısını kapatan fonksiyon
+  if (chatSocket) {
+    chatSocket.close();
+  }
+}
+
 document.getElementById('chat_send').onclick = function() {
-  const messageInput = document.getElementById('chat_input');
-  const message = messageInput.value;
-  // 'username' anahtarını mesaj objesine ekleyin.
-  // const username = localStorage.getItem('username');
-  const username = getCookie('username') // veya localStorage
+  var messageInput = document.getElementById('chat_input');
+  var message = messageInput.value;
+  const username = getCookie('username');
 
-  chatSocket.send(JSON.stringify({ 'message': message, 'username': username }));
+  if (chatSocket) {
+    chatSocket.send(JSON.stringify({ 'message': message, 'username': username }));
+  }
   messageInput.value = '';
 };
 
-
-// Enter tuşu ile mesaj gönderme
 document.getElementById('chat_input').onkeypress = function(e) {
-    if (e.keyCode === 13) {  // Enter tuşu
-        document.getElementById('chat_send').click();
-    }
+  if (e.keyCode === 13) {  // Enter tuşu
+    document.getElementById('chat_send').click();
+  }
 };
 
-// Gelen mesajları işleme
-chatSocket.onmessage = function(e) {
-const data = JSON.parse(e.data);
-const chatMessages = document.getElementById('chat_messages');
-const messageDiv = document.createElement('div');
-// Kullanıcı adını ve mesajı formatlayın.
-messageDiv.textContent = data.username + ': ' + data.message;
-chatMessages.appendChild(messageDiv);
-chatMessages.scrollTop = chatMessages.scrollHeight;  // Otomatik kaydırma
-};
-
-chatSocket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
-};

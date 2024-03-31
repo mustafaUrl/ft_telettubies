@@ -115,14 +115,17 @@ def login_view(request):
         return Response({'error': 'Invalid credentials or inactive user.'}, status=400)
 
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
     email = request.data.get('email')
+    first_name = request.data.get('first_name')  # İlk isim için alan eklendi
+    last_name = request.data.get('last_name')    # Soyisim için alan eklendi
 
-    if not all([username, password, email]):
+    if not all([username, password, email, first_name, last_name]):
         return Response({'error': 'All fields are required.'}, status=400)
 
     if User.objects.filter(username=username).exists():
@@ -131,10 +134,18 @@ def register_view(request):
     if User.objects.filter(email=email).exists():
         return Response({'error': 'Email already exists.'}, status=400)
 
-    # Kullanıcıyı oluştur ve aktif olarak işaretle
-    user = User.objects.create_user(username=username, email=email, password=password, is_active=True)
+    # Kullanıcıyı oluştur, ilk ve soyisimleri ayarla ve aktif olarak işaretle
+    user = User.objects.create_user(
+        username=username, 
+        email=email, 
+        password=password, 
+        first_name=first_name, 
+        last_name=last_name,
+        is_active=True
+    )
     user.save()
     return Response({'success': 'User created successfully.'})
+
 
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticated])

@@ -1,0 +1,38 @@
+  #chat_container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    border: 1px solid #6cd2ae;
+    padding: 10px;
+    overflow: hidden;
+    transition: height 0.5s;
+    height: 0;
+    z-index: 1000;
+  }
+
+  #chat_bar {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 20px;
+    background: #0d61d7;
+    cursor: pointer;
+    z-index: 1001;
+  }
+
+  #chat_messages {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+
+  #chat_input {
+    width: calc(100% - 60px);
+    margin-right: 10px;
+  }
+
+  #chat_send {
+    width: 40px;
+  }

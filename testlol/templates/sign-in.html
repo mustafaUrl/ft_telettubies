@@ -1,4 +1,4 @@
-<div id="login-container">
+{% comment %} <div id="login-container">
     <h2>Giriş Yap</h2>
     <form id="login-form">
         <label for="login-username_or_email">Kullanıcı Adı:</label>
@@ -7,4 +7,52 @@
         <input type="password" id="login-password" required>
         <button type="button" onclick="login()">Giriş Yap</button>
     </form>
+</div> {% endcomment %}
+{% load static %}
+
+<div  id="login-container" class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-12 col-xl-10">
+            <div class="card shadow-lg o-hidden border-0 my-5">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-flex">
+                            <div class="flex-grow-1 bg-login-image" style="background-image: url({% static 'img/42.png' %});background-size: cover; "></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h4 class="text-dark mb-4">Welcome Back!</h4>
+                                </div>
+                                <form id="login-form" class="user">
+                                    <div class="mb-3">
+                                        <input id="InputUserOrEmail" class="form-control form-control-user" type="text" aria-describedby="emailHelp" placeholder="Username or Email" name="username_or_email" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <input id="InputPassword" class="form-control form-control-user" type="password" placeholder="Password" name="password" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="custom-control custom-checkbox small">
+                                            <div class="form-check">
+                                                <input id="formCheck-1" class="form-check-input custom-control-input" type="checkbox" />
+                                                <label class="form-check-label custom-control-label" for="formCheck-1">Remember Me</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary d-block btn-user w-100" type="submit">Login</button>
+                                    <hr />
+                                    <a class="btn btn-primary d-block btn-google btn-user w-100 mb-2" role="button">
+                                        <i class="fab fa-google"></i>  Login with Google
+                                    </a>
+                                    <hr />
+                                </form>                                
+                                <div class="text-center"><a class="small" href="">Forgot Password?</a></div>
+                                <div class="text-center"><a class="small" href="">Create an Account!</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
