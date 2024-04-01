@@ -9,6 +9,7 @@ urlpatterns = [
    # path('', include('applol.urls')),
     path('',include('uimodule.urls')),
     path('chat/', include('channellol.urls')),
+    path('user/', include('userlol.urls')),
 ]
 
 

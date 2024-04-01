@@ -72,7 +72,7 @@ function signInListener() {
 
           // Login başarılı, ana sayfaya yönlendir
           // window.location.href = '/user_profile'; // Örnek bir yönlendirme
-          changeContent('user_profile');
+          changeContent('home');
         } else {
           // Hata mesajını göster
           alert('Giriş başarısız: ' + data.error);
@@ -139,6 +139,169 @@ document.addEventListener('sign-up-loaded', function() {
   // Sign-in içeriği için özel işlemler burada yapılır
   registerListener();
 });
+
+
+//-------
+
+function sendPostUserRequest(action, friend_username = null) {
+  return new Promise((resolve, reject) => {
+    const accessToken = getCookie('accessToken');
+    const headers = new Headers({
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+    });
+
+    const bodyData = { 'action': action };
+    if (friend_username) {
+        bodyData['friend_username'] = friend_username;
+    }
+    const body = JSON.stringify(bodyData);
+    fetch('user/user_actions/', {
+        method: 'POST',
+        headers: headers,
+        body: body
+    })
+    .then(response => response.json())
+    .then(data => resolve(data))
+    .catch(error => reject(error));
+  });
+}
+
+function pendingFriendRequests() {
+  sendPostUserRequest('list_pending_friend_requests')
+  .then(data => {
+    const list = document.getElementById('pendingFriendRequests');
+    // Mevcut listeyi temizle
+    list.innerHTML = '';
+    // Yeni istekler için 'li' elementleri ve butonlar oluştur
+    data.pending_requests.forEach(request => {
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+      // Kullanıcı adını gösteren span elementi
+      const usernameSpan = document.createElement('span');
+      usernameSpan.textContent = request.from_user;
+
+      // Kabul Et butonu
+      const acceptBtn = document.createElement('button');
+      acceptBtn.className = 'btn btn-success btn-sm';
+      acceptBtn.textContent = 'Kabul Et';
+      acceptBtn.onclick = function() { acceptFriendRequest(request.from_user); };
+
+      // Reddet butonu
+      const rejectBtn = document.createElement('button');
+      rejectBtn.className = 'btn btn-danger btn-sm';
+      rejectBtn.textContent = 'Reddet';
+      rejectBtn.onclick = function() { rejectFriendRequest(request.from_user); };
+
+      // 'li' elementine kullanıcı adı ve butonları ekle
+      listItem.appendChild(usernameSpan);
+      listItem.appendChild(acceptBtn);
+      listItem.appendChild(rejectBtn);
+
+      // Listeye 'li' elementini ekle
+      list.appendChild(listItem);
+    });
+  })
+  .catch(error => console.error('Bekleyen arkadaşlık istekleri alınırken hata oluştu:', error));
+}
+
+// Arkadaşlık isteğini kabul etme
+function acceptFriendRequest(friendUsername) {
+  sendPostUserRequest('accept_friend_request', friendUsername)
+    .then(data => {
+      if (data.success) {
+        console.log('Arkadaşlık isteği kabul edildi:', data);
+      } else {
+        console.error('Hata:', data.error);
+      }
+    })
+    .catch(error => console.error('İstek sırasında hata oluştu:', error));
+}
+
+// Arkadaşlık isteğini reddetme
+function rejectFriendRequest(friendUsername) {
+  sendPostUserRequest('reject_friend_request', friendUsername)
+    .then(data => {
+      if (data.success) {
+        console.log('Arkadaşlık isteği reddedildi:', data);
+      } else {
+        console.error('Hata:', data.error);
+      }
+    })
+    .catch(error => console.error('İstek sırasında hata oluştu:', error));
+}
+
+// Arkadaş listesini görüntüleme
+function listFriends() {
+  sendPostUserRequest('list_friends')
+    .then(data => {
+      if (data.friends) {
+        console.log('Arkadaş listesi:', data.friends);
+      } else {
+        console.error('Hata:', data.error);
+      }
+    })
+    .catch(error => console.error('İstek sırasında hata oluştu:', error));
+}
+
+
+function profileListener() {
+  document.getElementById('add_friend').addEventListener('click', function(e) {
+      e.preventDefault();
+      const friend_username = document.getElementById('friend_usernameInput').value;
+      sendPostUserRequest('add_friend', friend_username);
+  });
+
+  pendingFriendRequests();
+  listFriends();
+
+  const buttons = document.querySelectorAll('button:not(#add_friend)');
+  buttons.forEach(button => {
+      button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const action = this.id;
+          const friendId = this.dataset.friendId;
+          sendPostUserRequest(action, friendId);
+      });
+  });
+}
+
+// Arkadaş listesini getirme ve düğmeleri oluşturma
+// function getFriends() {
+//   sendPostRequest('get_friends');
+//   // Arkadaş listesi alındığında aşağıdaki gibi düğmeleri oluşturun
+//   // Örnek arkadaş listesi verisi
+//   const friends = [
+//       { id: 1, username: 'friend1' },
+//       { id: 2, username: 'friend2' }
+//       // ...
+//   ];
+//   const friendsListDiv = document.getElementById('friendsList');
+//   friends.forEach(friend => {
+//       const div = document.createElement('div');
+//       div.className = 'friend-actions';
+//       div.innerHTML = `
+//           <span class="friend-name">${friend.username}</span>
+//           <button id="ban_user" data-friend-id="${friend.id}">Block</button>
+//           <button id="mute_user" data-friend-id="${friend.id}">Mute</button>
+//           <button id="remove_friend" data-friend-id="${friend.id}">Remove</button>
+//       `;
+//       friendsListDiv.appendChild(div);
+//   });
+//   profileListener(); // Düğmelere olay dinleyicileri ekleyin
+// }
+
+
+
+// -------
+
+document.addEventListener('profile-loaded', function() {
+  // Sign-in içeriği için özel işlemler burada yapılır
+  profileListener();
+  // getFriends();
+});
+
 
 // Cookie ayarlama fonksiyonu
 function setCookie(name, value, options = {}) {
@@ -228,19 +391,19 @@ function sendGetRequestWithJwt(url) {
 }
 
 // Profil linkine tıklama olayını dinle
-const profileLink = document.getElementById('profile-link');
-profileLink.addEventListener('click', (event) => {
-  event.preventDefault();
-  sendGetRequestWithJwt('guest/profile/')
-    .then(data => {
-      // Profil bilgilerini göstermek için bir fonksiyon çağırabilirsiniz
-      // displayProfile(data);
-    })
-    .catch(error => {
-      // Hata mesajını kullanıcıya göstermek için bir fonksiyon çağırabilirsiniz
-      // showError(error);
-    });
-});
+// const profileLink = document.getElementById('profile-link');
+// profileLink.addEventListener('click', (event) => {
+//   event.preventDefault();
+//   sendGetRequestWithJwt('guest/profile/')
+//     .then(data => {
+//       // Profil bilgilerini göstermek için bir fonksiyon çağırabilirsiniz
+//       // displayProfile(data);
+//     })
+//     .catch(error => {
+//       // Hata mesajını kullanıcıya göstermek için bir fonksiyon çağırabilirsiniz
+//       // showError(error);
+//     });
+// });
 
 
 
