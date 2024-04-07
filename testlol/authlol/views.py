@@ -4,8 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.signals import user_logged_in
-from django.db.models import Q
-
+from userlol.models import UserProfile
 User = get_user_model()
 from django.http import JsonResponse
 
@@ -81,6 +80,11 @@ def register_view(request):
         first_name=first_name, 
         last_name=last_name,
         is_active=True
+    )
+
+    UserProfile.objects.create(
+        user=user,
+        profile_picture='static/img/pp.jpeg'  # Varsayılan resmin yolu
     )
     user.save()
     return Response({'success': 'User created successfully.'})

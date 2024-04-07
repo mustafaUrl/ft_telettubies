@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from .models import FriendList, FriendRequest
+from .models import FriendList, FriendRequest, UserProfile
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -79,13 +79,52 @@ def remove_friend(request):
 @authentication_classes([JWTAuthentication])
 def list_friends(request):
     user = request.user
-    try:
-        friend_list = FriendList.objects.get(user=user)
-        friends = friend_list.friends.all()
-        friend_data = [{'id': friend.id, 'username': friend.username} for friend in friends]
-        return JsonResponse({'friends': friend_data})
-    except FriendList.DoesNotExist:
-        return JsonResponse({'error': 'Arkadaş listesi bulunamadı.'}, status=404)
+    friend_list, created = FriendList.objects.get_or_create(user=user)  # Nesne yoksa oluştur
+    friends = friend_list.friends.all()  # friend_list artık doğru nesne
+    friend_data = []
+    for friend in friends:
+        profile = UserProfile.objects.get(user=friend)
+        friend_data.append({
+            'id': friend.id,
+            'username': friend.username,
+            'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+            'online': friend.is_online(),  # Bu metodu User modelinize eklemeniz gerekecek.
+            'muted': friend in friend_list.muted.all()
+        })
+    return JsonResponse({'friends': friend_data})
+# def list_friends(request):
+#     user = request.user
+#     try:
+#         print("yyyyy")
+#         friend_list = FriendList.objects.get_or_create(user=user)
+#         print("xxxx")
+#         friends = friend_list.friends.all()
+#         print("zzzz")
+#         friend_data = []
+#         print("ssss")
+#         for friend in friends:
+#             profile = UserProfile.objects.get(user=friend)
+#             friend_data.append({
+#                 'id': friend.id,
+#                 'username': friend.username,
+#                 'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+#                 'online': friend.is_online(),  # Bu metodu User modelinize eklemeniz gerekecek.
+#                 'muted': friend in friend_list.muted.all()
+#             })
+#         return JsonResponse({'friends': friend_data})
+#         print("aaaa")
+#     except FriendList.DoesNotExist:
+#         return JsonResponse({'error': 'Arkadaş listesi bulunamadı.'}, status=404)
+
+# def list_friends(request):
+#     user = request.user
+#     try:
+#         friend_list = FriendList.objects.get(user=user)
+#         friends = friend_list.friends.all()
+#         friend_data = [{'id': friend.id, 'username': friend.username} for friend in friends]
+#         return JsonResponse({'friends': friend_data})
+#     except FriendList.DoesNotExist:
+#         return JsonResponse({'error': 'Arkadaş listesi bulunamadı.'}, status=404)
 
 # Kullanıcıyı banlama
 @permission_classes([IsAuthenticated])
@@ -231,6 +270,7 @@ def user_actions(request):
 
     if action in actions_list:
        action_func = actions_list[action]
+       print(action)
        return action_func(request)
 
     return JsonResponse({'success': 'İşlem başarılı.'})

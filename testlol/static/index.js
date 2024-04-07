@@ -230,12 +230,71 @@ function rejectFriendRequest(friendUsername) {
     .catch(error => console.error('İstek sırasında hata oluştu:', error));
 }
 
+// function updateFriendList(friendsData) {
+//   const tbody = document.querySelector('#friend-list tbody');
+//   tbody.innerHTML = ''; // Mevcut listeyi temizle
+
+//   friendsData.forEach(friend => {
+//     const tr = document.createElement('tr');
+//     tr.innerHTML = `
+//       <td><img class="rounded-circle me-2" width="30" height="30" src="{% static "${friend.profile_picture}" %}" />${friend.username}</td>
+//       <td><button class="btn ${friend.online ? 'btn-success' : 'btn-secondary'}" type="button">${friend.online ? 'online' : 'offline'}</button></td>
+//       <td><button class="btn btn-warning" type="button">message</button></td>
+//       <td><button class="btn btn-info" type="button">invite</button></td>
+//       <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
+//       <td>
+//         <div class="btn-group">
+//           <button class="btn btn-primary" type="button">other</button>
+//           <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
+//           <div class="dropdown-menu">
+//             <a class="dropdown-item" href="#">First Item</a>
+//             <a class="dropdown-item" href="#">Second Item</a>
+//             <a class="dropdown-item" href="#">Third Item</a>
+//           </div>
+//         </div>
+//       </td>
+//     `;
+//     tbody.appendChild(tr);
+//   });
+// }
+
+function updateFriendList(friendsData) {
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = ''; // Mevcut listeyi temizle
+
+  friendsData.forEach(friend => {
+    const tr = document.createElement('tr');
+    const profilePictureUrl = friend.profile_picture || 'default-profile-picture-url'; // Varsayılan resim URL'si
+    tr.innerHTML = `
+      <td><img class="rounded-circle me-2" width="30" height="30" src="${profilePictureUrl}" alt="Profile Picture"/>${friend.username}</td>
+      <td><button class="btn ${friend.online ? 'btn-success' : 'btn-secondary'}" type="button">${friend.online ? 'online' : 'offline'}</button></td>
+      <td><button class="btn btn-warning" type="button">message</button></td>
+      <td><button class="btn btn-info" type="button">invite</button></td>
+      <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-primary" type="button">other</button>
+          <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">First Item</a>
+            <a class="dropdown-item" href="#">Second Item</a>
+            <a class="dropdown-item" href="#">Third Item</a>
+          </div>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+
 // Arkadaş listesini görüntüleme
 function listFriends() {
   sendPostUserRequest('list_friends')
     .then(data => {
       if (data.friends) {
         console.log('Arkadaş listesi:', data.friends);
+        updateFriendList(data.friends);
       } else {
         console.error('Hata:', data.error);
       }
@@ -245,14 +304,23 @@ function listFriends() {
 
 
 function profileListener() {
-  // document.getElementById('add_friend').addEventListener('click', function(e) {
-  //     e.preventDefault();
-  //     const friend_username = document.getElementById('friend_usernameInput').value;
-  //     sendPostUserRequest('add_friend', friend_username);
-  // });
+ 
+  
+  const dynamicLinks = document.querySelectorAll('.dynamic-profile');
+
+  // Her bir link için olay dinleyici ekle
+  dynamicLinks.forEach(link => {
+    link.addEventListener('click', function(event) {
+      event.preventDefault();
+      const contentId = this.id.replace('-link', ''); // 'sign-in-link' -> 'sign-in'
+      changeContentProfile(contentId);
+    });
+  });
+
+ 
 
   // pendingFriendRequests();
-  // listFriends();
+    //listFriends();
 
   // const buttons = document.querySelectorAll('button:not(#add_friend)');
   // buttons.forEach(button => {
@@ -300,6 +368,47 @@ function profileListener() {
     const htmlContent =contentData[contentId];
     document.getElementById('main-content').innerHTML = htmlContent;
     history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+    triggerContentLoad(contentId);
+  }
+  checkAuthStatus();
+
+}
+
+function addfriendListener() {
+   document.getElementById('add_friend').addEventListener('click', function(e) {
+      e.preventDefault();
+      const friend_username = document.getElementById('friend_usernameInput').value;
+      sendPostUserRequest('add_friend', friend_username);
+  });
+}
+
+async function changeContentProfile(contentId) {
+  console.log('İçerik değiştiriliyor:', contentId);
+  if (localStorage.getItem('contentData') === null) {
+    const contentData = JSON.parse(document.getElementById('content-data').textContent);
+    localStorage.setItem('contentData', JSON.stringify(contentData));
+  }
+  else {
+    var contentData = JSON.parse(localStorage.getItem('contentData'));
+  }
+  if ( contentId !== 'logout' && contentData[contentId] === undefined) {
+    console.log('Content not found');
+    return;
+  }
+  if (contentId === 'logout') {
+    logoutListener();
+  }
+  else{
+    
+    const htmlContent =contentData[contentId];
+    document.getElementById('content-profile').innerHTML = htmlContent;
+    history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+    if (contentId === 'friends') {
+      listFriends();
+      pendingFriendRequests();
+      addfriendListener();
+
+    }
     triggerContentLoad(contentId);
   }
   checkAuthStatus();
@@ -566,6 +675,7 @@ function getCookie(name) {
 
  document.addEventListener('profile-loaded', function() {
   // Sign-in içeriği için özel işlemler burada yapılır
+
   profileListener();
   // getFriends();
 });
@@ -651,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function triggerContentLoad(contentId) {
   const event = new Event(contentId + '-loaded');
   document.dispatchEvent(event);
-  hrefListener();
+  //hrefListener();
   // Diğer özel olaylar burada tetiklenebilir
 }
 

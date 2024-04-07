@@ -1,0 +1,76 @@
+
+<div>
+    <label for="friendIdInput">Friend ID:</label>
+    <input type="text" id="friend_usernameInput" name="friendIdInput">
+    <button id="add_friend">Friend Add</button>
+</div>
+
+
+<div class="card" style="width: 18rem;">
+    <div class="card-header">
+        Pending Friend Requests
+    </div>
+    <ul class="list-group list-group-flush" id="pendingFriendRequests">
+    </ul>
+</div> 
+
+
+<div class="container-fluid">
+    <div class="card shadow">
+        <div class="card-body">
+            <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
+                <table id="dataTable" class="table my-0">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th>message</th>
+                            <th>invite</th>
+                            <th>mute</th>
+                            <th>other</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Username</strong></td>
+                            <td><strong>Status</strong></td>
+                            <td><strong>message</strong></td>
+                            <td><strong>invite</strong></td>
+                            <td><strong>mute</strong></td>
+                            <td><strong>other</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% comment %} <tr>
+    <td><img class="rounded-circle me-2" width="30" height="30" src="avatars/avatar1.jpeg" />Airi Satou</td>
+    <td><button class="btn btn-success" type="button">online</button></td>
+    <td><button class="btn btn-warning" type="button">message</button></td>
+    <td><button class="btn btn-info" type="button">invite</button></td>
+    <td><button class="btn btn-success" type="button">mute</button></td>
+    <td>
+        <div class="btn-group"><button class="btn btn-primary" type="button">other</button><button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
+            <div class="dropdown-menu"><a class="dropdown-item" href="#">First Item</a><a class="dropdown-item" href="#">Second Item</a><a class="dropdown-item" href="#">Third Item</a></div>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td><img class="rounded-circle me-2" width="30" height="30" src="avatars/avatar1.jpeg" />Airi Satou</td>
+    <td><button class="btn btn-secondary" type="button">offline</button></td>
+    <td><button class="btn btn-warning" type="button">message</button></td>
+    <td><button class="btn btn-info" type="button">invite</button></td>
+    <td><button class="btn btn-danger" type="button">unmute</button></td>
+    <td>
+        <div class="btn-group"><button class="btn btn-primary" type="button">other</button><button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
+            <div class="dropdown-menu"><a class="dropdown-item" href="#">First Item</a><a class="dropdown-item" href="#">Second Item</a><a class="dropdown-item" href="#">Third Item</a></div>
+        </div>
+    </td>
+</tr> {% endcomment %}
