@@ -36,3 +36,54 @@
   #chat_send {
     width: 40px;
   }
+
+  .profile-container {
+    position: relative;
+  }
+
+  .profile-background {
+    width: 100%;
+    height: 250px;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    padding-left: 20px; /* Adjust as needed */
+  }
+
+  .profile-picture {
+    width: 200px; /* Adjust as needed */
+    height: 200px; /* Adjust as needed */
+    border-radius: 50%;
+    border: 3px solid white;
+  }
+
+  .profile-row {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .link-container {
+    border-right: 1px solid #000000;
+    padding: 12px;
+    width: 220px;
+  }
+
+  .content-container {
+    flex-grow: 1;
+    padding: 12px;
+  }
+
+  /* 
+  .link-container { 
+    padding: 12px;
+    float: left;
+    width: 220px;
+  }
+  
+  
+  
+  .content-container {
+    margin-left: 220px; 
+    padding: 12px;
+  }*/

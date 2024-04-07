@@ -6,63 +6,9 @@ from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 
-# Arkadaş ekleme
-# @require_http_methods(["POST"])
-# def add_friend(request):
-#     user = request.user
-#     friend_id = request.data.get('friend_id')
-#     try:
-#         friend = User.objects.get(id=friend_id)
-#     except User.DoesNotExist:
-#         return JsonResponse({'error': 'Arkadaş bulunamadı.'}, status=404)
 
-#     if user.id == friend.id:
-#         return JsonResponse({'error': 'Kullanıcı kendini ekleyemez.'}, status=400)
-
-#     friend_list, created = FriendList.objects.get_or_create(user=user)
-
-#     if friend in friend_list.friends.all():
-#         return JsonResponse({'error': 'Bu kullanıcı zaten arkadaş listesinde.'}, status=400)
-
-#     if friend in friend_list.banned.all():
-#         return JsonResponse({'error': 'Bu kullanıcı banlanmış.'}, status=400)
-
-#     friend_list.friends.add(friend)
-#     return JsonResponse({'success': 'Arkadaş başarıyla eklendi.'})
-
-
-# def add_friend(request):
-#     user = request.user
-#     friend_username = request.data.get('friend_username')
-#     try:
-#         friend = User.objects.get(username=friend_username)
-#     except User.DoesNotExist:
-#         return JsonResponse({'error': 'Kullanıcı bulunamadı.'}, status=404)
-
-#     if user.username == friend.username:
-#         return JsonResponse({'error': 'Kullanıcı kendini ekleyemez.'}, status=400)
-
-#     friend_list, created = FriendList.objects.get_or_create(user=user)
-
-#     if friend in friend_list.friends.all():
-#         return JsonResponse({'error': 'Bu kullanıcı zaten arkadaş listesinde.'}, status=400)
-
-#     if friend in friend_list.banned.all():
-#         return JsonResponse({'error': 'Bu kullanıcı banlanmış.'}, status=400)
-
-#     friend_list.friends.add(friend)
-#     return JsonResponse({'success': 'Arkadaş başarıyla eklendi.'})
-
-# def accept_friend_request(request):
-#     user = request.user
-#     friend_username = request.data.get('friend_username')
-
-#     try:
-#         friend_request = FriendRequest.objects.get(from_user__username=friend_username, to_user=user)
-#         friend_request.accept()  # Arkadaşlık isteğini kabul etmek için bir metod varsayıyorum
-#         return JsonResponse({'success': 'Arkadaşlık isteği kabul edildi.'})
-#     except FriendRequest.DoesNotExist:
-#         return JsonResponse({'error': 'Arkadaşlık isteği bulunamadı.'}, status=404)
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def send_friend_request(request):
     user = request.user
     friend_username = request.data.get('friend_username')
@@ -70,12 +16,28 @@ def send_friend_request(request):
         friend = User.objects.get(username=friend_username)
         if friend == user:
             return JsonResponse({'error': 'Kullanıcı kendini ekleyemez.'}, status=400)
-        FriendRequest.objects.create(from_user=user, to_user=friend)
-        return JsonResponse({'success': 'Arkadaşlık isteği gönderildi.'})
+        
+        # Zaten aktif bir istek var mı kontrol edin
+        if FriendList.objects.filter(user=user, friends=friend).exists():
+            return JsonResponse({'error': 'Bu kullanıcı zaten arkadaş listesinde.'}, status=400)
+
+        if FriendRequest.objects.filter(from_user=user, to_user=friend, is_active=True).exists():
+            return JsonResponse({'error': 'Zaten aktif bir arkadaşlık isteği var.'}, status=400)
+        elif FriendRequest.objects.filter(from_user=friend, to_user=user, is_active=True).exists():
+            # Karşı kullanıcıdan gelen isteği kabul edin
+            existing_request = FriendRequest.objects.get(from_user=friend, to_user=user, is_active=True)
+            existing_request.accept()
+            return JsonResponse({'success': 'Karşı kullanıcıdan gelen istek kabul edildi ve arkadaş olarak eklendi.'})
+        else:
+            # Yeni bir arkadaşlık isteği oluşturun
+            FriendRequest.objects.create(from_user=user, to_user=friend)
+            return JsonResponse({'success': 'Arkadaşlık isteği gönderildi.'})
     except User.DoesNotExist:
         return JsonResponse({'error': 'Kullanıcı bulunamadı.'}, status=404)
 
 # Arkadaşlık isteği kabul etme
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def accept_friend_request(request):
     user = request.user
     friend_username = request.data.get('friend_username')
@@ -87,6 +49,8 @@ def accept_friend_request(request):
         return JsonResponse({'error': 'Aktif arkadaşlık isteği bulunamadı.'}, status=404)
 
 # Arkadaşlık isteği reddetme
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def reject_friend_request(request):
     user = request.user
     friend_username = request.data.get('friend_username')
@@ -96,7 +60,11 @@ def reject_friend_request(request):
         return JsonResponse({'success': 'Arkadaşlık isteği reddedildi.'})
     except FriendRequest.DoesNotExist:
         return JsonResponse({'error': 'Aktif arkadaşlık isteği bulunamadı.'}, status=404)
+
 # Arkadaş silme
+
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def remove_friend(request):
     user = request.user
     friend_id = request.POST.get('friend_id')
@@ -106,6 +74,9 @@ def remove_friend(request):
     return JsonResponse({'success': 'Arkadaş başarıyla silindi.'})
 
 # Arkadaş listesini listeleme
+
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def list_friends(request):
     user = request.user
     try:
@@ -117,6 +88,8 @@ def list_friends(request):
         return JsonResponse({'error': 'Arkadaş listesi bulunamadı.'}, status=404)
 
 # Kullanıcıyı banlama
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def ban_user(request):
     user = request.user
     target_user_id = request.POST.get('friend_id')
@@ -134,6 +107,8 @@ def ban_user(request):
     return JsonResponse({'success': 'Kullanıcı başarıyla banlandı.'})
 
 # Kullanıcıyı banlamayı kaldırma
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def unban_user(request):
     user = request.user
     target_user_id = request.POST.get('friend_id')
@@ -143,6 +118,8 @@ def unban_user(request):
     return JsonResponse({'success': 'Kullanıcının banı başarıyla kaldırıldı.'})
 
 # Kullanıcıyı sessize alma
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def mute_user(request):
     user = request.user
     target_user_id = request.POST.get('friend_id')
@@ -160,6 +137,8 @@ def mute_user(request):
     return JsonResponse({'success': 'Kullanıcı başarıyla sessize alındı.'})
 
 # Kullanıcının sessizliğini kaldırma
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def unmute_user(request):
     user = request.user
     target_user_id = request.POST.get('friend_id')
@@ -169,6 +148,8 @@ def unmute_user(request):
     return JsonResponse({'success': 'Kullanıcının sessizliği başarıyla kaldırıldı.'})
 
 # Belirli bir arkadaşı getirme
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def get_friend(request):
     user = request.user
     friend_id = request.data.get('friend_id')
@@ -185,6 +166,8 @@ def get_friend(request):
         return JsonResponse({'error': 'Arkadaş bulunamadı.'}, status=404)
 
 # Banlanmış kullanıcıları getirme
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def get_banned(request):
     user = request.user
     friend_list = FriendList.objects.get(user=user)
@@ -192,41 +175,9 @@ def get_banned(request):
     banned_data = [{'id': user.id, 'username': user.username} for user in banned_users]
     return JsonResponse({'banned_users': banned_data})
 
-# Tüm arkadaşları getirme
-def get_friends(request):
-    user = request.user
-    friend_list = FriendList.objects.get(user=user)
-    friends = friend_list.friends.all()
-    friend_data = [{'id': friend.id, 'username': friend.username} for friend in friends]
-    return JsonResponse({'friends': friend_data})
-
-
-# # Arkadaşlık isteğini kabul etme
-# def acceptFriendRequest(request):
-#     user = request.user
-#     friend_id = request.data.get('friend_id')
-
-#     # Arkadaşlık isteği modelinizi ve mantığınızı bilmediğim için genel bir örnek veriyorum
-#     try:
-#         friend_request = FriendRequest.objects.get(from_user=friend_id, to_user=user.id)
-#         friend_request.accept()  # Arkadaşlık isteğini kabul etmek için bir metod varsayıyorum
-#         return JsonResponse({'success': 'Arkadaşlık isteği kabul edildi.'})
-#     except FriendRequest.DoesNotExist:
-#         return JsonResponse({'error': 'Arkadaşlık isteği bulunamadı.'}, status=404)
-
-# Arkadaşlık isteğini reddetme
-# def rejectFriendRequest(request):
-#     user = request.user
-#     friend_id = request.data.get('friend_id')
-
-#     try:
-#         friend_request = FriendRequest.objects.get(from_user=friend_id, to_user=user.id)
-#         friend_request.reject()  # Arkadaşlık isteğini reddetmek için bir metod varsayıyorum
-#         return JsonResponse({'success': 'Arkadaşlık isteği reddedildi.'})
-#     except FriendRequest.DoesNotExist:
-#         return JsonResponse({'error': 'Arkadaşlık isteği bulunamadı.'}, status=404)
-
 # Arkadaşlık isteğini iptal etme
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def cancel_friend_request(request):
     user = request.user
     friend_id = request.data.get('friend_id')
@@ -238,13 +189,14 @@ def cancel_friend_request(request):
     except FriendRequest.DoesNotExist:
         return JsonResponse({'error': 'Arkadaşlık isteği bulunamadı.'}, status=404)
 
-
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def list_pending_friend_requests(request):
     user = request.user
     pending_requests = FriendRequest.objects.filter(to_user=user, is_active=True)
 
     if not pending_requests.exists():
-        return JsonResponse({'message': 'Bekleyen arkadaşlık isteği yok.'})
+        return JsonResponse({'pending_requests': 'nonerequests'})
 
     pending_requests_list = [{'from_user': fr.from_user.username, 'to_user': fr.to_user.username} for fr in pending_requests]
     
@@ -262,7 +214,6 @@ actions_list = {
     'unmute_user': unmute_user,
     'get_friend': get_friend,
     'get_banned': get_banned,
-    'get_friends': get_friends,
     'accept_friend_request': accept_friend_request,
     'reject_friend_request': reject_friend_request,
     'cancel_friend_request': cancel_friend_request,

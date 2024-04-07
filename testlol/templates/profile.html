@@ -1,4 +1,3 @@
-    <h2>Friend Management</h2>
     {% comment %} <button id="add_friend">Send Friend Request</button>
     <button id="remove_friend">Remove Friend</button>
     <button id="list_friends">List Friend</button>
@@ -19,7 +18,7 @@
     <div id="friendsList"></div> {% endcomment %}
 
     <!-- Add more buttons for other actions -->
-
+{% comment %} 
     <div>
         <label for="friendIdInput">Friend ID:</label>
         <input type="text" id="friend_usernameInput" name="friendIdInput">
@@ -34,12 +33,38 @@
         <ul class="list-group list-group-flush" id="pendingFriendRequests">
             <!-- Bekleyen istekler burada listelenecek -->
         </ul>
-    </div>
+    </div> {% endcomment %}
     
+    {% load static %}
 
-
-
-
+    <div class="profile-container">
+        <div class="profile-background" style="background-image: url('{% static "img/orange.jpeg" %}');">
+          <img src="{% static "img/pp.jpeg" %}" class="profile-picture" alt="Profile Picture">
+        </div>
+      
+      <div class="profile-row">
+        <div class="link-container">
+          <!-- Navigation links -->
+          <section style="padding: 12px;">
+            <a class="btn btn-primary btn-lg dynamic-content" id="account-link" role="button">Account</a>
+            <hr />
+          </section>
+          <section style="padding: 12px;">
+            <a class="btn btn-primary btn-lg dynamic-content" id="friends-link" role="button">Friends</a>
+            <hr />
+          </section>
+          <section style="padding: 12px;">
+            <a class="btn btn-primary btn-lg dynamic-content" id="match_history-link" role="button">Match History</a>
+            <hr />
+          </section>
+        </div>
+        <div class="content-container">
+          <h2>Account</h2>
+          <p>Account content</p>
+        </div>
+      </div>
+      
+      
 
 
     {% comment %} <div class="card" style="width: 18rem;">
