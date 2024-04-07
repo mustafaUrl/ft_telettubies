@@ -652,6 +652,7 @@ function triggerContentLoad(contentId) {
   const event = new Event(contentId + '-loaded');
   document.dispatchEvent(event);
   hrefListener();
+  // Diğer özel olaylar burada tetiklenebilir
 }
 
   // Sayfa yüklendiğinde oturum durumunu kontrol et
