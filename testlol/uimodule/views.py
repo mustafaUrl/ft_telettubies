@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
-template_list = ['home', 'sign-in', 'sign-up', 'profile', 'profile_settings', 'friends']
+template_list = ['home', 'sign-in', 'sign-up', 'profile', 'account', 'friends']
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def index(request):

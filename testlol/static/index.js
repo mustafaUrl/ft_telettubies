@@ -230,33 +230,193 @@ function rejectFriendRequest(friendUsername) {
     .catch(error => console.error('İstek sırasında hata oluştu:', error));
 }
 
-// function updateFriendList(friendsData) {
-//   const tbody = document.querySelector('#friend-list tbody');
-//   tbody.innerHTML = ''; // Mevcut listeyi temizle
 
-//   friendsData.forEach(friend => {
-//     const tr = document.createElement('tr');
-//     tr.innerHTML = `
-//       <td><img class="rounded-circle me-2" width="30" height="30" src="{% static "${friend.profile_picture}" %}" />${friend.username}</td>
-//       <td><button class="btn ${friend.online ? 'btn-success' : 'btn-secondary'}" type="button">${friend.online ? 'online' : 'offline'}</button></td>
-//       <td><button class="btn btn-warning" type="button">message</button></td>
-//       <td><button class="btn btn-info" type="button">invite</button></td>
-//       <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
-//       <td>
-//         <div class="btn-group">
-//           <button class="btn btn-primary" type="button">other</button>
-//           <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
-//           <div class="dropdown-menu">
-//             <a class="dropdown-item" href="#">First Item</a>
-//             <a class="dropdown-item" href="#">Second Item</a>
-//             <a class="dropdown-item" href="#">Third Item</a>
-//           </div>
-//         </div>
-//       </td>
-//     `;
-//     tbody.appendChild(tr);
+
+// function accountListener() {
+
+//   const accessToken = getCookie('accessToken');
+
+
+//   document.querySelector('.btn-primary').addEventListener('click', function() {
+//     // Kullanıcıdan bir dosya seçmesini isteyen dosya seçim penceresini aç
+//     const fileInput = document.createElement('input');
+//     fileInput.type = 'file';
+//     fileInput.accept = 'image/*';
+//     fileInput.onchange = e => {
+//       // Dosya seçildikten sonra, seçilen dosyayı al
+//       const file = e.target.files[0];
+//       // FormData nesnesi oluştur
+//       const formData = new FormData();
+//       // FormData nesnesine dosyayı ekle
+//       formData.append('profile_pic', file);
+//       // FormData nesnesini ve kullanıcı token'ını kullanarak sunucuya POST isteği yap
+//     };
+  
+//     fileInput.click();
+    
 //   });
+
+//     fetch('user/get_info', {
+//       method: 'GET', // Veri almak için GET metodu kullanılır
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${accessToken}`
+//       }
+//     })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error('Network response was not ok');
+//       }
+//       return response.json();
+//     })
+//     .then(userData => {
+//       // API'den gelen kullanıcı verilerini form alanlarına yerleştir
+//       document.getElementById('username').value = userData.username;
+//       document.getElementById('email').value = userData.email;
+//       document.getElementById('first_name').value = userData.first_name;
+//       document.getElementById('last_name').value = userData.last_name;
+//       document.querySelector('.card-body img').src = data.new_profile_pic_url;
+//     })
+//     .catch(error => {
+//       console.error('There has been a problem with your fetch operation:', error);
+//     });
+    
+
+// document.querySelector('form').addEventListener('submit', function(e) {
+//   e.preventDefault();
+
+//   // Form verilerini al
+//   const formData = {
+    
+//     email: document.getElementById('email').value,
+//     first_name: document.getElementById('first_name').value,
+//     last_name: document.getElementById('last_name').value
+//   };
+
+//   // Erişim belirtecini al
+ 
+
+//   // Fetch ile verileri gönder
+//   fetch('user/update_user/', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${accessToken}` // Erişim belirtecini ekle
+//     },
+//     body: JSON.stringify(formData)
+//   })
+//   .then(response => response.json())
+//   .then(data => {
+//     console.log('success:', data);
+//   })
+//   .catch((error) => {
+//     console.error('error:', error);
+//   });
+// });
 // }
+function accountListener() {
+  // Erişim belirtecini çerezlerden al
+  const accessToken = getCookie('accessToken');
+
+  document.querySelector('.finput').addEventListener('click', function() {
+    // Erişim belirtecinizi buraya ekleyin
+  
+    // Dosya seçim inputunu oluştur
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*'; // Sadece resim dosyalarını kabul et
+    fileInput.onchange = e => {
+      // Kullanıcının seçtiği dosyayı al
+      const file = e.target.files[0];
+      // FormData nesnesini oluştur ve dosyayı ekle
+      const formData = new FormData();
+      formData.append('profile_pic', file);
+  
+      // Sunucuya POST isteği yaparak dosyayı gönder
+      fetch('user/update_profile_pic/', { // Sunucu tarafı yükleme endpoint'i
+        method: 'POST',
+        headers: {
+          // 'Content-Type': 'application/json', bu satırı kaldırın çünkü multipart/form-data kullanıyoruz
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Başarılı yükleme sonrası profil resmini güncelle
+        // 'data.newImageUrl' yerine doğru anahtarı kullanın, örneğin 'data.new_profile_pic_url'
+        document.querySelector('.card-body img').src = data.new_profile_pic_url;
+      })
+      .catch(error => {
+        console.error('error:', error);
+      });
+    };
+  
+    // Dosya seçim penceresini aç
+    fileInput.click(); // Bu satır, programatik olarak dosya seçim penceresini açar
+  });
+  
+  
+  // Profil fotoğrafını güncellemek için düğmeye tıklama olayını dinle
+  
+
+  // Kullanıcı bilgilerini almak için API'ye istek yap
+  fetch('user/get_info', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    }
+  })
+  .then(response => response.json())
+  .then(userData => {
+    // API'den gelen kullanıcı verilerini form alanlarına yerleştir
+    document.getElementById('username').value = userData.username;
+    document.getElementById('email').value = userData.email;
+    document.getElementById('first_name').value = userData.first_name;
+    document.getElementById('last_name').value = userData.last_name;
+    // Profil fotoğrafını güncelle
+    document.querySelector('.card-body img').src = userData.profile_picture;
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+  });
+
+  // Form gönderme olayını dinle
+  document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = {
+      email: document.getElementById('email').value,
+      first_name: document.getElementById('first_name').value,
+      last_name: document.getElementById('last_name').value
+    };
+
+    // Kullanıcı bilgilerini güncellemek için API'ye istek yap
+    fetch('user/update_user/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('success:', data);
+    })
+    .catch((error) => {
+      console.error('error:', error);
+    });
+  });
+}
+
+// Sayfa yüklendiğinde accountListener fonksiyonunu çalıştır
+
 
 function updateFriendList(friendsData) {
   const tbody = document.querySelector('#dataTable tbody');
@@ -407,8 +567,11 @@ async function changeContentProfile(contentId) {
       listFriends();
       pendingFriendRequests();
       addfriendListener();
-
     }
+    else if (contentId === 'account') {
+      accountListener();
+    }
+
     triggerContentLoad(contentId);
   }
   checkAuthStatus();
@@ -657,6 +820,45 @@ function getCookie(name) {
  };
  
  
+
+document.getElementById('chat_icon').onclick = toggleChat;
+document.getElementById('chat_bar').onclick = toggleChat;
+
+function toggleChat() {
+  var chatContainer = document.getElementById('chat_container');
+  var chatBar = document.getElementById('chat_bar');
+  var friendsList = document.getElementById('friends_list');
+  
+  // Chat container ve chat bar'ın mevcut durumunu kontrol et
+  if (chatContainer.style.right === '300px') {
+    chatContainer.style.right = '10px';
+    chatBar.style.right = '10px';
+    friendsList.style.width = '0';
+  } else {
+    chatContainer.style.right = '300px';
+    chatBar.style.right = '300px';
+    friendsList.style.width = '300px';
+  }
+}
+
+
+
+
+ function openPrivateChat(targetUsername) {
+  // Create a new chat box for private messaging
+  // Establish a WebSocket connection to the private room
+  const privateChatSocket = new WebSocket('ws://' + window.location.host + '/ws/private_chat/' + targetUsername + '/');
+
+  // Handle incoming messages for the private chat
+  privateChatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    // Display the message in the private chat box
+  };
+
+  // Add event listeners for sending messages in the private chat
+  // ...
+}
+
 
  /* 
  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .-----------------. .----------------. 

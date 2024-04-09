@@ -9,6 +9,7 @@
     transition: height 0.5s;
     height: 0;
     z-index: 1000;
+    transition: right 0.5s, height 0.5s; /* Sağa kayma ve yükseklik animasyonları için */
   }
 
   #chat_bar {
@@ -74,16 +75,30 @@
     padding: 12px;
   }
 
-  /* 
-  .link-container { 
-    padding: 12px;
-    float: left;
-    width: 220px;
-  }
-  
-  
-  
-  .content-container {
-    margin-left: 220px; 
-    padding: 12px;
-  }*/
+/* Arkadaş listesi için CSS */
+#friends_list {
+  position: fixed;
+  bottom: 30px; /* chat_bar'ın yüksekliğine göre ayarlayın */
+  right: 10px;
+  width: 300px;
+  border: 1px solid #6cd2ae;
+  padding: 10px;
+  overflow: hidden;
+  transition: height 0.5s;
+  height: 0;
+  transition: width 0.5s; /* Genişlik animasyonu için */
+  width: 0; /* Başlangıçta arkadaş listesi gizli olacak */
+  z-index: 1001; /* chat_container ile aynı z-index değerine sahip olmalı */
+}
+
+/* Chat iconu için CSS */
+#chat_icon {
+  position: fixed;
+  bottom: 10px;
+  right: 320px; /* chat_bar'ın genişliğine göre ayarlayın */
+  width: 20px;
+  height: 20px;
+  background: url('../img/chat.svg') no-repeat center center; /* Chat iconunuzun URL'si */
+  cursor: pointer;
+  z-index: 1002; /* chat_icon her zaman en üstte olmalı */
+}

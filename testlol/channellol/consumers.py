@@ -24,12 +24,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         username = text_data_json["username"]
+        private = text_data_json.get("private", False)
+        target_username = text_data_json.get("target_username", None)
 
-        if self.scope['user'].is_anonymous:
-            await self.send(text_data=json.dumps({
-                "error": "UnauthorizedForChat",
-                "message": "You must be logged in to send messages."
-            }))
+        if private and target_username:
+            private_room_name = self.get_private_room_name(username, target_username)
+            await self.channel_layer.group_add(
+                private_room_name,
+                self.channel_name
+            )
+            await self.channel_layer.group_send(
+                private_room_name, {
+                    "type": "chat_message",
+                    "message": message,
+                    "username": username,
+                }
+            )
         else:
             await self.channel_layer.group_send(
                 self.roomGroupName,{
@@ -56,7 +66,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except OnlineUserStatus.DoesNotExist:
             pass
 
-
+    @staticmethod
+    def get_private_room_name(user1, user2):
+        # Generate a unique room name for a private conversation
+        return f'private_chat_{user1}_{user2}' if user1 < user2 else f'private_chat_{user2}_{user1}'
 # import json
 # from channels.generic.websocket import AsyncWebsocketConsumer
 # from asgiref.sync import sync_to_async
