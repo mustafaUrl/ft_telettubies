@@ -232,88 +232,6 @@ function rejectFriendRequest(friendUsername) {
 
 
 
-// function accountListener() {
-
-//   const accessToken = getCookie('accessToken');
-
-
-//   document.querySelector('.btn-primary').addEventListener('click', function() {
-//     // Kullanıcıdan bir dosya seçmesini isteyen dosya seçim penceresini aç
-//     const fileInput = document.createElement('input');
-//     fileInput.type = 'file';
-//     fileInput.accept = 'image/*';
-//     fileInput.onchange = e => {
-//       // Dosya seçildikten sonra, seçilen dosyayı al
-//       const file = e.target.files[0];
-//       // FormData nesnesi oluştur
-//       const formData = new FormData();
-//       // FormData nesnesine dosyayı ekle
-//       formData.append('profile_pic', file);
-//       // FormData nesnesini ve kullanıcı token'ını kullanarak sunucuya POST isteği yap
-//     };
-  
-//     fileInput.click();
-    
-//   });
-
-//     fetch('user/get_info', {
-//       method: 'GET', // Veri almak için GET metodu kullanılır
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${accessToken}`
-//       }
-//     })
-//     .then(response => {
-//       if (!response.ok) {
-//         throw new Error('Network response was not ok');
-//       }
-//       return response.json();
-//     })
-//     .then(userData => {
-//       // API'den gelen kullanıcı verilerini form alanlarına yerleştir
-//       document.getElementById('username').value = userData.username;
-//       document.getElementById('email').value = userData.email;
-//       document.getElementById('first_name').value = userData.first_name;
-//       document.getElementById('last_name').value = userData.last_name;
-//       document.querySelector('.card-body img').src = data.new_profile_pic_url;
-//     })
-//     .catch(error => {
-//       console.error('There has been a problem with your fetch operation:', error);
-//     });
-    
-
-// document.querySelector('form').addEventListener('submit', function(e) {
-//   e.preventDefault();
-
-//   // Form verilerini al
-//   const formData = {
-    
-//     email: document.getElementById('email').value,
-//     first_name: document.getElementById('first_name').value,
-//     last_name: document.getElementById('last_name').value
-//   };
-
-//   // Erişim belirtecini al
- 
-
-//   // Fetch ile verileri gönder
-//   fetch('user/update_user/', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${accessToken}` // Erişim belirtecini ekle
-//     },
-//     body: JSON.stringify(formData)
-//   })
-//   .then(response => response.json())
-//   .then(data => {
-//     console.log('success:', data);
-//   })
-//   .catch((error) => {
-//     console.error('error:', error);
-//   });
-// });
-// }
 function accountListener() {
   // Erişim belirtecini çerezlerden al
   const accessToken = getCookie('accessToken');
@@ -819,28 +737,59 @@ function getCookie(name) {
    }
  };
  
- 
-
-document.getElementById('chat_icon').onclick = toggleChat;
-document.getElementById('chat_bar').onclick = toggleChat;
-
-function toggleChat() {
+ function toggleFriendList() {
+  var friendList = document.getElementById('friend-list');
   var chatContainer = document.getElementById('chat_container');
-  var chatBar = document.getElementById('chat_bar');
-  var friendsList = document.getElementById('friends_list');
-  
-  // Chat container ve chat bar'ın mevcut durumunu kontrol et
-  if (chatContainer.style.right === '300px') {
-    chatContainer.style.right = '10px';
-    chatBar.style.right = '10px';
-    friendsList.style.width = '0';
-  } else {
-    chatContainer.style.right = '300px';
-    chatBar.style.right = '300px';
-    friendsList.style.width = '300px';
-  }
+  var chatBbar = document.getElementById('chat_bar');
+  var chatIcon = document.getElementById('chat_icon');
+
+
+  var isFriendListVisible = friendList.style.display === 'block';
+
+  // Arkadaş listesinin görünürlüğünü değiştir
+  friendList.style.display = isFriendListVisible ? 'none' : 'block';
+
+  // Eğer arkadaş listesi görünürse, chat_container'ı sola kaydır
+  chatContainer.style.right = isFriendListVisible ? '10px' : '250px';
+  chatBbar.style.right = isFriendListVisible ? '10px' : '250px';
+  chatIcon.style.right = isFriendListVisible ? '330px' : '600px';
 }
 
+// get_user_info fonksiyonundan gelen veriyi işleme
+// Arkadaş listesini al ve ekranda göster
+function fetchAndDisplayFriends() {
+  sendPostUserRequest('list_friends')
+    .then(data => {
+      // Arkadaş listesini al
+      const friends = data.friends;
+      // Arkadaş listesini ekranda göster
+      displayFriends(friends);
+    })
+    .catch(error => {
+      console.error('Arkadaş listesi alınamadı:', error);
+    });
+}
+
+// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+function displayFriends(friends) {
+  const friendListContainer = document.getElementById('friend-list');
+  // Mevcut listeyi temizle
+  friendListContainer.innerHTML = '';
+  // Her bir arkadaşı listeye ekle
+  friends.forEach(friend => {
+    const friendElement = document.createElement('div');
+    friendElement.classList.add('friend-item');
+    friendElement.innerHTML = `<img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span>`;
+    friendListContainer.appendChild(friendElement);
+  });
+}
+
+// İkona tıklama olayını dinleme ve arkadaş listesini göster
+document.getElementById('chat_icon').addEventListener('click', function() {
+  toggleFriendList(); // Bu fonksiyon daha önce tanımlanmış olmalı
+  fetchAndDisplayFriends();
+});
 
 
 
