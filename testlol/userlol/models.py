@@ -4,15 +4,17 @@ from channellol.models import OnlineUserStatus
 # from django.conf import settings
 
 
-User.add_to_class('is_online', lambda self: OnlineUserStatus.objects.get(user=self).is_online)
+# User.add_to_class('is_online', lambda self: OnlineUserStatus.objects.get(user=self).is_online)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     
-
-    def __str__(self):
-        return self.user.username
+    def is_online(self):
+        try:
+            return self.user.online_status.is_online
+        except OnlineUserStatus.DoesNotExist:
+            return False
 
 
 # Arkadaş listesi modeli

@@ -11,3 +11,4 @@ class OnlineUserStatus(models.Model):
         self.is_online = online
         self.last_seen = timezone.now()
         self.save()
+

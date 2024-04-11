@@ -88,7 +88,7 @@ def list_friends(request):
             'id': friend.id,
             'username': friend.username,
             'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-            'online': friend.is_online(),  # Bu metodu User modelinize eklemeniz gerekecek.
+            'online': profile.is_online(),  # Bu metodu User modelinize eklemeniz gerekecek.
             'muted': friend in friend_list.muted.all()
         })
     return JsonResponse({'friends': friend_data})
