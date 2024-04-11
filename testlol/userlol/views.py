@@ -159,32 +159,43 @@ def unban_user(request):
 # Kullanıcıyı sessize alma
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-def mute_user(request):
+def mute(request):
     user = request.user
-    target_user_id = request.POST.get('friend_id')
-
+    friend_username = request.data.get('friend_username')
+    print(friend_username)
     try:
-        target_user = User.objects.get(id=target_user_id)
+        friend = User.objects.get(username=friend_username)
     except User.DoesNotExist:
         return JsonResponse({'error': 'Kullanıcı bulunamadı.'}, status=404)
 
     friend_list = FriendList.objects.get(user=user)
-    if target_user in friend_list.muted.all():
+    if friend in friend_list.muted.all():
         return JsonResponse({'error': 'Kullanıcı zaten sessize alınmış.'}, status=400)
 
-    friend_list.muted.add(target_user)
+    friend_list.muted.add(friend)
     return JsonResponse({'success': 'Kullanıcı başarıyla sessize alındı.'})
+
+
 
 # Kullanıcının sessizliğini kaldırma
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-def unmute_user(request):
+def unmute(request):
     user = request.user
-    target_user_id = request.POST.get('friend_id')
+    friend_username = request.data.get('friend_username')
+
+    try:
+        friend = User.objects.get(username=friend_username)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Kullanıcı bulunamadı.'}, status=404)
 
     friend_list = FriendList.objects.get(user=user)
-    friend_list.muted.remove(target_user_id)
+    if friend not in friend_list.muted.all():
+        return JsonResponse({'error': 'Kullanıcı sessize alınmamış.'}, status=400)
+
+    friend_list.muted.remove(friend)
     return JsonResponse({'success': 'Kullanıcının sessizliği başarıyla kaldırıldı.'})
+
 
 # Belirli bir arkadaşı getirme
 @permission_classes([IsAuthenticated])
@@ -249,8 +260,8 @@ actions_list = {
     'list_friends': list_friends,
     'ban_user': ban_user,
     'unban_user': unban_user,
-    'mute_user': mute_user,
-    'unmute_user': unmute_user,
+    'mute': mute,
+    'unmute': unmute,
     'get_friend': get_friend,
     'get_banned': get_banned,
     'accept_friend_request': accept_friend_request,

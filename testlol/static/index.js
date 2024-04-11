@@ -464,6 +464,23 @@ function addfriendListener() {
       const friend_username = document.getElementById('friend_usernameInput').value;
       sendPostUserRequest('add_friend', friend_username);
   });
+
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' && (e.target.textContent === 'mute' || e.target.textContent === 'unmute')) {
+      const friendUsername = e.target.closest('tr').querySelector('td:first-child').textContent.trim();
+      const action = e.target.textContent;
+      sendPostUserRequest(action, friendUsername)
+        .then(data => {
+          console.log('İşlem başarılı:', data);
+          listFriends();
+          // Burada başarılı işlem sonrası güncelleme yapabilirsiniz.
+        })
+        .catch(error => {
+          console.error('İşlem hatası:', error);
+        });
+    }
+  });
 }
 
 async function changeContentProfile(contentId) {
@@ -612,6 +629,7 @@ document.getElementById('chat_bar').addEventListener('click', function() {
 }
 
  function sendPostUserRequest(action, friend_username = null) {
+  console.log('İstek gönderiliyor:', action, friend_username);
   return new Promise((resolve, reject) => {
     const accessToken = getCookie('accessToken');
     const headers = new Headers({
@@ -810,20 +828,82 @@ document.getElementById('chat_icon').addEventListener('click', function() {
 
 
 
- function openPrivateChat(targetUsername) {
-  // Create a new chat box for private messaging
-  // Establish a WebSocket connection to the private room
-  const privateChatSocket = new WebSocket('ws://' + window.location.host + '/ws/private_chat/' + targetUsername + '/');
+// Özel sohbet penceresini açma fonksiyonu
+// function openPrivateChatWindow(targetUsername) {
+//   // Özel sohbet için bir div oluştur
+//   const privateChatDiv = document.createElement('div');
+//   privateChatDiv.id = 'private_chat_' + targetUsername;
+//   privateChatDiv.classList.add('private-chat-container');
 
-  // Handle incoming messages for the private chat
-  privateChatSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    // Display the message in the private chat box
-  };
+//   // Özel sohbet başlığını ekle
+//   const chatHeader = document.createElement('div');
+//   chatHeader.classList.add('chat-header');
+//   chatHeader.textContent = targetUsername + ' ile Özel Sohbet';
+//   privateChatDiv.appendChild(chatHeader);
 
-  // Add event listeners for sending messages in the private chat
-  // ...
-}
+//   // Mesajları gösterecek bir div ekle
+//   const messagesDiv = document.createElement('div');
+//   messagesDiv.classList.add('chat-messages');
+//   privateChatDiv.appendChild(messagesDiv);
+
+//   // Mesaj gönderme formunu ekle
+//   const form = document.createElement('form');
+//   form.onsubmit = function(e) {
+//     e.preventDefault();
+//     sendPrivateMessage(targetUsername);
+//   };
+
+//   const input = document.createElement('input');
+//   input.type = 'text';
+//   input.id = 'private_message_input_' + targetUsername;
+//   input.classList.add('chat-input');
+//   input.placeholder = 'Mesajınızı yazın...';
+//   form.appendChild(input);
+
+//   const sendButton = document.createElement('button');
+//   sendButton.type = 'submit';
+//   sendButton.textContent = 'Gönder';
+//   form.appendChild(sendButton);
+
+//   privateChatDiv.appendChild(form);
+
+//   // Pencereyi belgeye ekle
+//   document.body.appendChild(privateChatDiv);
+
+//   // WebSocket bağlantısını aç
+//   openPrivateChatSocket(targetUsername, messagesDiv);
+// }
+
+// // Özel sohbet için WebSocket bağlantısını açma fonksiyonu
+// function openPrivateChatSocket(targetUsername, messagesDiv) {
+//   const privateChatSocket = new WebSocket('ws://' + window.location.host + '/ws/private_chat/' + targetUsername + '/');
+
+//   // Gelen mesajları işle
+//   privateChatSocket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     const messageDiv = document.createElement('div');
+//     messageDiv.textContent = data.username + ': ' + data.message;
+//     messagesDiv.appendChild(messageDiv);
+//     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+//   };
+
+//   // WebSocket bağlantısını kapatma durumunu işle
+//   privateChatSocket.onclose = function(e) {
+//     console.error(targetUsername + ' ile özel sohbet kapandı');
+//   };
+
+//   // Mesaj gönderme fonksiyonu
+//   function sendPrivateMessage(targetUsername) {
+//     const input = document.getElementById('private_message_input_' + targetUsername);
+//     const message = input.value;
+//     const username = getCookie('username');
+
+//     if (privateChatSocket) {
+//       privateChatSocket.send(JSON.stringify({ 'message': message, 'username': username }));
+//     }
+//     input.value = '';
+//   }
+// }
 
 
  /* 
