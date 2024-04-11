@@ -39,6 +39,13 @@
       changeContent('sign-in');
     })
     .catch(error => {
+      deleteCookie('accessToken');
+      deleteCookie('refreshToken');
+      deleteCookie('username');
+      closeSocket();
+
+      // Kullanıcıyı giriş sayfasına yönlendir
+      changeContent('sign-in');
       console.error('There has been a problem with your fetch operation:', error);
     });
   });
@@ -354,9 +361,8 @@ function updateFriendList(friendsData) {
           <button class="btn btn-primary" type="button">other</button>
           <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
           <div class="dropdown-menu">
-            <a class="dropdown-item" href="#">First Item</a>
-            <a class="dropdown-item" href="#">Second Item</a>
-            <a class="dropdown-item" href="#">Third Item</a>
+            <a class="dropdown-item" href="#">remove friends</a>
+            <a class="dropdown-item" href="#">block</a>
           </div>
         </div>
       </td>
@@ -445,7 +451,7 @@ function profileListener() {
 
     const htmlContent =contentData[contentId];
     document.getElementById('main-content').innerHTML = htmlContent;
-    history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+    history.pushState({ id: contentId, htmlContent: htmlContent, profileContent: false }, null, null);
     triggerContentLoad(contentId);
   }
   checkAuthStatus();
@@ -480,7 +486,7 @@ async function changeContentProfile(contentId) {
     
     const htmlContent =contentData[contentId];
     document.getElementById('content-profile').innerHTML = htmlContent;
-    history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
+    history.pushState({ id: contentId, htmlContent: htmlContent, profileContent: true }, null, null);
     if (contentId === 'friends') {
       listFriends();
       pendingFriendRequests();
@@ -498,9 +504,20 @@ async function changeContentProfile(contentId) {
 
 window.onpopstate = function(event) {
   if (event.state) {
-    document.getElementById('main-content').innerHTML = event.state.htmlContent;
+    var mainContent = document.getElementById('main-content');
+    var contentProfile = document.getElementById('content-profile');
+    
+    // Check if 'content-profile' exists before setting its innerHTML
+    if (contentProfile && event.state.profileContent) {
+      contentProfile.innerHTML = event.state.htmlContent;
+    } else if (mainContent && !event.state.profileContent) {
+      mainContent.innerHTML = event.state.htmlContent;
+    }
+    triggerContentLoad(event.state.id);
+
   }
 };
+
 
 
 function checkAuthStatus() {
