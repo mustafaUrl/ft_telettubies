@@ -71,14 +71,35 @@
 <div id="friend-list" style="display:none;">
   <!-- Kullanıcı bilgileri burada gösterilecek -->
 </div>
-<div id="chat_box" >
+
+
+
+
+
+ <div id="chat_box">
+  <div id="chat_bar">
+    <div id="tabs">
+      <div id="tab1">Sekme 1</div>
+      <div id="tab2">Sekme 2</div>
+    </div>
+  </div>
+  <div id="chat_container">
+    <div id="chat_messages1"></div>
+    <div id="chat_messages2"></div>
+    <input type="text" id="chat_input" placeholder="Mesajınızı yazın...">
+    <button id="chat_send">Send</button>
+  </div>
+</div>
+
+
+{% comment %} <div id="chat_box" >
   <div id="chat_bar">chat</div>  
     <div id="chat_container">
       <div id="chat_messages"></div>
       <input type="text" id="chat_input" placeholder="Mesajınızı yazın...">
       <button id="chat_send">Gönder</button>
     </div>
-</div>
+</div> {% endcomment %}
   
 
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>

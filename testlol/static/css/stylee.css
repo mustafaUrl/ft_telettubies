@@ -10,8 +10,10 @@
     height: 0;
     z-index: 1000;
     transition: right 0.5s, height 0.5s;
+    background-color: rgba(0, 255, 255, 0.21);
   }
 
+  
   #chat_bar {
     position: fixed;
     bottom: 10px;
@@ -21,16 +23,59 @@
     background: #0d61d7;
     cursor: pointer;
     z-index: 1001;
+    padding: 10px;
+    text-align: center;
+
+  }
+  
+ 
+  
+  #tabs {
+    display: flex;
+    justify-content: space-around;
+    position: absolute; /* Pozisyonu absolute yap */
+    bottom: -30px; /* chat_bar'ın altına yerleştir */
+    left: 0;
+    right: 0;
+    /* background-color: #1c010157; */
+  }
+  
+  #tab1{
+    flex: 1; /* Her iki sekme de eşit genişlikte olacak */
+    text-align: center;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #fff0f0;
   }
 
-  /* Rest of your CSS remains unchanged */
+  #tab2 {
+    flex: 1; /* Her iki sekme de eşit genişlikte olacak */
+    text-align: center;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #fff0f0;
+  }
+  
+  #tab1:hover, #tab2:hover {
+    background-color: #ddd;
+  }
+
+  
   
 
-  #chat_messages {
+  #chat_messages1 {
     height: 200px;
     overflow-y: auto;
     margin-bottom: 10px;
   }
+  #chat_messages2 {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+
 
   #chat_input {
     width: calc(100% - 60px);

@@ -84,7 +84,7 @@ def register_view(request):
 
     UserProfile.objects.create(
         user=user,
-        profile_picture='static/img/pp.jpeg'  # Varsayılan resmin yolu
+        profile_picture='profile_pictures/pp.jpeg'  # Varsayılan resmin yolu
     )
     user.save()
     return Response({'success': 'User created successfully.'})

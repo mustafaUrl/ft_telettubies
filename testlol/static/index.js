@@ -89,8 +89,8 @@ function signInListener() {
           setCookie('accessToken', data.access, {secure: true});
           setCookie('refreshToken', data.refresh, {secure: true});
           setCookie('username', data.username, {secure: true});
-          openSocket();
-
+          openSocketForTab1();
+          selectTab('tab1');
           // Login başarılı, ana sayfaya yönlendir
           // window.location.href = '/user_profile'; // Örnek bir yönlendirme
           changeContent('home');
@@ -565,15 +565,8 @@ function checkAuthStatus() {
 }
 
 
-document.getElementById('chat_bar').addEventListener('click', function() {
-  var chatContainer = document.getElementById('chat_container');
-  var chatBar = document.getElementById('chat_bar');
-  var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
 
-  // Sohbet penceresinin yüksekliğini ve gri çubuğun alt pozisyonunu güncelle
-  chatContainer.style.height = isClosed ? '300px' : '0px';
-  chatBar.style.bottom = isClosed ? '310px' : '10px'; // Gri çubuğun alt pozisyonunu ayarla
-});
+
 
 
  /* 
@@ -714,6 +707,43 @@ function getCookie(name) {
   return null;
 }
 
+function refreshAccessToken() {
+  // Refresh token'ı cookie'den alın
+  const refreshToken = getCookie('refreshToken');
+
+  fetch('auth/api/token/refresh/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ refresh: refreshToken })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.access) {
+      // Yeni access token'ı cookie'ye kaydedin
+      setCookie('accessToken', data.access, {secure: true});
+      // Access token yenilendi, işlemlere devam edin
+      console.log('Access token successfully refreshed');
+    } else {
+      // Hata mesajını göster
+      alert('Access token refresh failed: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+  });
+}
+
+// Refresh token'ı belirli aralıklarla yenilemek için setInterval kullanın
+setInterval(refreshAccessToken, 4 * 60 * 1000); // Her 4 dakikada bir yenile
+
+
  /*
  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. 
 | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |
@@ -728,103 +758,7 @@ function getCookie(name) {
  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------' 
  */
 
- let chatSocket;
 
- function openSocket() {
-   // WebSocket bağlantısını açan fonksiyon
-   chatSocket = new WebSocket('ws://' + window.location.host + '/?token=' + getCookie('accessToken'));
- 
-   chatSocket.onmessage = function(e) {
-     var data = JSON.parse(e.data);
-     var chatMessages = document.getElementById('chat_messages');
-     var messageDiv = document.createElement('div');
-     messageDiv.textContent = data.username + ': ' + data.message;
-     chatMessages.appendChild(messageDiv);
-     chatMessages.scrollTop = chatMessages.scrollHeight;
-   };
- 
-   chatSocket.onclose = function(e) {
-     console.error('Chat socket closed unexpectedly');
-   };
- }
- 
- function closeSocket() {
-   // WebSocket bağlantısını kapatan fonksiyon
-   if (chatSocket) {
-     chatSocket.close();
-   }
- }
- 
- document.getElementById('chat_send').onclick = function() {
-   var messageInput = document.getElementById('chat_input');
-   var message = messageInput.value;
-   const username = getCookie('username');
- 
-   if (chatSocket) {
-     chatSocket.send(JSON.stringify({ 'message': message, 'username': username }));
-   }
-   messageInput.value = '';
- };
- 
- document.getElementById('chat_input').onkeypress = function(e) {
-   if (e.keyCode === 13) {  // Enter tuşu
-     document.getElementById('chat_send').click();
-   }
- };
- 
- function toggleFriendList() {
-  var friendList = document.getElementById('friend-list');
-  var chatContainer = document.getElementById('chat_container');
-  var chatBbar = document.getElementById('chat_bar');
-  var chatIcon = document.getElementById('chat_icon');
-
-
-  var isFriendListVisible = friendList.style.display === 'block';
-
-  // Arkadaş listesinin görünürlüğünü değiştir
-  friendList.style.display = isFriendListVisible ? 'none' : 'block';
-
-  // Eğer arkadaş listesi görünürse, chat_container'ı sola kaydır
-  chatContainer.style.right = isFriendListVisible ? '10px' : '250px';
-  chatBbar.style.right = isFriendListVisible ? '10px' : '250px';
-  chatIcon.style.right = isFriendListVisible ? '330px' : '600px';
-}
-
-// get_user_info fonksiyonundan gelen veriyi işleme
-// Arkadaş listesini al ve ekranda göster
-function fetchAndDisplayFriends() {
-  sendPostUserRequest('list_friends')
-    .then(data => {
-      // Arkadaş listesini al
-      const friends = data.friends;
-      // Arkadaş listesini ekranda göster
-      displayFriends(friends);
-    })
-    .catch(error => {
-      console.error('Arkadaş listesi alınamadı:', error);
-    });
-}
-
-// Arkadaş listesini HTML olarak oluştur ve ekranda göster
-// Arkadaş listesini HTML olarak oluştur ve ekranda göster
-function displayFriends(friends) {
-  const friendListContainer = document.getElementById('friend-list');
-  // Mevcut listeyi temizle
-  friendListContainer.innerHTML = '';
-  // Her bir arkadaşı listeye ekle
-  friends.forEach(friend => {
-    const friendElement = document.createElement('div');
-    friendElement.classList.add('friend-item');
-    friendElement.innerHTML = `<img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span>`;
-    friendListContainer.appendChild(friendElement);
-  });
-}
-
-// İkona tıklama olayını dinleme ve arkadaş listesini göster
-document.getElementById('chat_icon').addEventListener('click', function() {
-  toggleFriendList(); // Bu fonksiyon daha önce tanımlanmış olmalı
-  fetchAndDisplayFriends();
-});
 
 
 
@@ -962,12 +896,298 @@ document.addEventListener('DOMContentLoaded', function() {
   localStorage.setItem('contentData', JSON.stringify(contentData));
   checkAuthStatus();
   hrefListener();
+  refreshAccessToken();
  
 });
   
+/*
+ .----------------.  .----------------.  .----------------.  .----------------. 
+| .--------------. || .--------------. || .--------------. || .--------------. |
+| |     ______   | || |  ____  ____  | || |      __      | || |  _________   | |
+| |   .' ___  |  | || | |_   ||   _| | || |     /  \     | || | |  _   _  |  | |
+| |  / .'   \_|  | || |   | |__| |   | || |    / /\ \    | || | |_/ | | \_|  | |
+| |  | |         | || |   |  __  |   | || |   / ____ \   | || |     | |      | |
+| |  \ `.___.'\  | || |  _| |  | |_  | || | _/ /    \ \_ | || |    _| |_     | |
+| |   `._____.'  | || | |____||____| | || ||____|  |____|| || |   |_____|    | |
+| |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------' 
+ */
 
 
 
+// Global değişkenler
+
+//  function selectTab(selectedTabId) {
+//   var tabs = document.querySelectorAll('#tabs > div');
+//   tabs.forEach(function(tab) {
+//     if (tab.id === selectedTabId) {
+//       tab.style.backgroundColor = '#0d61d7'; // Seçili sekme stilini ayarla
+//       tab.style.color = 'black'; // Seçili sekme metin rengini ayarla
+//     } else {
+//       tab.style.backgroundColor = ''; // Diğer sekmelerin stilini sıfırla
+//       tab.style.color = ''; // Diğer sekmelerin metin rengini sıfırla
+//     }
+//   });
+// }
+
+// // Sekmeler için tıklama olaylarını tanımla
+// document.getElementById('tab1').addEventListener('click', function(event) {
+//   event.stopPropagation();
+//   selectTab('tab1'); // Sekme 1'i seç
+//   openSocket();
+//   });
+
+//   document.getElementById('tab2').addEventListener('click', function(event) {
+//   event.stopPropagation();
+//   // closeSocket();
+//   selectTab('tab2'); // Sekme 2'i seç
+// });
+
+// let chatSocket;
+
+// function openSocket() {
+//   // WebSocket bağlantısını açan fonksiyon
+//   chatSocket = new WebSocket('ws://' + window.location.host + '/?token=' + getCookie('accessToken'));
+function selectTab(selectedTabId) {
+  var tabs = document.querySelectorAll('#tabs > div');
+  tabs.forEach(function(tab) {
+    tab.style.backgroundColor = ''; // Tüm sekmelerin stilini sıfırla
+    tab.style.color = ''; // Tüm sekmelerin metin rengini sıfırla
+  });
+
+  var selectedTab = document.getElementById(selectedTabId);
+  selectedTab.style.backgroundColor = '#0d61d7'; // Seçili sekme stilini ayarla
+  selectedTab.style.color = 'black'; // Seçili sekme metin rengini ayarla
+
+  // Mesaj kutularının görünürlüğünü ayarla
+  document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
+  document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
+  activeTab = selectedTabId;
+}
+
+
+let chatSocketTab1;
+let chatSocketTab2;
+let activeTab = 'tab1';
+
+function openSocketForTab1() {
+  // Eğer WebSocket zaten açıksa, yeni bir tane açma
+  if (chatSocketTab1 && chatSocketTab1.readyState === WebSocket.OPEN) {
+    return;
+  }
+  chatSocketTab1 = new WebSocket('ws://' + window.location.host + '/ws/global/?token=' + getCookie('accessToken'));
+
+  chatSocketTab1.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+    // if (data.type === 'notification') {
+    //   // Bildirim mesajını işle
+    //   console.log(data.message);
+    // }
+    if (activeTab === 'tab1') {
+      var chatMessages = document.getElementById('chat_messages1');
+      var messageDiv = document.createElement('div');
+      messageDiv.textContent = data.username + ': ' + data.message;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  };
+    chatSocketTab1.onclose = function(e) {
+    console.error('Chat socket for tab1 closed unexpectedly');
+  };
+}
+
+let otherUsername =  getCookie('username') === 'test' ? 'lol' : 'test';
+
+function openSocketForPrivateChat() {
+  // Eğer WebSocket zaten açıksa, yeni bir tane açma
+  if (chatSocketTab2 && chatSocketTab2.readyState === WebSocket.OPEN) {
+    return;
+  }
+  chatSocketTab2 = new WebSocket('ws://' + window.location.host + '/ws/private_chat/' +  otherUsername + '/?token=' + getCookie('accessToken'));
+
+  chatSocketTab2.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+    if (activeTab === 'tab2') {
+      var chatMessages = document.getElementById('chat_messages2');
+      var messageDiv = document.createElement('div');
+      messageDiv.textContent = data.username + ': ' + data.message;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  };
+
+  chatSocketTab2.onclose = function(e) {
+    console.error('Chat socket for private chat closed unexpectedly');
+  };
+}
+
+// Sekme 2 için tıklama olayını tanımla
+document.getElementById('tab2').addEventListener('click', function(event) {
+  event.stopPropagation();
+  selectTab('tab2'); // Sekme 2'i seç
+  openSocketForPrivateChat(); // Özel WebSocket bağlantısını aç
+});
+
+
+// Sekme 1 için tıklama olayını tanımla
+document.getElementById('tab1').addEventListener('click', function(event) {
+  event.stopPropagation();
+  selectTab('tab1'); // Sekme 1'i seç
+  openSocketForTab1(); // WebSocket bağlantısını aç
+});
+
+// Sekme 2 için tıklama olayını tanımla
+// Sekme seçim fonksiyonu ve diğer olay dinleyicileri aynı kalacak.
+
+document.getElementById('chat_send').onclick = function() {
+  var messageInput = document.getElementById('chat_input');
+  var message = messageInput.value;
+  const username = getCookie('username');
+
+  // Aktif sekme tab1 ise, chatSocketTab1 üzerinden gönder
+  if (activeTab === 'tab1' && chatSocketTab1) {
+    chatSocketTab1.send(JSON.stringify({ 'message': message, 'username': username }));
+  }
+  // Aktif sekme tab2 ise, chatSocketTab2 üzerinden gönder
+  else if (activeTab === 'tab2' && chatSocketTab2) {
+    chatSocketTab2.send(JSON.stringify({ 'message': message, 'username': username }));
+  }
+  messageInput.value = '';
+};
+
+function closeSocket() {
+  // WebSocket bağlantısını kapatan fonksiyon
+  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+    chatSocket.close();
+  }
+}
+
+// Diğer fonksiyonlar ve olay dinleyicileri aynı kalacak.
+
+
+document.getElementById('chat_input').onkeypress = function(e) {
+  if (e.keyCode === 13) {  // Enter tuşu
+    document.getElementById('chat_send').click();
+  }
+};
+
+ 
+ // Toggle chat box function
+
+// Add event listener to chat bar
+
+ function toggleFriendList() {
+  var friendList = document.getElementById('friend-list');
+  var chatContainer = document.getElementById('chat_container');
+  var chatBbar = document.getElementById('chat_bar');
+  var chatIcon = document.getElementById('chat_icon');
+
+
+  var isFriendListVisible = friendList.style.display === 'block';
+
+  // Arkadaş listesinin görünürlüğünü değiştir
+  friendList.style.display = isFriendListVisible ? 'none' : 'block';
+
+  // Eğer arkadaş listesi görünürse, chat_container'ı sola kaydır
+  chatContainer.style.right = isFriendListVisible ? '10px' : '250px';
+  chatBbar.style.right = isFriendListVisible ? '10px' : '250px';
+  chatIcon.style.right = isFriendListVisible ? '330px' : '600px';
+  if (!isFriendListVisible) {
+    fetchAndDisplayFriends(); // Arkadaş listesini temizle
+  }
+}
+
+// get_user_info fonksiyonundan gelen veriyi işleme
+// Arkadaş listesini al ve ekranda göster
+function fetchAndDisplayFriends() {
+  sendPostUserRequest('list_friends')
+    .then(data => {
+      // Arkadaş listesini al
+      const friends = data.friends;
+      // Arkadaş listesini ekranda göster
+      displayFriends(friends);
+    })
+    .catch(error => {
+      console.error('Arkadaş listesi alınamadı:', error);
+    });
+}
+
+// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+function displayFriends(friends) {
+  const friendListContainer = document.getElementById('friend-list');
+  // Mevcut listeyi temizle
+  friendListContainer.innerHTML = '';
+  // Her bir arkadaşı listeye ekle
+  friends.forEach(friend => {
+    const friendElement = document.createElement('div');
+    friendElement.classList.add('friend-item');
+    friendElement.innerHTML = `<img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span>`;
+    friendListContainer.appendChild(friendElement);
+  });
+}
+
+// İkona tıklama olayını dinleme ve arkadaş listesini göster
+document.getElementById('chat_icon').addEventListener('click', function() {
+  toggleFriendList(); // Bu fonksiyon daha önce tanımlanmış olmalı
+  // fetchAndDisplayFriends();
+});
+
+
+
+// document.getElementById('chat_bar').addEventListener('click', function() {
+//   var chatContainer = document.getElementById('chat_container');
+//   var chatBar = document.getElementById('chat_bar');
+//   var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
+
+//   // Sohbet penceresinin yüksekliğini ve gri çubuğun alt pozisyonunu güncelle
+//   chatContainer.style.height = isClosed ? '300px' : '0px';
+//   chatBar.style.bottom = isClosed ? '310px' : '10px'; // Gri çubuğun alt pozisyonunu ayarla
+// });
+
+
+// Chat bar'a tıklandığında chat container'ı aç/kapa
+document.getElementById('chat_bar').addEventListener('click', function() {
+  var chatContainer = document.getElementById('chat_container');
+  var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
+
+  // Sohbet penceresinin yüksekliğini ve gri çubuğun alt pozisyonunu güncelle
+  chatContainer.style.height = isClosed ? '285px' : '0px';
+  this.style.bottom = isClosed ? '310px' : '10px'; // 'this' ile chatBar'ı güncelle
+});
+
+// Sekmeler için tıklama olaylarını tanımla ve olay yayılımını durdur
+// document.getElementById('tab1').addEventListener('click', function(event) {
+//   event.stopPropagation();
+//   openSocket(); 
+//   console.log('Sekme 1 içeriği göster');
+//   // Sekme 1 içeriğini göster
+// });
+
+// document.getElementById('tab2').addEventListener('click', function(event) {
+//   event.stopPropagation();
+//   console.log('Sekme 2 içeriği göster');
+//   // Sekme 2 içeriğini göster
+// });
+
+
+
+
+ /*
+
+ .----------------.  .-----------------. .----------------. 
+| .--------------. || .--------------. || .--------------. |
+| |  _________   | || | ____  _____  | || |  ________    | |
+| | |_   ___  |  | || ||_   \|_   _| | || | |_   ___ `.  | |
+| |   | |_  \_|  | || |  |   \ | |   | || |   | |   `. \ | |
+| |   |  _|  _   | || |  | |\ \| |   | || |   | |    | | | |
+| |  _| |___/ |  | || | _| |_\   |_  | || |  _| |___.' / | |
+| | |_________|  | || ||_____|\____| | || | |________.'  | |
+| |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------' 
+ */
 // document.addEventListener('DOMContentLoaded', function() {
 //   // 'dynamic-content' sınıfına sahip tüm linkleri seç
 //   const contentData = JSON.parse(document.getElementById('content-data').textContent);

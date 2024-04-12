@@ -1,3 +1,4 @@
 myenv
 testlol/media/profile_pictures/*
 !testlol/media/profile_pictures/.gitkeep
+testlol/db.sqlite3

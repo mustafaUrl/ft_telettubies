@@ -8,9 +8,10 @@
 # ] 
 
 from django.urls import path
-from .consumers import ChatConsumer
+from .consumers import ChatConsumer, PrivateChatConsumer
 from .middleware import JWTAuthMiddleware  # Özelleştirilmiş middleware'inizi burada import edin
 
 websocket_urlpatterns = [
-    path("", JWTAuthMiddleware(ChatConsumer.as_asgi())),  # Middleware ile ChatConsumer'ı sarmalayın
+    path("ws/global/", JWTAuthMiddleware(ChatConsumer.as_asgi())),  # Middleware ile ChatConsumer'ı sarmalayın
+    path('ws/private_chat/<str:username>/', JWTAuthMiddleware(PrivateChatConsumer.as_asgi())),
 ]
