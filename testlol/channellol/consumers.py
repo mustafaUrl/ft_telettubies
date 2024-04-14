@@ -91,7 +91,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message": message,
                 "username": username
             }))
-    
+    async def fetch_notifications(self, user):
+    notifications = Notification.objects.filter(recipient=user, is_read=False)
+    for notification in notifications:
+        # Send notification to the user
+        await self.send(text_data=json.dumps({
+            'type': notification.notification_type,
+            'message': 'You have a new notification!',
+            'from_user': notification.sender.username
+        }))
+        # Optionally, mark the notification as read
+        notification.is_read = True
+        notification.save()
 
 
 #     # async def receive(self, text_data):

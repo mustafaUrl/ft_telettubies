@@ -89,8 +89,9 @@ function signInListener() {
           setCookie('accessToken', data.access, {secure: true});
           setCookie('refreshToken', data.refresh, {secure: true});
           setCookie('username', data.username, {secure: true});
-          openSocketForTab1();
           selectTab('tab1');
+          openSocketForTab1();
+          
           // Login başarılı, ana sayfaya yönlendir
           // window.location.href = '/user_profile'; // Örnek bir yönlendirme
           changeContent('home');
@@ -897,6 +898,8 @@ document.addEventListener('DOMContentLoaded', function() {
   checkAuthStatus();
   hrefListener();
   refreshAccessToken();
+  openSocketForTab1();
+  selectTab('tab1');
  
 });
   
@@ -984,13 +987,12 @@ function openSocketForTab1() {
     //   // Bildirim mesajını işle
     //   console.log(data.message);
     // }
-    if (activeTab === 'tab1') {
-      var chatMessages = document.getElementById('chat_messages1');
-      var messageDiv = document.createElement('div');
-      messageDiv.textContent = data.username + ': ' + data.message;
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+  
+    var chatMessages = document.getElementById('chat_messages1');
+    var messageDiv = document.createElement('div');
+    messageDiv.textContent = data.username + ': ' + data.message;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   };
     chatSocketTab1.onclose = function(e) {
     console.error('Chat socket for tab1 closed unexpectedly');
