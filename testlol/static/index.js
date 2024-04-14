@@ -997,9 +997,9 @@ function openSocketForTab1() {
   };
 }
 
-let otherUsername =  getCookie('username') === 'test' ? 'lol' : 'test';
+// let otherUsername =  getCookie('username') === 'test' ? 'lol' : 'test';
 
-function openSocketForPrivateChat() {
+function openSocketForPrivateChat(otherUsername) {
   // Eğer WebSocket zaten açıksa, yeni bir tane açma
   if (chatSocketTab2 && chatSocketTab2.readyState === WebSocket.OPEN) {
     return;
@@ -1026,7 +1026,7 @@ function openSocketForPrivateChat() {
 document.getElementById('tab2').addEventListener('click', function(event) {
   event.stopPropagation();
   selectTab('tab2'); // Sekme 2'i seç
-  openSocketForPrivateChat(); // Özel WebSocket bağlantısını aç
+  //openSocketForPrivateChat(); // Özel WebSocket bağlantısını aç
 });
 
 
@@ -1113,8 +1113,7 @@ function fetchAndDisplayFriends() {
     });
 }
 
-// Arkadaş listesini HTML olarak oluştur ve ekranda göster
-// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+
 function displayFriends(friends) {
   const friendListContainer = document.getElementById('friend-list');
   // Mevcut listeyi temizle
@@ -1123,10 +1122,36 @@ function displayFriends(friends) {
   friends.forEach(friend => {
     const friendElement = document.createElement('div');
     friendElement.classList.add('friend-item');
-    friendElement.innerHTML = `<img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span>`;
+    // Kullanıcı adını data attribute olarak ekle
+    friendElement.innerHTML = `<p><a href="#" class="link-underline-dark" data-username="${friend.username}"><img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span></a></p>`;
     friendListContainer.appendChild(friendElement);
   });
+
+  // Tüm arkadaş öğelerine tıklama olayı ekle
+  document.querySelectorAll('.friend-item .link-underline-dark').forEach(item => {
+    item.addEventListener('click', function(event) {
+      event.preventDefault();
+      const username = this.getAttribute('data-username');
+      // Sekme 2'yi seç ve özel sohbeti aç
+      selectTab('tab2');
+      openSocketForPrivateChat(username);
+    });
+  });
 }
+
+// Arkadaş listesini HTML olarak oluştur ve ekranda göster
+// function displayFriends(friends) {
+//   const friendListContainer = document.getElementById('friend-list');
+//   // Mevcut listeyi temizle
+//   friendListContainer.innerHTML = '';
+//   // Her bir arkadaşı listeye ekle
+//   friends.forEach(friend => {
+//     const friendElement = document.createElement('div');
+//     friendElement.classList.add('friend-item');
+//     friendElement.innerHTML = `<p><a href="#" class="link-underline-dark"><img src="${friend.profile_picture}" alt="${friend.username}"><span>${friend.username}</span></a></p>`;
+//     friendListContainer.appendChild(friendElement);
+//   });
+// }
 
 // İkona tıklama olayını dinleme ve arkadaş listesini göster
 document.getElementById('chat_icon').addEventListener('click', function() {
@@ -1373,5 +1398,3 @@ function triggerContentLoad(contentId) {
 
   // JavaScript
  
-  
-
