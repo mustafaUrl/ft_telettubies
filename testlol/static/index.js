@@ -898,7 +898,6 @@ document.addEventListener('DOMContentLoaded', function() {
   checkAuthStatus();
   hrefListener();
   refreshAccessToken();
-  openSocketForTab1();
   selectTab('tab1');
  
 });
@@ -983,11 +982,13 @@ function openSocketForTab1() {
 
   chatSocketTab1.onmessage = function(e) {
     var data = JSON.parse(e.data);
-    // if (data.type === 'notification') {
-    //   // Bildirim mesajını işle
-    //   console.log(data.message);
-    // }
-  
+    console.log('type:', data.type , 'data:', data);
+
+    if (data.type === 'notification') {
+      console.log('Bildirim:', data);
+      addNotification(data);
+      incrementNotificationCount();
+    }
     var chatMessages = document.getElementById('chat_messages1');
     var messageDiv = document.createElement('div');
     messageDiv.textContent = data.username + ': ' + data.message;
@@ -999,6 +1000,73 @@ function openSocketForTab1() {
   };
 }
 
+function incrementNotificationCount() {
+  var countElement = document.getElementById('notificationCount');
+  var currentCount = parseInt(countElement.textContent);
+  countElement.textContent = currentCount + 1;
+}
+
+function addNotification(notificationData) {
+  // Bildirim sayısını artıran fonksiyonu çağır
+  incrementNotificationCount();
+
+  // Bildirimleri gösterecek bir konteyner oluştur (Eğer henüz yoksa)
+  var notificationsContainer = document.getElementById('notificationsContainer');
+  if (!notificationsContainer) {
+      notificationsContainer = document.createElement('div');
+      notificationsContainer.id = 'notificationsContainer';
+      document.body.appendChild(notificationsContainer);
+  }
+
+  // Yeni bir bildirim elementi oluştur
+  var notificationElement = document.createElement('div');
+  notificationElement.className = 'notification';
+  notificationElement.textContent = notificationData.from_user + ': ' + notificationData.message;
+
+  // Bildirim elementine tıklanma olayını ekle
+  notificationElement.onclick = function() {
+      // Bildirimi okundu olarak işaretle
+      markNotificationAsRead(notificationData.id);
+      // Bildirim elementini kaldır
+      notificationElement.remove();
+      // Sayaç değerini azalt
+      decrementNotificationCount();
+  };
+
+  // Bildirim elementini konteynere ekle
+  notificationsContainer.appendChild(notificationElement);
+}
+
+// Bildirim okundu olarak işaretleyen fonksiyon
+function markNotificationAsRead(notificationId) {
+  // AJAX isteği ile sunucuya bildir
+  fetch('/mark-notification-as-read/' + notificationId, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + getCookie('accessToken') // CSRF token eklemeyi unutmayın
+      },
+      body: JSON.stringify({ 'is_read': true })
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log('Bildirim okundu olarak işaretlendi:', data);
+      // Sayaç değerini azalt
+      decrementNotificationCount();
+  })
+  .catch((error) => {
+      console.error('Hata:', error);
+  });
+}
+
+// Bildirim sayısını azaltan fonksiyon
+function decrementNotificationCount() {
+  var countElement = document.getElementById('notificationCount');
+  var currentCount = parseInt(countElement.textContent);
+  if (currentCount > 0) {
+      countElement.textContent = currentCount - 1;
+  }
+}
 // let otherUsername =  getCookie('username') === 'test' ? 'lol' : 'test';
 
 function openSocketForPrivateChat(otherUsername) {
@@ -1060,8 +1128,11 @@ document.getElementById('chat_send').onclick = function() {
 
 function closeSocket() {
   // WebSocket bağlantısını kapatan fonksiyon
-  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-    chatSocket.close();
+  if (chatSocketTab1 && chatSocketTab1.readyState === WebSocket.OPEN) {
+    chatSocketTab1.close();
+  }
+  if (chatSocketTab2 && chatSocketTab2.readyState === WebSocket.OPEN) {
+    chatSocketTab2.close();
   }
 }
 

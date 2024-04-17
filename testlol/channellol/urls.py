@@ -1,8 +1,8 @@
 from django.urls import path, include
-from . import views as chat_views
+from . import views
 
 
 urlpatterns = [
-    path("", chat_views.chatPage, name="chat-page"),
+   path('mark-notification-as-read/<int:notification_id>/', views.mark_notification_as_read, name='mark_notification_as_read'),
 
 ]

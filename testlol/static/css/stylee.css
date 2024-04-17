@@ -163,3 +163,20 @@
   border-radius: 50%; 
   margin-right: 10px; 
 }
+
+
+.notification-icon {
+  position: relative;
+  display: inline-block;
+  font-size: 24px; /* İkon boyutu */
+}
+.notification-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  padding: 5px;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 14px; /* Sayaç boyutu */
+}

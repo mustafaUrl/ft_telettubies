@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
+from channellol.models import OnlineUserStatus
 
 
 @permission_classes([IsAuthenticated])
@@ -82,13 +83,15 @@ def list_friends(request):
     friend_list, created = FriendList.objects.get_or_create(user=user)  # Nesne yoksa oluştur
     friends = friend_list.friends.all()  # friend_list artık doğru nesne
     friend_data = []
+    
     for friend in friends:
+        online_status = OnlineUserStatus.objects.filter(user=friend).first()
         profile = UserProfile.objects.get(user=friend)
         friend_data.append({
             'id': friend.id,
             'username': friend.username,
             'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-            'online': profile.is_online(),  # Bu metodu User modelinize eklemeniz gerekecek.
+            'online':  online_status.is_online if online_status else False,  # Bu metodu User modelinize eklemeniz gerekecek.
             'muted': friend in friend_list.muted.all()
         })
     return JsonResponse({'friends': friend_data})
