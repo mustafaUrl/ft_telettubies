@@ -95,7 +95,7 @@ def list_friends(request):
         online_status = OnlineUserStatus.objects.filter(user=friend).first()
         profile = UserProfile.objects.get(user=friend)
         friend_data.append({
-            'id': friend.id,
+            'id': friend.id, #bunu silicez 
             'username': friend.username,
             'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
             'online':  online_status.is_online if online_status else False,  # Bu metodu User modelinize eklemeniz gerekecek.

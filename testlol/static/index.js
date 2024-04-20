@@ -1206,6 +1206,12 @@ function displayFriends(friends) {
       }
       // closeSocket(); // Önceki WebSocket bağlantısını kapat
       selectTab('tab2'); // Özel sohbet sekmesini aktif hale getir
+
+      var chatContainer = document.getElementById('chat_container');
+      var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
+      var chatBar = document.getElementById('chat_bar');
+      chatContainer.style.height = isClosed ? '285px' : '0px';
+      chatBar.style.bottom = isClosed ? '310px' : '10px'; // 'this' ile chatBar'ı güncelle
     });
   });
 }
@@ -1227,6 +1233,7 @@ document.getElementById('chat_send').onclick = function() {
   }
   messageInput.value = '';
 };
+
 
 
 // İkona tıklama olayını dinleme ve arkadaş listesini göster
