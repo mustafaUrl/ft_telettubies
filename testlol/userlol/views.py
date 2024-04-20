@@ -68,11 +68,18 @@ def reject_friend_request(request):
 @authentication_classes([JWTAuthentication])
 def remove_friend(request):
     user = request.user
-    friend_id = request.POST.get('friend_id')
+    friend_username = request.data.get('friend_username')
 
+    # Kendi arkadaş listesinden çıkar
     friend_list = FriendList.objects.get(user=user)
-    friend_list.friends.remove(friend_id)
-    return JsonResponse({'success': 'Arkadaş başarıyla silindi.'})
+    friend = User.objects.get(username=friend_username)
+    friend_list.friends.remove(friend)
+
+    # Arkadaşın arkadaş listesinden çıkar
+    friend_list_other = FriendList.objects.get(user=friend)
+    friend_list_other.friends.remove(user)
+
+    return JsonResponse({'success': 'Arkadaş her iki taraftan da başarıyla silindi.'})
 
 # Arkadaş listesini listeleme
 
@@ -259,10 +266,10 @@ def list_pending_friend_requests(request):
 
 actions_list = {
     'add_friend': send_friend_request,
-    'remove_friend': remove_friend,
+    'remove friend': remove_friend,
     'list_friends': list_friends,
-    'ban_user': ban_user,
-    'unban_user': unban_user,
+    'block': ban_user,
+    'remove block': unban_user,
     'mute': mute,
     'unmute': unmute,
     'get_friend': get_friend,
@@ -281,10 +288,10 @@ def user_actions(request):
     action = request.data.get('action')
     # friend_id = request.data.get('friend_id')
     # print(friend_username)
-
+    print(action)
     if action in actions_list:
        action_func = actions_list[action]
        print(action)
        return action_func(request)
 
-    return JsonResponse({'success': 'İşlem başarılı.'})
+    return JsonResponse({'error': 'Invalid action.'}, status=400)

@@ -2,10 +2,11 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async, async_to_sync
 from .models import OnlineUserStatus, Notification, OnlineUserStatusPrivate
-from userlol.models import PrivateChatMessage
+from userlol.models import PrivateChatMessage, FriendList
 from channels.db import database_sync_to_async
 # from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
+
 
 class UniversalChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -58,7 +59,7 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
                 self.private_room_name,
                 self.channel_name
             )
-
+  
     async def receive(self, text_data):
         self.user = self.scope['user']
         if self.user.is_anonymous:
@@ -68,7 +69,7 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
         username = text_data_json["username"]
         message = text_data_json['message']
         room = text_data_json.get('room', 'global')
-
+        
         # Global sohbete mesaj gönder
         if room == 'global':
             await self.channel_layer.group_send(
@@ -119,7 +120,7 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
                 'username': username,
                 'room': 'private'
             }))
-
+    
     @database_sync_to_async
     def update_user_status(self, user, is_online):
         if not user.is_anonymous:
@@ -128,8 +129,6 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
     def update_userprivate_status(self, user, is_online):
         if not user.is_anonymous:
            OnlineUserStatusPrivate.objects.update_or_create(user=user, defaults={'is_online': is_online})
-
-        
     # Diğer kullanıcı bağlı mı kontrol etme metodu (implemente edilmeli)
     @database_sync_to_async
     def is_user_connected(self, username):
