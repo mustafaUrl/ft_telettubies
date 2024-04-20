@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import UserProfile
+from django.shortcuts import get_object_or_404
 
 
 @api_view(['POST'])
@@ -45,8 +46,8 @@ def update_user(request):
 @authentication_classes([JWTAuthentication])
 def get_info(request):
     # Kullanıcı bilgilerini döndür
-    user = User.objects.get(username=request.user.username)
-    profile = UserProfile.objects.get(user=user)
+    user = get_object_or_404(User, username=request.user.username)
+    profile = get_object_or_404(UserProfile, user=user)
 
     return JsonResponse({
         'username': user.username,
@@ -55,7 +56,6 @@ def get_info(request):
         'last_name': user.last_name,
         'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
     }, status=200)
-
 
 
 from django.core.files.storage import FileSystemStorage
