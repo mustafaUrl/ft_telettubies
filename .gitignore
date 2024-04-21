@@ -5,3 +5,4 @@ testlol/media/profile_pictures/*
 #ignore db.sqlite3
 testlol/db.sqlite3
 .env
+frontend/dist/static/img/

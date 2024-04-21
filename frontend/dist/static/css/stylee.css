@@ -1,0 +1,182 @@
+  #chat_container {
+    position: fixed;
+    bottom: 10px;
+    right: 0px; 
+    width: 300px;
+    border: 1px solid #6cd2ae;
+    padding: 10px;
+    overflow: hidden;
+    transition: height 0.5s;
+    height: 0;
+    z-index: 1000;
+    transition: right 0.5s, height 0.5s;
+    background-color: rgba(0, 255, 255, 0.21);
+  }
+
+  
+  #chat_bar {
+    position: fixed;
+    bottom: 10px;
+    right: 0px;
+    width: 300px;
+    height: 20px;
+    background: #0d61d7;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+    text-align: center;
+
+  }
+  
+ 
+  
+  #tabs {
+    display: flex;
+    justify-content: space-around;
+    position: absolute; /* Pozisyonu absolute yap */
+    bottom: -30px; /* chat_bar'ın altına yerleştir */
+    left: 0;
+    right: 0;
+    /* background-color: #1c010157; */
+  }
+  
+  #tab1{
+    flex: 1; /* Her iki sekme de eşit genişlikte olacak */
+    text-align: center;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #fff0f0;
+  }
+
+  #tab2 {
+    flex: 1; /* Her iki sekme de eşit genişlikte olacak */
+    text-align: center;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #fff0f0;
+  }
+  
+  #tab1:hover, #tab2:hover {
+    background-color: #ddd;
+  }
+
+  
+  
+
+  #chat_messages1 {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  #chat_messages2 {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+
+
+  #chat_input {
+    width: calc(100% - 60px);
+    margin-right: 10px;
+  }
+
+  #chat_send {
+    width: 40px;
+  }
+
+  .profile-container {
+    position: relative;
+  }
+
+  .profile-background {
+    width: 100%;
+    height: 250px;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    padding-left: 20px; /* Adjust as needed */
+  }
+
+  .profile-picture {
+    width: 200px; /* Adjust as needed */
+    height: 200px; /* Adjust as needed */
+    border-radius: 50%;
+    border: 3px solid white;
+  }
+
+  .profile-row {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .link-container {
+    border-right: 1px solid #000000;
+    padding: 12px;
+    width: 220px;
+  }
+
+  .content-container {
+    flex-grow: 1;
+    padding: 12px;
+  }
+
+
+
+
+#chat_icon {
+  position: fixed;
+  bottom: 10px;
+  right: 320px; 
+  width: 20px;
+  height: 20px;
+  background: url('../img/chat.svg') no-repeat center center;
+  cursor: pointer;
+  z-index: 1002; 
+}
+
+#friend-list {
+  display: none; 
+  position: fixed;
+  right: 0; 
+  top: 0;
+  width: 250px; 
+  height: 100%;
+  background-color: #9cd8a341;
+  overflow-y: auto; 
+  border-left: 1px solid #9a878775; 
+  height: 50vh;
+  top: 50vh;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center; 
+  padding: 10px; 
+}
+
+.friend-item img {
+  width: 50px; 
+  height: 50px; 
+  border-radius: 50%; 
+  margin-right: 10px; 
+}
+
+
+.notification-icon {
+  position: relative;
+  display: inline-block;
+  font-size: 24px; /* İkon boyutu */
+}
+.notification-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  padding: 5px;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 14px; /* Sayaç boyutu */
+}
