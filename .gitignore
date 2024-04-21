@@ -4,3 +4,4 @@ testlol/media/profile_pictures/*
 *.pyc
 #ignore db.sqlite3
 testlol/db.sqlite3
+.env
