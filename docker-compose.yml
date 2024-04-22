@@ -1,15 +1,20 @@
 # version: '3.8' #kaldır modası geçmiş
 
 services:
-  db:
-    container_name: db
-    image: postgres:latest
-    networks:
-      - backend_network
+  postgres:
+    container_name: postgres
+    image: postgres:16.1-alpine3.18
+    restart: always
+    env_file: .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval:  5s
+      timeout:  5s
+      retries:  5
 
   backend:
     container_name: backend
@@ -27,7 +32,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      - postgres
 
   frontend:
     container_name: frontend
@@ -40,6 +45,16 @@ services:
       - "443:443"
     depends_on:
       - backend
+networks:
+  backend_network:
+    driver: bridge
+  frontend_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  media_volume:
+  static_volume:
 
   # nginx:
   #   container_name: nginx
@@ -56,13 +71,8 @@ services:
   #   depends_on:
   #     - frontend
 
-volumes:
-  postgres_data:
-  media_volume:
-  static_volume:
 
-networks:
-  backend_network:
-    driver: bridge
-  frontend_network:
-    driver: bridge
+
+# networks:
+#   my-pre-existing-network:
+#     external: true

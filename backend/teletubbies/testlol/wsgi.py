@@ -1,5 +1,5 @@
 """
-WSGI config for testlol project.
+WSGI config for teletubbies project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

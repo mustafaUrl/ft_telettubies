@@ -1,25 +1,27 @@
-# Python resmi imajını kullanarak başlayın
-FROM python:3.12-slim
+# Base image olarak Python 3.9 slim sürümünü kullan
+FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libc-dev \
-    libffi-dev \
-    python3-dev
+# Ortam değişkenlerini ayarla
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
+# Çalışma dizinini oluştur
+WORKDIR /app
 
+# PostgreSQL client'ı kur
+RUN apt-get update && apt-get install -y postgresql-client
+
+# Bağımlılıkları kur
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Uygulama kaynak kodunu kopyalayın
-COPY teletubbies/ /teletubbies/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Çalışma dizinini ayarlayın
-WORKDIR teletubbies/
+# Uygulama kodunu kopyala
+COPY . .
 
-# Gerekli Python kütüphanelerini yükleyin
+# Veritabanı migrasyonlarını yap
+RUN python3 manage.py makemigrations
 
-
-
-# Uygulamayı çalıştırın
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Uygulama için gerekli portu aç
+EXPOSE 8000

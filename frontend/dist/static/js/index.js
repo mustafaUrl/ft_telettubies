@@ -435,30 +435,42 @@ function profileListener() {
  */
  async function changeContent(contentId) {
   console.log('İçerik değiştiriliyor:', contentId);
-  if (localStorage.getItem('contentData') === null) {
-    const contentData = JSON.parse(document.getElementById('content-data').textContent);
-    localStorage.setItem('contentData', JSON.stringify(contentData));
+  let contentData = JSON.parse(localStorage.getItem('contentData'));
+  
+  if (contentData === null) {
+    try {
+      const response = await fetch('/api/content/');
+      contentData = await response.json();
+      localStorage.setItem('contentData', JSON.stringify(contentData));
+    } catch (error) {
+      console.error('Error:', error);
+      return; // Hata durumunda fonksiyondan çık
+    }
   }
-  else {
-    var contentData = JSON.parse(localStorage.getItem('contentData'));
-  }
-  if ( contentId !== 'logout' && contentData[contentId] === undefined) {
+  
+  console.log(contentData[contentId]);
+  
+  if (contentId !== 'logout' && contentData[contentId] === undefined) {
     console.log('Content not found');
     return;
   }
+  
   if (contentId === 'logout') {
     logoutListener();
+  } else {
+    const htmlContent = contentData[contentId];
+    if (htmlContent) {
+      document.getElementById('main-content').innerHTML = htmlContent;
+      history.pushState({ id: contentId, htmlContent: htmlContent, profileContent: false }, null, null);
+      triggerContentLoad(contentId);
+    } else {
+      console.log('İçerik bulunamadı:', contentId);
+    }
   }
-  else{
-
-    const htmlContent =contentData[contentId];
-    document.getElementById('main-content').innerHTML = htmlContent;
-    history.pushState({ id: contentId, htmlContent: htmlContent, profileContent: false }, null, null);
-    triggerContentLoad(contentId);
-  }
+  
   checkAuthStatus();
-
 }
+
 
 function addfriendListener() {
    document.getElementById('add_friend').addEventListener('click', function(e) {
@@ -514,8 +526,13 @@ function addfriendListener() {
 async function changeContentProfile(contentId) {
   console.log('İçerik değiştiriliyor:', contentId);
   if (localStorage.getItem('contentData') === null) {
-    const contentData = JSON.parse(document.getElementById('content-data').textContent);
-    localStorage.setItem('contentData', JSON.stringify(contentData));
+    fetch('api/content/')
+      .then(response => response.json())
+      .then(data => {
+        localStorage.setItem('contentData', JSON.stringify(data));
+      })
+  .catch(error => console.error('Error:', error));
+  var contentData = JSON.parse(localStorage.getItem('contentData'));
   }
   else {
     var contentData = JSON.parse(localStorage.getItem('contentData'));

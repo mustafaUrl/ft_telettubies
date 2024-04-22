@@ -15,7 +15,7 @@
  function logoutListener() {
   document.getElementById('logout-link').addEventListener('click', function(e) {
     e.preventDefault();
-    fetch('auth/logout/', {
+    fetch('api/auth/logout/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ function signInListener() {
       const username_or_email = document.getElementById('InputUserOrEmail').value;
       const password = document.getElementById('InputPassword').value;
 
-      fetch('auth/login/', {
+      fetch('api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -124,7 +124,7 @@ function signInListener() {
             return;
         }
 
-        fetch('auth/register/', {
+        fetch('api/auth/register/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -259,7 +259,7 @@ function accountListener() {
       formData.append('profile_pic', file);
   
       // Sunucuya POST isteği yaparak dosyayı gönder
-      fetch('user/update_profile_pic/', { // Sunucu tarafı yükleme endpoint'i
+      fetch('api/user/update_profile_pic/', { // Sunucu tarafı yükleme endpoint'i
         method: 'POST',
         headers: {
           // 'Content-Type': 'application/json', bu satırı kaldırın çünkü multipart/form-data kullanıyoruz
@@ -292,7 +292,7 @@ function accountListener() {
   
 
   // Kullanıcı bilgilerini almak için API'ye istek yap
-  fetch('user/get_info', {
+  fetch('api/user/get_info', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ function accountListener() {
     };
 
     // Kullanıcı bilgilerini güncellemek için API'ye istek yap
-    fetch('user/update_user/', {
+    fetch('api/user/update_user/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -663,7 +663,7 @@ function checkAuthStatus() {
         bodyData['friend_username'] = friend_username;
     }
     const body = JSON.stringify(bodyData);
-    fetch('user/user_actions/', {
+    fetch('api/user/user_actions/', {
         method: 'POST',
         headers: headers,
         body: body
@@ -739,7 +739,7 @@ function refreshAccessToken() {
   // Refresh token'ı cookie'den alın
   const refreshToken = getCookie('refreshToken');
 
-  fetch('auth/api/token/refresh/', {
+  fetch('api/auth/api/token/refresh/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -920,8 +920,8 @@ function hrefListener() {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  const contentData = JSON.parse(document.getElementById('content-data').textContent);
-  localStorage.setItem('contentData', JSON.stringify(contentData));
+  // const contentData = JSON.parse(document.getElementById('content-data').textContent);
+  // localStorage.setItem('contentData', JSON.stringify(contentData));
   checkAuthStatus();
   hrefListener();
   //refreshAccessToken();

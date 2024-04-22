@@ -6,12 +6,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('auth/', include('authlol.urls')),
+    path('api/admin/', admin.site.urls),
+    path('api/auth/', include('authlol.urls')),
    # path('', include('applol.urls')),
-    path('',include('uimodule.urls')),
-    path('chat/', include('channellol.urls')),
-    path('user/', include('userlol.urls')),
+    path('api/',include('uimodule.urls')),
+    path('api/chat/', include('channellol.urls')),
+    path('api/user/', include('userlol.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
