@@ -6,3 +6,5 @@ testlol/media/profile_pictures/*
 testlol/db.sqlite3
 .env
 frontend/dist/static/img/
+others
+micro/data
