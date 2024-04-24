@@ -1053,6 +1053,25 @@ document.addEventListener('DOMContentLoaded', function() {
 // function openSocket() {
 //   // WebSocket bağlantısını açan fonksiyon
 //   chatSocket = new WebSocket('ws://' + window.location.host + '/?token=' + getCookie('accessToken'));
+
+
+// async function requestNotificationPermission() {
+//   try {
+//     const permission = await Notification.requestPermission();
+//     if (permission === 'granted') {
+//       console.log('Notification permission granted.');
+//     } else {
+//       console.log('Notification permission denied.');
+//     }
+//   } catch (error) {
+//     console.error('Error requesting notification permission:', error);
+//   }
+// }
+
+// // Call this function when the page loads or when the user logs in
+// requestNotificationPermission();
+
+
 let chatSocket;
 let activeTab = 'tab1';
 let privateChatRoom = '';
@@ -1080,6 +1099,7 @@ openSocket() {
     messageDiv.textContent = data.username + ': ' + data.message;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    
   };
 
   chatSocket.onclose = function(e) {
@@ -1206,11 +1226,11 @@ function closeSocket() {
 
 
 
-// document.getElementById('chat_input').onkeypress = function(e) {
-//   if (e.keyCode === 13) {  // Enter tuşu
-//     document.getElementById('chat_send').click();
-//   }
-// };
+ document.getElementById('chat_input').onkeypress = function(e) {
+  if (e.keyCode === 13) {  // Enter tuşu
+    document.getElementById('chat_send').click();
+   }
+ };
 
  
  // Toggle chat box function

@@ -34,6 +34,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from userlol.models import FriendRequest, UserProfile
+
 User = get_user_model()
 
 class Notification(models.Model):
@@ -84,3 +85,8 @@ def create_profile_update_notification(sender, instance, created, **kwargs):
         )
 
 
+# Bildirim oluşturulduğunda WebSocket üzerinden göndermek için sinyal
+@receiver(post_save, sender=Notification)
+def send_notification_via_websocket(sender, instance, created, **kwargs):
+    if created:
+        instance.send_websocket_notification()

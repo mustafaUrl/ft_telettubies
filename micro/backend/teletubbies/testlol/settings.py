@@ -54,7 +54,7 @@ IP ="127.0.0.1"
 
 URL_DOMAIN = f"https://{DOMAIN}:8000"
 URL_IP = f"https://{IP}:8000"
-ALLOWED_HOSTS = ["localhost", IP, DOMAIN]
+ALLOWED_HOSTS = ["localhost", IP, DOMAIN,"10.12.5.2"]
 
 
 
@@ -232,7 +232,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
 	URL_DOMAIN,
-	URL_IP
+	URL_IP,
+    "10.12.5.2"
 ]
 
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']

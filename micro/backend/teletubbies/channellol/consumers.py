@@ -4,7 +4,7 @@ from asgiref.sync import sync_to_async, async_to_sync
 from .models import OnlineUserStatus, Notification, OnlineUserStatusPrivate
 from userlol.models import PrivateChatMessage, FriendList
 from channels.db import database_sync_to_async
-# from channels.layers import get_channel_layer
+from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 
 
@@ -69,6 +69,7 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
         username = text_data_json["username"]
         message = text_data_json['message']
         room = text_data_json.get('room', 'global')
+        notification_user = await self.notification_check(self.user)
         
         # Global sohbete mesaj gönder
         if room == 'global':
@@ -78,7 +79,8 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
                     'type': 'chat_message',
                     'message': message + " global",
                     'username': username,
-                    'room': 'global'
+                    'room': 'global',
+                    'notification' : notification_user
                 }
             )
         # Özel sohbete mesaj gönder
@@ -92,9 +94,12 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
                     'username': username,
                     'room': 'private',
                     'other_user': self.other_user
+                    'notification' : notification_user
+
                 }
             )
-
+        # Bildirimi ilgili kullanıcının kanalına gönder
+        async_to_sync(channel_layer.group_send)(f"user_{self.recipient.id}", notification_data)
     # Mesajı WebSocket üzerinden gönder
     async def chat_message(self, event):
         message = event['message']
@@ -121,6 +126,11 @@ class UniversalChatConsumer(AsyncWebsocketConsumer):
                 'room': 'private'
             }))
     
+        # Bildirim verilerini al
+    @database_sync_to_async
+    def notification_check(self, user);
+        
+
     @database_sync_to_async
     def update_user_status(self, user, is_online):
         if not user.is_anonymous:
