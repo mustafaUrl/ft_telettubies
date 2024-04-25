@@ -1,0 +1,29 @@
+{% load static %}
+
+<div class="profile-container">
+    <div class="profile-background" style="background-image: url('{% static "img/orange.jpeg" %}');">
+      <img src="{% static "img/pp.jpeg" %}" class="profile-picture" alt="Profile Picture">
+    </div>
+  
+  <div class="profile-row">
+    <div class="link-container">
+      <!-- Navigation links -->
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="account-link" role="button">Account</a>
+        <hr />
+      </section>
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="friends-link" role="button">Friends</a>
+        <hr />
+      </section>
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="match_history-link" role="button">Match History</a>
+        <hr />
+      </section>
+    </div>
+    <div id="content-profile" class="content-container">
+      <h2>match_history</h2>
+      <p>match_history content</p>
+    </div>
+  </div>
+  

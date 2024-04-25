@@ -1,4 +1,28 @@
+{% load static %}
 
+<div class="profile-container">
+    <div class="profile-background" style="background-image: url('{% static "img/orange.jpeg" %}');">
+      <img src="{% static "img/pp.jpeg" %}" class="profile-picture" alt="Profile Picture">
+    </div>
+  
+  <div class="profile-row">
+    <div class="link-container">
+      <!-- Navigation links -->
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="account-link" role="button">Account</a>
+        <hr />
+      </section>
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="friends-link" role="button">Friends</a>
+        <hr />
+      </section>
+      <section style="padding: 12px;">
+        <a class="btn btn-primary btn-lg dynamic-profile" id="match_history-link" role="button">Match History</a>
+        <hr />
+      </section>
+    </div>
+    <div id="content-profile" class="content-container">
+      
 <div>
     <label for="friendIdInput">Friend ID:</label>
     <input type="text" id="friend_usernameInput" name="friendIdInput">
@@ -48,29 +72,6 @@
         </div>
     </div>
 </div>
-
-
-{% comment %} <tr>
-    <td><img class="rounded-circle me-2" width="30" height="30" src="avatars/avatar1.jpeg" />Airi Satou</td>
-    <td><button class="btn btn-success" type="button">online</button></td>
-    <td><button class="btn btn-warning" type="button">message</button></td>
-    <td><button class="btn btn-info" type="button">invite</button></td>
-    <td><button class="btn btn-success" type="button">mute</button></td>
-    <td>
-        <div class="btn-group"><button class="btn btn-primary" type="button">other</button><button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
-            <div class="dropdown-menu"><a class="dropdown-item" href="#">First Item</a><a class="dropdown-item" href="#">Second Item</a><a class="dropdown-item" href="#">Third Item</a></div>
-        </div>
-    </td>
-</tr>
-<tr>
-    <td><img class="rounded-circle me-2" width="30" height="30" src="avatars/avatar1.jpeg" />Airi Satou</td>
-    <td><button class="btn btn-secondary" type="button">offline</button></td>
-    <td><button class="btn btn-warning" type="button">message</button></td>
-    <td><button class="btn btn-info" type="button">invite</button></td>
-    <td><button class="btn btn-danger" type="button">unmute</button></td>
-    <td>
-        <div class="btn-group"><button class="btn btn-primary" type="button">other</button><button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
-            <div class="dropdown-menu"><a class="dropdown-item" href="#">First Item</a><a class="dropdown-item" href="#">Second Item</a><a class="dropdown-item" href="#">Third Item</a></div>
-        </div>
-    </td>
-</tr> {% endcomment %}
+    </div>
+  </div>
+  
