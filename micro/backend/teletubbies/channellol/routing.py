@@ -9,13 +9,15 @@
 
 from django.urls import path 
 # from .consumers import ChatConsumer, PrivateChatConsumer
-from .consumers import UniversalChatConsumer
+from .consumers import PrivateChatConsumer , ChatConsumer
 from .middleware import JWTAuthMiddleware  # Özelleştirilmiş middleware'inizi burada import edin
 from django.urls import re_path
 
 websocket_urlpatterns = [
-    re_path(r'^ws/chat/$', UniversalChatConsumer.as_asgi()),
-    re_path(r'^ws/chat/(?P<username>\w+)/$', UniversalChatConsumer.as_asgi()),
+    re_path(r'^ws/chatPrivate/$', JWTAuthMiddleware(PrivateChatConsumer.as_asgi())),
+    re_path(r'^ws/chat/$', JWTAuthMiddleware(ChatConsumer.as_asgi())),
+    # re_path(r'^ws/chat/(?P<username>\w+)/$', UniversalChatConsumer.as_asgi()),
+    # re_path(r'^ws/notifications/$', NotificationConsumer.as_asgi()),
 ]
 
 # websocket_urlpatterns = [

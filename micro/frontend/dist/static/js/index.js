@@ -93,7 +93,8 @@ function signInListener() {
         setCookie('refreshToken', data.refresh, {secure: true});
         setCookie('username', data.username, {secure: true});
         selectTab('tab1');
-        // openSocketForTab1();
+        openSocket();
+        openSocketPrivate();
         
         // Login başarılı, ana sayfaya yönlendir
         // window.location.href = '/user_profile'; // Örnek bir yönlendirme
@@ -494,7 +495,6 @@ function addfriendListener() {
         if (action === 'message') {
           if (otherUser !== this.getAttribute('data-username')) {
             otherUser = this.getAttribute('data-username');
-            closeSocket(); 
           }
           selectTab('tab2');
           return;
@@ -999,6 +999,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // localStorage.setItem('contentData', JSON.stringify(contentData));
   checkAuthStatus();
   hrefListener();
+  openSocketPrivate();
+  openSocket();
   //refreshAccessToken();
   //selectTab('tab1');
  
@@ -1020,41 +1022,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-// Global değişkenler
-
-//  function selectTab(selectedTabId) {
-//   var tabs = document.querySelectorAll('#tabs > div');
-//   tabs.forEach(function(tab) {
-//     if (tab.id === selectedTabId) {
-//       tab.style.backgroundColor = '#0d61d7'; // Seçili sekme stilini ayarla
-//       tab.style.color = 'black'; // Seçili sekme metin rengini ayarla
-//     } else {
-//       tab.style.backgroundColor = ''; // Diğer sekmelerin stilini sıfırla
-//       tab.style.color = ''; // Diğer sekmelerin metin rengini sıfırla
-//     }
-//   });
-// }
-
-// // Sekmeler için tıklama olaylarını tanımla
-// document.getElementById('tab1').addEventListener('click', function(event) {
-//   event.stopPropagation();
-//   selectTab('tab1'); // Sekme 1'i seç
-//   openSocket();
-//   });
-
-//   document.getElementById('tab2').addEventListener('click', function(event) {
-//   event.stopPropagation();
-//   // closeSocket();
-//   selectTab('tab2'); // Sekme 2'i seç
-// });
-
-// let chatSocket;
-
-// function openSocket() {
-//   // WebSocket bağlantısını açan fonksiyon
-//   chatSocket = new WebSocket('ws://' + window.location.host + '/?token=' + getCookie('accessToken'));
-
-
 // async function requestNotificationPermission() {
 //   try {
 //     const permission = await Notification.requestPermission();
@@ -1072,22 +1039,152 @@ document.addEventListener('DOMContentLoaded', function() {
 // requestNotificationPermission();
 
 
+
+// function incrementNotificationCount() {
+//   var countElement = document.getElementById('notificationCount');
+//   var currentCount = parseInt(countElement.textContent);
+//   countElement.textContent = currentCount + 1;
+// }
+
+// function addNotification(notificationData) {
+//   // Bildirim sayısını artıran fonksiyonu çağır
+//   incrementNotificationCount();
+  
+//   // Bildirimleri gösterecek bir konteyner oluştur (Eğer henüz yoksa)
+//   var notificationsContainer = document.getElementById('notificationsContainer');
+//   if (!notificationsContainer) {
+//     notificationsContainer = document.createElement('div');
+//     notificationsContainer.id = 'notificationsContainer';
+//     document.body.appendChild(notificationsContainer);
+//   }
+
+//   // Yeni bir bildirim elementi oluştur
+//   var notificationElement = document.createElement('div');
+//   notificationElement.className = 'notification';
+//   notificationElement.textContent = notificationData.from_user + ': ' + notificationData.message;
+
+//   // Bildirim elementine tıklanma olayını ekle
+//   notificationElement.onclick = function() {
+//     // Bildirimi okundu olarak işaretle
+//     markNotificationAsRead(notificationData.id);
+//     // Bildirim elementini kaldır
+//     notificationElement.remove();
+//     // Sayaç değerini azalt
+//     decrementNotificationCount();
+//   };
+// }
+
+
+// let notificationSocket;
+// function  openNotificationSocket(){
+//   // Bildirimler için WebSocket bağlantısını açan fonksiyon
+//   if  (notificationSocket && notificationSocket.readyState === WebSocket.OPEN) {
+//     return;
+//   }
+
+//   notificationSocket = new WebSocket('ws://' + window.location.host + '/ws/notifications/?token=' + getCookie('accessToken'));
+//   notificationSocket.onmessage = function(e) {
+//     const data = JSON.parse(e.data);
+//     console.log('Bildirim geldi:', data);
+//     // Bildirim sayısını artıran fonksiyonu çağır
+//     // incrementNotificationCount();
+//     // // Bildirimleri gösteren fonksiyonu çağır
+//     // addNotification(data);
+
+// }}
+// openNotificationSocket();
+
+
+
+// Global olarak WebSocket bağlantısını tanımla
+let chatSocketPrivate
+let otherUser = '';
+
+// WebSocket bağlantısını aç
+function openSocketPrivate() {
+  if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    return;
+  }
+  chatSocketPrivate = new WebSocket(`wss://${window.location.host}/ws/chatPrivate/?token=` + getCookie('accessToken'));
+
+  chatSocketPrivate.onopen = function(e) {
+    console.log('WebSocket bağlantısı açıldı:', e);
+  };
+
+  chatSocketPrivate.onerror = function(e) {
+    console.error('WebSocket hatası:', e);
+  };
+
+  chatSocketPrivate.onmessage = function(e) {
+    // Gelen mesajları işle
+    const data = JSON.parse(e.data);
+
+    // Mesajın hangi odaya ait olduğunu kontrol et
+    const chatMessages = document.getElementById('chat_messages2');
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = data.username + ': ' + data.message;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  };
+
+  chatSocketPrivate.onclose = function(e) {
+    console.error('WebSocket bağlantısı kapandı:', e);
+  };
+}
+
+// Odaya katılma komutunu gönder
+function joinRoom(friendUsername) {
+  if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    const message = {
+      command: 'join',
+      friend: friendUsername
+    };
+    chatSocketPrivate.send(JSON.stringify(message));
+  } else {
+    console.error('WebSocket bağlantısı açık değil.');
+  }
+}
+
+// Odayı terk etme komutunu gönder
+function leaveRoom(friendUsername) {
+  if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    const message = {
+      command: 'leave',
+      friend: friendUsername
+    };
+    chatSocketPrivate.send(JSON.stringify(message));
+  } else {
+    console.error('WebSocket bağlantısı açık değil.');
+  }
+}
+
+// Mesaj gönderme komutunu gönder
+function sendMessage(text) {
+  if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    const message = {
+      command: 'send',
+      friend: otherUser,
+      message: text
+    };
+    chatSocketPrivate.send(JSON.stringify(message));
+  } else {
+    console.error('WebSocket bağlantısı açık değil.');
+  }
+}
+
+// WebSocket bağlantısını aç
+
+
+
 let chatSocket;
 let activeTab = 'tab1';
-let privateChatRoom = '';
-let otherUser = '';
-function 
-openSocket() {
+function openSocket() {
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
     return;
   }
-  if (otherUser === '') {
-    chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?token=` + getCookie('accessToken'));
-  } else {
 
-    chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${otherUser}/?token=` + getCookie('accessToken'));
-  // chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?token=' + getCookie('accessToken'));
-  }
+  chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?token=` + getCookie('accessToken'));
+ 
   chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('type:', data.type , 'data:', data);
@@ -1107,7 +1204,6 @@ openSocket() {
   };
 }
 
-// Özel sohbet odasına mesaj gönderme fonksiyonu
 
 
 // Sekme değiştirme fonksiyonu
@@ -1128,9 +1224,6 @@ function selectTab(selectedTabId) {
   document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
   document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
   activeTab = selectedTabId;
-
-  // WebSocket bağlantısını yeniden aç
-  openSocket();
 
 }
 
@@ -1297,16 +1390,15 @@ function displayFriends(friends) {
       event.preventDefault();
       if (otherUser !== this.getAttribute('data-username')) {
         otherUser = this.getAttribute('data-username'); // Diğer kullanıcının adını güncelle
-        closeSocket(); // Önceki WebSocket bağlantısını kapat
       }
       // closeSocket(); // Önceki WebSocket bağlantısını kapat
       selectTab('tab2'); // Özel sohbet sekmesini aktif hale getir
 
       var chatContainer = document.getElementById('chat_container');
-      var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
+      // var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
       var chatBar = document.getElementById('chat_bar');
-      chatContainer.style.height = isClosed ? '285px' : '0px';
-      chatBar.style.bottom = isClosed ? '310px' : '10px'; // 'this' ile chatBar'ı güncelle
+      chatContainer.style.height =  '285px';
+      chatBar.style.bottom =  '310px'; // 'this' ile chatBar'ı güncelle
     });
   });
 }
@@ -1317,15 +1409,18 @@ document.getElementById('chat_send').onclick = function() {
   const message = messageInput.value;
   const username = getCookie('username'); // Gönderen kullanıcının adını al
 
+  if (chatSocketPrivate && activeTab === 'tab2') {
+    sendMessage(message);
+  } else {
   // Mesajı WebSocket üzerinden gönder
   if (chatSocket) {
     console.log('activeTab:', activeTab , 'otherUser:', otherUser, 'username:', username, 'message:', message); 
     chatSocket.send(JSON.stringify({
       'message': message,
       'username': username,
-      'room': activeTab === 'tab1' ? 'global' : `private_chat_${username}_${otherUser}`
+      'room': 'global'
     }));
-  }
+  }}
   messageInput.value = '';
 };
 
