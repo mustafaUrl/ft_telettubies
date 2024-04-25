@@ -180,3 +180,22 @@
   color: white;
   font-size: 14px; /* Sayaç boyutu */
 }
+
+
+#canvas {
+  background: darkgreen;
+  display: none;
+}
+
+.btn {
+  margin-bottom: 20px;
+}
+
+#btn-start {
+  display: block;
+}
+
+#btn-toggle-sound {
+  display: block;
+}
+
