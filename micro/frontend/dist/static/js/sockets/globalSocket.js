@@ -1,17 +1,17 @@
 import  {getCookie}  from '../cookies/cookies.js';
 
 
-let chatSocket;
+window.chatSocket = '';
 // let activeTab = 'tab1';
 
 export default function openSocket() {
-  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+  if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
     return;
   }
 
-  chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?token=` + getCookie('accessToken'));
+  window.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?token=` + getCookie('accessToken'));
  
-  chatSocket.onmessage = function(e) {
+  window.chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('type:', data.type , 'data:', data);
 
@@ -24,7 +24,7 @@ export default function openSocket() {
     
   };
 
-  chatSocket.onclose = function(e) {
+  window.chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
   };
 }

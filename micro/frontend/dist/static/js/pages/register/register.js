@@ -34,7 +34,6 @@ export default function register() {
             if(data.success) {
                 // Kayıt başarılı, ana sayfaya yönlendir
                 changeContent('home');
-                console.log('Registration successful:', data.success);
             } else {
                 // Hata mesajını göster
                 alert('Kayıt başarısız: ' + data.error);

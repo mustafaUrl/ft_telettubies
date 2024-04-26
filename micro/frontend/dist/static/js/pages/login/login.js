@@ -2,17 +2,15 @@ import  {setCookie}  from '../../cookies/cookies.js';
 import  changeContent  from '../../uimodule/changeContent.js';
 import   openSocket  from '../../sockets/globalSocket.js';
 import  openSocketPrivate  from '../../sockets/privateSocket.js';
-
+import { selectTab } from '../../uimodule/chatBox.js';
 
 
 export default function login() {
-  console.log('olur11');
     // Giriş formu işlevselliğini burada etkinleştir
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const username_or_email = document.getElementById('InputUserOrEmail').value;
       const password = document.getElementById('InputPassword').value;
-      console.log('olur');
       fetch('api/auth/login/', {
         method: 'POST',
         headers: {
@@ -34,11 +32,10 @@ export default function login() {
           selectTab('tab1');
           openSocket();
           openSocketPrivate();
-          setInterval(refreshAccessToken, 4 * 60 * 1000); 
+          // setInterval(refreshAccessToken, 4 * 60 * 1000); 
           // Login başarılı, ana sayfaya yönlendir
           // window.location.href = '/user_profile'; // Örnek bir yönlendirme
           changeContent('home');
-          console.log('login.js ok accessToken');
 
         } else {
           // Hata mesajını göster
@@ -49,5 +46,4 @@ export default function login() {
         console.error('There has been a problem with your fetch operation:', error);
       });
     });
-    console.log('login.js loaded');
   }

@@ -1,31 +1,31 @@
 import  {getCookie}  from '../cookies/cookies.js';
 import { addMessageToCookie, updateNotificationButton, showTab2WithUsername } from '../uimodule/chatBox.js';
 
-let chatSocketPrivate;
-let otherUser = '';
+window.chatSocketPrivate;
+window.otherUser = '';
 
 // WebSocket bağlantısını aç
 
 export default function openSocketPrivate() {
-  if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+  if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
     return;
   }
-  chatSocketPrivate = new WebSocket(`wss://${window.location.host}/ws/chatPrivate/?token=` + getCookie('accessToken'));
+  window.chatSocketPrivate = new WebSocket(`wss://${window.location.host}/ws/chatPrivate/?token=` + getCookie('accessToken'));
 
-  chatSocketPrivate.onopen = function(e) {
+  window.chatSocketPrivate.onopen = function(e) {
     console.log('WebSocket bağlantısı açıldı:', e);
   };
 
-  chatSocketPrivate.onerror = function(e) {
+  window.chatSocketPrivate.onerror = function(e) {
     console.error('WebSocket hatası:', e);
   };
 
-  chatSocketPrivate.onmessage = function(e) {
+  window.chatSocketPrivate.onmessage = function(e) {
     // Gelen mesajları işle
     const data = JSON.parse(e.data);
     // Mesajları cookie'de sakla
     addMessageToCookie(data.username, data.message);
-    if (data.username !== getCookie('username') && data.username !== otherUser) {
+    if (data.username !== getCookie('username') && data.username !== window.otherUser) {
       updateNotificationButton(data.username);
       return;
     }
@@ -41,7 +41,7 @@ export default function openSocketPrivate() {
     }
   };
 
-  chatSocketPrivate.onclose = function(e) {
+  window.chatSocketPrivate.onclose = function(e) {
     console.error('WebSocket bağlantısı kapandı:', e);
   };
 }

@@ -1,4 +1,6 @@
-async function refreshAccessToken() {
+import { getCookie, setCookie } from './cookies.js';
+
+export default async function refreshAccessToken() {
     // Refresh token'ı cookie'den alın
     const refreshToken = getCookie('refreshToken');
     const response = await fetch('api/auth/token/refresh/', {
@@ -17,11 +19,9 @@ async function refreshAccessToken() {
     if (data.access) {
       // Yeni access token'ı cookie'ye kaydedin
       setCookie('accessToken', data.access, {secure: true});
-      console.log('Access token successfully refreshed');
       return data.access;
     } else {
       throw new Error('Access token refresh failed: ' + data.error);
     }
   }
   
-  export { refreshAccessToken };

@@ -1,10 +1,10 @@
 function joinRoom(friendUsername) {
-    if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
         command: 'join',
         friend: friendUsername
       };
-      chatSocketPrivate.send(JSON.stringify(message));
+      window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
       console.error('WebSocket bağlantısı açık değil.');
     }
@@ -12,12 +12,12 @@ function joinRoom(friendUsername) {
   
   // Odayı terk etme komutunu gönder
   function leaveRoom(friendUsername) {
-    if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
         command: 'leave',
         friend: friendUsername
       };
-      chatSocketPrivate.send(JSON.stringify(message));
+      window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
       console.error('WebSocket bağlantısı açık değil.');
     }
@@ -25,13 +25,13 @@ function joinRoom(friendUsername) {
   
   // Mesaj gönderme komutunu gönder
   function sendMessage(text) {
-    if (chatSocketPrivate && chatSocketPrivate.readyState === WebSocket.OPEN) {
+    if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
         command: 'send',
-        friend: otherUser,
+        friend: window.otherUser,
         message: text
       };
-      chatSocketPrivate.send(JSON.stringify(message));
+      window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
       console.error('WebSocket bağlantısı açık değil.');
     }
@@ -39,8 +39,8 @@ function joinRoom(friendUsername) {
   
 
   function closeSocket() {
-    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-      chatSocket.close();
+    if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+      window.chatSocket.close();
     }
   }
 

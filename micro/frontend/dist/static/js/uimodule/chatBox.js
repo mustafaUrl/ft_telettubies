@@ -1,3 +1,7 @@
+import sendPostUserRequest from '../postwithjwt/userRequest.js';
+import { getCookie } from '../cookies/cookies.js';
+import { sendMessage } from '../utils/SocketHelper.js';
+
 let activeTab = 'tab1';
 function selectTab(selectedTabId) {
     // Sekmelerin stilini sıfırla
@@ -40,11 +44,11 @@ document.getElementById('chat_send').onclick = function() {
 
   if (chatSocketPrivate && activeTab === 'tab2') {
     sendMessage(message);
-    showTab2WithUsername(otherUser);
+    showTab2WithUsername(window.otherUser);
   } else {
   // Mesajı WebSocket üzerinden gönder
-  if (chatSocket) {
-    chatSocket.send(JSON.stringify({
+  if (window.chatSocket) {
+    window.chatSocket.send(JSON.stringify({
       'message': message,
       'username': username,
       'room': 'global'
@@ -217,8 +221,8 @@ function displayFriends(friends) {
       const username = this.getAttribute('data-username');
      // Bildirim sayısını sıfırla
       // Görünümü güncelle
-      if (otherUser !== username) {
-          otherUser = username; // Diğer kullanıcının adını güncelle
+      if (window.otherUser !== username) {
+          window.otherUser = username; // Diğer kullanıcının adını güncelle
         }
       selectTab('tab2');
       displayMessagesFromCookie(username);

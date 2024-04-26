@@ -1,7 +1,9 @@
+import { getCookie } from '../cookies/cookies.js';
+
+import  refreshAccessToken from '../cookies/token.js';
 
 export default async function sendPostUserRequest(action, friend_username = null) {
     try {
-      console.log('İstek gönderiliyor:', action, friend_username);
       const accessToken = getCookie('accessToken');
       let headers = new Headers({
         'Authorization': 'Bearer ' + accessToken,

@@ -9,7 +9,6 @@ export default function triggerContentLoad(contentId) {
    
     switch (contentId) {
       case 'sign-in':
-        console.log('login');
         login();
         break;
       case 'logout':
@@ -22,6 +21,8 @@ export default function triggerContentLoad(contentId) {
         pong();
         break;
       case 'profile':
+      case 'friends':
+      case 'account':
         profile();
         break;
       case 'tournament':

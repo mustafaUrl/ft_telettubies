@@ -1,3 +1,6 @@
+import  sendPostUserRequest from '../../postwithjwt/userRequest.js';
+import  sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
+import { selectTab } from '../../uimodule/chatBox.js';
 
 function addfriendListener() {
     document.getElementById('add_friend').addEventListener('click', function(e) {
@@ -5,7 +8,6 @@ function addfriendListener() {
        const friend_username = document.getElementById('friend_usernameInput').value;
        sendPostUserRequest('add_friend', friend_username)
        .then(data => {
-         console.log('İşlem başarılı:', data);
          listFriends();
        })
        .catch(error => {
@@ -17,13 +19,12 @@ function addfriendListener() {
    tbody.addEventListener('click', function(e) {
      const friendUsername = e.target.closest('tr').querySelector('td:first-child').textContent.trim();
      const action = e.target.textContent;
-     console.log('Tıklanan arkadaş:', friendUsername, 'İşlem:', action);
      if (action === 'mute' || action === 'unmute'
        || action === 'message' || action === 'invite' || action === 'show profile' || action === 'remove friend' || action === 'block'){
        
          if (action === 'message') {
-           if (otherUser !== this.getAttribute('data-username')) {
-             otherUser = this.getAttribute('data-username');
+           if (window.otherUser !== this.getAttribute('data-username')) {
+            window.otherUser = this.getAttribute('data-username');
            }
            selectTab('tab2');
            return;
@@ -31,7 +32,6 @@ function addfriendListener() {
        
        sendPostUserRequest(action, friendUsername)
        .then(data => {
-       console.log('İşlem başarılı:', data);
        if (action === 'mute' || action === 'unmute') {
        listFriends();
        }

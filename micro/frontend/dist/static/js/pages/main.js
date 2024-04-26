@@ -1,5 +1,4 @@
 async function changeContentProfile(contentId) {
-  console.log('İçerik değiştiriliyor:', contentId);
   if (localStorage.getItem('contentData') === null) {
     fetch('api/content/')
       .then(response => response.json())

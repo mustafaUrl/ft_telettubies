@@ -4,7 +4,8 @@ import  openSocket  from './sockets/globalSocket.js';
 import  openSocketPrivate  from './sockets/privateSocket.js';
 import  {selectTab}  from './uimodule/chatBox.js';
 import  {getCookie}  from './cookies/cookies.js';
-
+import triggerContentLoad from './gatePage/gatePage.js';
+import profileTrigger from './pages/profile/profileTrigger.js';
     checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {
@@ -29,6 +30,9 @@ import  {getCookie}  from './cookies/cookies.js';
     if (event.state) {
       var mainContent = document.getElementById('main-content');
       mainContent.innerHTML = event.state.htmlContent;
+      triggerContentLoad(event.state.id);
+      profileTrigger(event.state.id);
+
     }
   }
 
