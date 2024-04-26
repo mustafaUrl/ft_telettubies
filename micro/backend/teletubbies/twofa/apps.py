@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ApplolConfig(AppConfig):
+class TwofaConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'applol'
+    name = 'twofa'

@@ -169,8 +169,143 @@ function listFriends() {
       fileInput.click(); 
     });
     
-   
+
+
+    document.querySelector('.btn-secondary').addEventListener('click', async function() {
+      // Sunucudan 2FA bilgilerini almak için sendPostWithJwt fonksiyonunu kullanın
+      sendPostWithJwt('api/2fa/enable/', {
+        // İstek gövdesi (eğer gerekliyse)
+      })
+      .then(data => {
+        // Sunucudan gelen yanıtı işleyin
+        if(data.error) {
+          alert('Hata: ' + data.error);
+        } else {
+          // Popup penceresini oluşturun ve kullanıcıya gösterin
+          let popupWindow = window.open('', '2FA Popup', 'width=400,height=400');
+          popupWindow.document.write('<html><head><title>2FA QR Code</title></head><body>');
+          popupWindow.document.write('<h1>Two-factor Authentication</h1>');
+          popupWindow.document.write('<p>' + data.message + '</p>');
     
+          // QR kodu oluşturmak için qrcode.js kütüphanesini kullanın
+          let script = popupWindow.document.createElement('script');
+          script.src = './static/js/pages/profile/qrcode.min.js';
+          script.onload = function() {
+            let qrCode = new QRCode(popupWindow.document.body, {
+              text: data.otp_url, // Sunucudan gelen OTP URL'si
+              width: 128,
+              height: 128,
+              colorDark: "#000000",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.H
+            });
+          };
+          popupWindow.document.body.appendChild(script);
+    
+          // OTP kodunu girmek için bir input ve buton ekleyin
+          popupWindow.document.write('<input id="otpInput" type="text" placeholder="Enter OTP code here"/>');
+          popupWindow.document.write('<button id="verifyOtp">Verify OTP</button>');
+    
+          popupWindow.document.write('<p>Secret Key: ' + data.secret_key + '</p>');
+          popupWindow.document.write('</body></html>');
+          popupWindow.document.close();
+    
+          // Butona tıklandığında OTP kodunu doğrulayın
+          popupWindow.document.getElementById('verifyOtp').onclick = function() {
+            let otpCode = popupWindow.document.getElementById('otpInput').value;
+            // OTP kodunu sunucuya gönderin ve doğrulayın
+            sendPostWithJwt('api/2fa/verify/', { token: otpCode })
+            .then(verificationData => {
+              if(verificationData.error) {
+                popupWindow.alert('Doğrulama başarısız: ' + verificationData.error);
+              } else {
+                popupWindow.alert('Doğrulama başarılı!');
+                popupWindow.close(); // Doğrulama başarılıysa pencereyi kapat
+              }
+            })
+            .catch(verificationError => {
+              console.error('Doğrulama sırasında bir hata oluştu:', verificationError);
+            });
+          };
+        }
+      })
+      .catch(error => {
+        console.error('Bir hata oluştu:', error);
+      });
+    });
+    
+    // document.querySelector('.btn-secondary').addEventListener('click', async function() {
+    //   // Sunucudan 2FA bilgilerini almak için sendPostWithJwt fonksiyonunu kullanın
+    //   sendPostWithJwt('api/2fa/enable/', {
+    //     // İstek gövdesi (eğer gerekliyse)
+    //   })
+    //   .then(data => {
+    //     // Sunucudan gelen yanıtı işleyin
+    //     if(data.error) {
+    //       alert('Hata: ' + data.error);
+    //     } else {
+    //       // Popup penceresini oluşturun ve kullanıcıya gösterin
+    //       let popupWindow = window.open('', '2FA Popup', 'width=400,height=400');
+    //       popupWindow.document.write('<html><head><title>2FA QR Code</title></head><body>');
+    //       popupWindow.document.write('<h1>Two-factor Authentication</h1>');
+    //       popupWindow.document.write('<p>' + data.message + '</p>');
+    
+    //       // QR kodu oluşturmak için qrcode.js kütüphanesini kullanın
+    //       let script = popupWindow.document.createElement('script');
+    //       script.src = './static/js/pages/profile/qrcode.min.js';
+    //       script.onload = function() {
+    //         let qrCode = new QRCode(popupWindow.document.body, {
+    //           text: data.otp_url, // Sunucudan gelen OTP URL'si
+    //           width: 128,
+    //           height: 128,
+    //           colorDark: "#000000",
+    //           colorLight: "#ffffff",
+    //           correctLevel: QRCode.CorrectLevel.H
+    //         });
+    //       };
+    //       popupWindow.document.body.appendChild(script);
+    
+    //       popupWindow.document.write('<p>Secret Key: ' + data.secret_key + '</p>');
+    //       popupWindow.document.write('</body></html>');
+    //       popupWindow.document.close();
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.error('Bir hata oluştu:', error);
+    //   });
+    // });
+    
+
+   
+    // document.querySelector('.btn-secondary').addEventListener('click', async function() {
+    //   // Sunucudan 2FA bilgilerini almak için sendPostWithJwt fonksiyonunu kullanın
+    //   sendPostWithJwt('api/2fa/enable/', {
+    //     // İstek gövdesi (eğer gerekliyse)
+    //   })
+    //   .then(data => {
+    //     // Sunucudan gelen yanıtı işleyin
+    //     if(data.error) {
+    //       alert('Hata: ' + data.error);
+    //     } else {
+    //       // Popup penceresini oluşturun ve kullanıcıya gösterin
+    //       let popupWindow = window.open('', '2FA Popup', 'width=400,height=400');
+    //       popupWindow.document.write('<html><head><title>2FA QR Code</title></head><body>');
+    //       popupWindow.document.write('<h1>Two-factor Authentication</h1>');
+    //       popupWindow.document.write('<p>' + data.message + '</p>');
+    //       // QR kodunu göstermek için bir img etiketi ekleyin
+    //       // QR kodu görüntüsünü oluşturmak için bir backend servisi veya frontend kütüphanesi kullanmanız gerekebilir
+    //       popupWindow.document.write('<img src="BURAYA_QR_KODU_GÖRÜNTÜSÜ_URL" alt="2FA QR Code">');
+    //       popupWindow.document.write('<p>Secret Key: ' + data.secret_key + '</p>');
+    //       popupWindow.document.write('</body></html>');
+    //       popupWindow.document.close();
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.error('Bir hata oluştu:', error);
+    //   });
+
+    // });
+
   
     
     sendPostWithJwt('api/user/get_info/', {}, 'GET')
