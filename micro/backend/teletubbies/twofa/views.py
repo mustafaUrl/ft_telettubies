@@ -4,15 +4,10 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django_otp.plugins.otp_totp.models import TOTPDevice
-User = get_user_model()
-
-
-from django.http import JsonResponse
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.oath import totp
+
+
+User = get_user_model()
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -24,9 +19,14 @@ def enable_twofa(request):
         return JsonResponse({'error': 'Two-factor authentication is already enabled and confirmed'}, status=400)
     
     # Kullanıcı için bir TOTP cihazı oluşturun
-    device, created = TOTPDevice.objects.get_or_create(user=user, name='default', defaults={'confirmed': False})
-    if not created:
-        return JsonResponse({'error': 'A device already exists but is not confirmed. Please verify it.'}, status=400)
+    # Kullanıcının onaylanmamış tüm TOTP cihazlarını bul
+    unconfirmed_devices = TOTPDevice.objects.filter(user=user, confirmed=False)
+    # Bulunan tüm cihazları sil
+    unconfirmed_devices.delete()
+
+    device = TOTPDevice.objects.create(user=user, name=user.username, confirmed=False)
+    if not device:
+        return JsonResponse({'error': 'Failed to create TOTP device'}, status=500)
     
     # Kullanıcıya gösterilecek TOTP anahtarını ve QR kodunu oluşturun
     secret_key = device.bin_key
@@ -40,7 +40,8 @@ def enable_twofa(request):
         'otp_url': otp_url,
         'secret_key': secret_key.hex()
     })
-    
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
@@ -49,16 +50,12 @@ def verify_twofa(request):
     token = request.data.get('token')
     
     # Kullanıcının onaylanmış bir TOTP cihazı olup olmadığını kontrol edin
-    device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
-    if device:
-        return JsonResponse({'error': 'Two-factor authentication is already verified.'}, status=400)
+    device_qs = TOTPDevice.objects.filter(user=user, name=user.username, confirmed=False)
+    if not device_qs.exists():
+        return JsonResponse({'error': 'No unconfirmed TOTP device found.'}, status=400)
     
-    # Kullanıcının mevcut tüm TOTP cihazlarını alın ve silin
-    devices = TOTPDevice.objects.filter(user=user, confirmed=False)
-    devices.delete()
-    
-    # Yeni bir TOTP cihazı oluşturun
-    device = TOTPDevice.objects.create(user=user, name='default', confirmed=False)
+    # QuerySet'ten tek bir cihaz nesnesi alın
+    device = device_qs.first()
     
     # Gelen token'ı doğrulayın
     if totp(device.bin_key) == int(token):
@@ -69,6 +66,7 @@ def verify_twofa(request):
     else:
         # Token yanlışsa, hata mesajı gönderin
         return JsonResponse({'error': 'Invalid token'}, status=400)
+
 
 # def enable_twofa(request):
 #     user = request.user
@@ -132,12 +130,23 @@ def verify_twofa(request):
 #     else:
 #         # Token yanlışsa, hata mesajı gönderin
 #         return JsonResponse({'error': 'Invalid token'}, status=400)
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def disable_twofa(request):
-    if not user.twofa_enabled:
-        return JsonResponse({'error': 'Two-factor authentication is not enabled'}, status=400)
-
-
+    user = request.user
+    token = request.data.get('token')
+    
+    # Kullanıcının onaylanmış bir TOTP cihazı olup olmadığını kontrol edin
+    device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+    if not device:
+        return JsonResponse({'error': 'Two-factor authentication is not enabled or already disabled.'}, status=400)
+    
+    # Gelen token'ı doğrulayın
+    if totp(device.bin_key) == int(token):
+        # Token doğruysa, cihazı silin ve 2FA'yı devre dışı bırakın
+        device.delete()
+        return JsonResponse({'success': 'Two-factor authentication has been disabled.'})
+    else:
+        # Token yanlışsa, hata mesajı gönderin
+        return JsonResponse({'error': 'Invalid token'}, status=400)

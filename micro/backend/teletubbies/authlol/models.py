@@ -16,7 +16,8 @@ class EmailBackend(ModelBackend):
                 
                 if user.check_password(password) and self.user_can_authenticate(user):
                     if user_has_device(user):
-                        return 'two_factor_auth_required', user
+                        user.two_factor_auth_required = True
+                        return user
                     else:
                         return user
             except UserModel.DoesNotExist:

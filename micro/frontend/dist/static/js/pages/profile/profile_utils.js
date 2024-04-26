@@ -170,6 +170,39 @@ function listFriends() {
     });
     
 
+    document.getElementById('disable').addEventListener('click', async function() {
+      // Popup penceresini oluşturun ve kullanıcıya gösterin
+      let popupWindow = window.open('', 'Disable 2FA', 'width=400,height=400');
+      popupWindow.document.write('<html><head><title>Disable 2FA</title></head><body>');
+      popupWindow.document.write('<h1>Disable Two-factor Authentication</h1>');
+      popupWindow.document.write('<p>Please enter the OTP code from your authenticator app to disable 2FA.</p>');
+    
+      // OTP kodunu girmek için bir input ve buton ekleyin
+      popupWindow.document.write('<input id="otpInput" type="text" placeholder="Enter OTP code here"/>');
+      popupWindow.document.write('<button id="disableOtp">Disable 2FA</button>');
+      popupWindow.document.close();
+    
+      // Butona tıklandığında OTP kodunu doğrulayın ve 2FA'yı devre dışı bırakın
+      popupWindow.document.getElementById('disableOtp').onclick = function() {
+        let otpCode = popupWindow.document.getElementById('otpInput').value;
+        // OTP kodunu sunucuya gönderin ve doğrulayın
+        sendPostWithJwt('api/2fa/disable/', { token: otpCode })
+        .then(disableData => {
+          if(disableData.error) {
+            popupWindow.alert('2FA devre dışı bırakılamadı: ' + disableData.error);
+          } else {
+            popupWindow.alert('2FA başarıyla devre dışı bırakıldı.');
+            popupWindow.close(); // İşlem başarılıysa pencereyi kapat
+          }
+        })
+        .catch(error => {
+          console.error('2FA devre dışı bırakma sırasında bir hata oluştu:', error);
+        });
+      };
+    });
+    
+
+
 
     document.querySelector('.btn-secondary').addEventListener('click', async function() {
       // Sunucudan 2FA bilgilerini almak için sendPostWithJwt fonksiyonunu kullanın
@@ -219,7 +252,7 @@ function listFriends() {
               if(verificationData.error) {
                 popupWindow.alert('Doğrulama başarısız: ' + verificationData.error);
               } else {
-                popupWindow.alert('Doğrulama başarılı!');
+                popupWindow.alert('Doğrulama başarılı!' + verificationData.success);
                 popupWindow.close(); // Doğrulama başarılıysa pencereyi kapat
               }
             })

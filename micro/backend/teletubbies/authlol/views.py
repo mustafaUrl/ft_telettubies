@@ -7,6 +7,9 @@ from django.contrib.auth.signals import user_logged_in
 from userlol.models import UserProfile
 User = get_user_model()
 from django.http import JsonResponse
+from django_otp import user_has_device
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from django_otp.oath import totp
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -22,8 +25,34 @@ def logout_view(request):
     logout(request)
     return Response({'success': 'Çıkış yapıldı'}, status=200)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_2fa(request):
+    token = request.data.get('token')
+    user_username = request.data.get('user_username')
+    user = User.objects.filter(username=user_username).first()
+    # Kullanıcının onaylanmış bir TOTP cihazı olup olmadığını kontrol edin
+    device_qs = TOTPDevice.objects.filter(user=user, name=user.username, confirmed=True)
+    if not device_qs.exists():
+        return JsonResponse({'error': 'No unconfirmed TOTP device found.'}, status=400)
+    
+    # QuerySet'ten tek bir cihaz nesnesi alın
+    device = device_qs.first()
+    
+    # Gelen token'ı doğrulayın
+    if totp(device.bin_key) == int(token):
+        # Token doğruysa, cihazı onaylayın
+        refresh = RefreshToken.for_user(user)
+        return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'username': user.username,
+            })
+    else:
+        # Token yanlışsa, hata mesajı gönderin
+        return JsonResponse({'error': 'Invalid token'}, status=400)
 
-
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -36,21 +65,54 @@ def login_view(request):
         
     user = authenticate(username_or_email=username_or_email, password=password)
 
-    if user and user.is_active:
-        # Kullanıcı doğrulandıysa, tokenları oluştur ve yanıtı döndür
-        refresh = RefreshToken.for_user(user)
-        
-        # Kullanıcının son giriş zamanını güncelle
-        user_logged_in.send(sender=user.__class__, request=request, user=user)
-        
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'username': user.username,
-        })
+    if user is not None and user.is_active:
+        # Kullanıcı doğrulandıysa ve aktifse, 2FA kontrolü yap
+        if user_has_device(user):
+            # Kullanıcının onaylanmış bir TOTP cihazı varsa, 2FA kodu iste
+            device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+            if device:
+                return Response({
+                    'two_factor_required': True,
+                    'user_username': user.username,
+                })
+            else:
+                # Onaylanmış bir cihaz yoksa, hata döndür
+                return Response({'error': 'Two-factor authentication device not confirmed.'}, status=400)
+        else:
+            # 2FA etkin değilse, JWT tokenları oluştur
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'username': user.username,
+            })
     else:
         # Kullanıcı doğrulanamadıysa veya aktif değilse, hata mesajı döndür
         return Response({'error': 'Invalid credentials or inactive user.'}, status=400)
+# def login_view(request):
+#     username_or_email = request.data.get('username_or_email')
+#     password = request.data.get('password')
+
+#     if not username_or_email or not password:
+#         return Response({'error': 'Username/Email and password are required.'}, status=400)
+        
+#     user = authenticate(username_or_email=username_or_email, password=password)
+
+#     if user and user.is_active:
+#         # Kullanıcı doğrulandıysa, tokenları oluştur ve yanıtı döndür
+#         refresh = RefreshToken.for_user(user)
+        
+#         # Kullanıcının son giriş zamanını güncelle
+#         user_logged_in.send(sender=user.__class__, request=request, user=user)
+        
+#         return Response({
+#             'refresh': str(refresh),
+#             'access': str(refresh.access_token),
+#             'username': user.username,
+#         })
+#     else:
+#         # Kullanıcı doğrulanamadıysa veya aktif değilse, hata mesajı döndür
+#         return Response({'error': 'Invalid credentials or inactive user.'}, status=400)
 
 
 
