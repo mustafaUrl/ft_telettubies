@@ -134,9 +134,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             # Eğer FriendList bulunamazsa boş liste döndür
             return []
 
-        def generate_room_name(self, username1, username2):
+    def generate_room_name(self, username1, username2):
             # Kullanıcı adlarını sıralayarak oda adı oluştur
-            return '_'.join(sorted([username1, username2]))
+        return '_'.join(sorted([username1, username2]))
     
 
 

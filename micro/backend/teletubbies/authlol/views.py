@@ -63,7 +63,8 @@ def login_view(request):
 
     if not username_or_email or not password:
         return Response({'error': 'Username/Email and password are required.'}, status=400)
-        
+    if username_or_email.startswith('FT-'):
+        return Response({'error': 'Username cannot start with "FT-".'}, status=400)  
     user = authenticate(username_or_email=username_or_email, password=password)
 
     if user is not None and user.is_active:

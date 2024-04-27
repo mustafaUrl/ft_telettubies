@@ -88,8 +88,8 @@ export default function ft_login(authCode) {
               setCookie('username', data.username, {secure: true});
               console.log(data);
               // selectTab('tab1');
-              // openSocket();
-              //openSocketPrivate();
+              openSocket();
+              openSocketPrivate();
               // setInterval(refreshAccessToken, 4 * 60 * 1000); 
               // Login başarılı, ana sayfaya yönlendir
               // window.location.href = '/user_profile'; // Örnek bir yönlendirme

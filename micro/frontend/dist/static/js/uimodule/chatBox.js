@@ -142,59 +142,6 @@ function updateNotificationCount(username, count) {
   }
 }
 
-// Cookie'den mesajları alıp gösteren fonksiyon
-function displayMessagesFromCookie() {
-  const chatMessages = document.getElementById('chat_messages2');
-  chatMessages.innerHTML = ''; // Mevcut mesajları temizle
-
-  // 'chat_messages' cookie'sini al
-  const allCookies = document.cookie.split('; ');
-  const chatCookie = allCookies.find(row => row.startsWith('chat_messages='));
-  if (chatCookie) {
-    // Cookie'den tüm mesajları al ve '|' ile ayır
-    const messages = chatCookie.split('=')[1].split('|');
-    console.log('Cookie mesajları:', messages);
-    // Mesajları ve zaman damgalarını göster
-    messages.forEach(message => {
-      const [timeStamp, userMessage] = message.split('|');
-      const time = new Date(timeStamp);
-      const timeFormatted = time.toLocaleTimeString('tr-TR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      const messageDiv = document.createElement('div');
-      messageDiv.textContent = `${userMessage} (${timeFormatted})`;
-      chatMessages.appendChild(messageDiv);
-    });
-  }
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function addMessageToCookie(username, message) {
-  // Mevcut cookie değerini al
-  const existingCookie = document.cookie.split('; ').find(row => row.startsWith('chat_messages='));
-  const messages = existingCookie ? existingCookie.split('=')[1].split('|') : [];
-
-  // Yeni mesajı ve zaman damgasını mevcut mesajlara ekle
-  const now = new Date();
-  messages.push(`${now.toISOString()}|${username}: ${message}`);
-
-  // Eğer mesaj sayısı 50'den fazlaysa, en eski mesajları sil
-  if (messages.length > 50) {
-    messages.splice(0, messages.length - 50);
-  }
-
-  // Cookie'yi güncelle
-  const time = now.getTime();
-  const expireTime = time + 1000 * 36000; // 10 saat sonra sona erecek
-  now.setTime(expireTime);
-
-  // Cookie'de saklanacak mesaj formatı
-  const cookieValue = messages.join('|');
-  document.cookie = `chat_messages=${cookieValue};expires=${now.toUTCString()};path=/;SameSite=None; Secure`;
-}
-
-
 
 // Arkadaş listesini güncelleyen ve olay dinleyicileri ekleyen fonksiyon
 function displayFriends(friends) {
@@ -224,9 +171,7 @@ function displayFriends(friends) {
       if (window.otherUser !== username) {
           window.otherUser = username; // Diğer kullanıcının adını güncelle
         }
-      selectTab('tab2');
-      displayMessagesFromCookie(username);
-      updateNotificationCount(username, '');       
+      selectTab('tab2');     
       var chatContainer = document.getElementById('chat_container');
       var chatBar = document.getElementById('chat_bar');
       chatContainer.style.height = '285px';
@@ -235,4 +180,4 @@ function displayFriends(friends) {
   });
 }
 
-export { addMessageToCookie, updateNotificationButton, showTab2WithUsername, selectTab };
+export {  updateNotificationButton, showTab2WithUsername, selectTab };
