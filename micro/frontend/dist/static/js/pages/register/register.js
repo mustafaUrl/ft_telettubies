@@ -24,12 +24,7 @@ export default function register() {
             },
             body: JSON.stringify({ username, first_name, last_name, email, password })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if(data.success) {
                 // Kayıt başarılı, ana sayfaya yönlendir

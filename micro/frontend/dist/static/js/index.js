@@ -6,6 +6,9 @@ import  {selectTab}  from './uimodule/chatBox.js';
 import  {getCookie}  from './cookies/cookies.js';
 import triggerContentLoad from './gatePage/gatePage.js';
 import profileTrigger from './pages/profile/profileTrigger.js';
+import ft_login from './pages/login/42login.js';
+import changeContent from './uimodule/changeContent.js';
+
     checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {
@@ -19,28 +22,12 @@ import profileTrigger from './pages/profile/profileTrigger.js';
       const authCode = urlParams.get('code');
       console.log(authCode);
       if (authCode) {
-        // 'code' parametresini backend'e gönderin
-        fetch('api/auth/ft-auth/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ code: authCode })
-        })
-        .then(response => response.json())
-        .then(data => {
-          // Backend'den gelen yanıtı işleyin
-          console.log(data);
-        })
-        .catch(error => {
-          // Hata durumunda işlem yapın
-          console.error('error:', error);
-        });
-     
-      }
-     
-    });
 
+        ft_login(authCode);
+      }
+      this.history.replaceState({id: 'home'}, '', '/');
+    });
+    
   document.getElementById('tab1').addEventListener('click', function(event) {
     event.stopPropagation();
     selectTab('tab1');

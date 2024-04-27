@@ -16,8 +16,10 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY teletubbies/ /code/
 
 RUN python manage.py makemigrations
-RUN python manage.py migrate
 
+ENTRYPOINT ["./entrypoint.sh"]
+# RUN python manage.py migrate
 
+# RUN python create_super_user.py
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

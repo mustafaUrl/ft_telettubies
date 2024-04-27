@@ -30,13 +30,80 @@
 //       }
 //     }, false);
 //   }
-  
-export default function ft_login() {
+import  {setCookie}  from '../../cookies/cookies.js';
+import  changeContent  from '../../uimodule/changeContent.js';
+import   openSocket  from '../../sockets/globalSocket.js';
+import  openSocketPrivate  from '../../sockets/privateSocket.js';
+import { selectTab } from '../../uimodule/chatBox.js';
+
+export default function ft_login(authCode) {
 // URL'den 'code' parametresini parse edin
-window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-16b6c7462b738938b4c6b763f4d804a957769bb2e68fc5e727f86a1e219347e5&redirect_uri=https%3A%2F%2Flocalhost&response_type=code";
 
 // Sayfa yüklendiğinde URL'deki 'code' parametresini kontrol edin
 
+    // 'code' parametresini backend'e gönderin
+    fetch('api/auth/ft-auth/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: authCode })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.two_factor_required) {
+          // 2FA kodunu girmek için pop-up pencere aç
+          const twoFactorCode = prompt('Lütfen iki faktörlü doğrulama kodunuzu giriniz:');
+          if (twoFactorCode) {
+            // 2FA kodunu doğrulamak için başka bir API isteği gönder
+            fetch('api/auth/verify-2fa/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ user_username: data.user_username, token: twoFactorCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.access){
+              setCookie('accessToken', data.access, {secure: true});
+              setCookie('refreshToken', data.refresh, {secure: true});
+              setCookie('username', data.username, {secure: true});
+              selectTab('tab1');
+              openSocket();
+              openSocketPrivate();
+              // setInterval(refreshAccessToken, 4 * 60 * 1000); 
+              // Login başarılı, ana sayfaya yönlendir
+              // window.location.href = '/user_profile'; // Örnek bir yönlendirme
+              changeContent('home');
+              }
+            })
+            .catch(error => {
+              console.error('2FA doğrulama hatası:', error);
+            });
+          }
+        } else if (data.access) {
+              setCookie('accessToken', data.access, {secure: true});
+              setCookie('refreshToken', data.refresh, {secure: true});
+              setCookie('username', data.username, {secure: true});
+              console.log(data);
+              // selectTab('tab1');
+              // openSocket();
+              //openSocketPrivate();
+              // setInterval(refreshAccessToken, 4 * 60 * 1000); 
+              // Login başarılı, ana sayfaya yönlendir
+              // window.location.href = '/user_profile'; // Örnek bir yönlendirme
+              changeContent('home');
+        } else {
+          // Hata mesajını göster
+          alert('Giriş başarısız: ' + data.error);
+        }
+      })
+      .catch(error => {
+        // Hata durumunda işlem yapın
+        console.error('error:', error);
+      });
+   
 
 
 }

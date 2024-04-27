@@ -16,6 +16,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
             # Arkadaş listesini çek
         friend_usernames = await self.get_friend_usernames(self.user)
+
+        if not friend_usernames:
+            await self.close()
+            return
+
         # Her arkadaş için oda oluştur
         self.rooms = {}
         for friend_username in friend_usernames:
@@ -33,6 +38,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         if self.user.is_anonymous:
             await self.close()
             return
+        friend_usernames = await self.get_friend_usernames(self.user)
+
+        if not friend_usernames:
+            await self.close()
+            return
+
         for room_name in self.rooms.values():
             room_group_name = f'chat_{room_name}'
             await self.channel_layer.group_discard(
@@ -114,15 +125,19 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_friend_usernames(self, user):
-        # Arkadaş listesini çek ve kullanıcı adlarını al
-        friend_list = FriendList.objects.get(user=user).friends.all()
-        friend_usernames = [friend.username for friend in friend_list]
-        return friend_usernames
+        try:
+            # Arkadaş listesini çek ve kullanıcı adlarını al
+            friend_list = FriendList.objects.get(user=user).friends.all()
+            friend_usernames = [friend.username for friend in friend_list]
+            return friend_usernames
+        except FriendList.DoesNotExist:
+            # Eğer FriendList bulunamazsa boş liste döndür
+            return []
 
-    def generate_room_name(self, username1, username2):
-        # Kullanıcı adlarını sıralayarak oda adı oluştur
-        return '_'.join(sorted([username1, username2]))
- 
+        def generate_room_name(self, username1, username2):
+            # Kullanıcı adlarını sıralayarak oda adı oluştur
+            return '_'.join(sorted([username1, username2]))
+    
 
 
 class ChatConsumer(AsyncWebsocketConsumer):

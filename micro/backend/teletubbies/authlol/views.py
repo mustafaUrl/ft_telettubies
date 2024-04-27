@@ -1,11 +1,12 @@
-from django.contrib.auth import logout, authenticate, get_user_model
+from django.contrib.auth import logout, authenticate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.signals import user_logged_in
 from userlol.models import UserProfile
-User = get_user_model()
+from django.contrib.auth.models import User
+
 from django.http import JsonResponse
 from django_otp import user_has_device
 from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -127,6 +128,14 @@ def register_view(request):
 
     if not all([username, password, email, first_name, last_name]):
         return Response({'error': 'All fields are required.'}, status=400)
+     # Check if username starts with '42-'
+    if username.startswith('FT-'):
+        return Response({'error': 'Username cannot start with "FT-".'}, status=400)
+
+    # Check if '42' is in the domain part of the email
+    email_domain = email.split('@')[-1]
+    if '42' in email_domain:
+        return Response({'error': 'Usage of "42" in the email domain is not allowed.'}, status=400)
 
     if User.objects.filter(username=username).exists():
         return Response({'error': 'Username already exists.'}, status=400)

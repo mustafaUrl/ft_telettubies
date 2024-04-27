@@ -3,7 +3,6 @@ import  changeContent  from '../../uimodule/changeContent.js';
 import   openSocket  from '../../sockets/globalSocket.js';
 import  openSocketPrivate  from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
-import ft_login from './42login.js'
 
 
 export default function login() {
@@ -11,7 +10,7 @@ export default function login() {
   document.getElementById('42intra').addEventListener('click', function(e) {
     e.preventDefault();
     console.log('42 login');
-    ft_login();
+    window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-16b6c7462b738938b4c6b763f4d804a957769bb2e68fc5e727f86a1e219347e5&redirect_uri=https%3A%2F%2Flocalhost&response_type=code";
 
   });
 
@@ -43,7 +42,7 @@ export default function login() {
         .then(response => response.json())
         .then(data => {
           if (data.access){
-            setCookie('accessToken', data.access, {secure: true});
+          setCookie('accessToken', data.access, {secure: true});
           setCookie('refreshToken', data.refresh, {secure: true});
           setCookie('username', data.username, {secure: true});
           selectTab('tab1');
@@ -81,6 +80,8 @@ export default function login() {
 });
 
 }
+
+ 
 
 // export default function login() {
 //     // Giriş formu işlevselliğini burada etkinleştir

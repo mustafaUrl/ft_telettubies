@@ -1,12 +1,14 @@
-# create_super_user.py
-import os
-from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.contrib.auth.models import User
 
-class Command(BaseCommand):
-    help = 'Create a superuser'
+# Süper kullanıcı bilgileri
+username = 'admin'
+password = 'sifreniz'
+email = 'admin@example.com'
 
-    def handle(self, *args, **options):
-        User = get_user_model()
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser('admin', 'admin@example.com', 'sifre')
+# Süper kullanıcıyı oluştur veya güncelle
+User.objects.update_or_create(username=username, defaults={'email': email})
+user = User.objects.get(username=username)
+user.set_password(password)
+user.is_superuser = True
+user.is_staff = True
+user.save()
