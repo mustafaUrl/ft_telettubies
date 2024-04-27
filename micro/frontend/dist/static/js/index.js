@@ -3,13 +3,13 @@ import  hrefListener from './uimodule/hrefListener.js';
 import  openSocket  from './sockets/globalSocket.js';
 import  openSocketPrivate  from './sockets/privateSocket.js';
 import  {selectTab}  from './uimodule/chatBox.js';
-import  {getCookie}  from './cookies/cookies.js';
+import  {getCookie, deleteCookie}  from './cookies/cookies.js';
 import triggerContentLoad from './gatePage/gatePage.js';
 import profileTrigger from './pages/profile/profileTrigger.js';
 import ft_login from './pages/login/42login.js';
 // import changeContent from './uimodule/changeContent.js';
 
-
+deleteCookie('contentData');
 
     checkAuthStatus();
     hrefListener();

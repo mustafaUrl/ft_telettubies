@@ -25,7 +25,7 @@ def mark_notification_as_read(request, notification_id):
         notification.save()
         
         # Başarılı yanıt döndür
-        return JsonResponse({'status': 'success', 'message': 'Bildirim okundu olarak işaretlendi.'})
+        return JsonResponse({'status': 'success', 'message': 'The notice was marked as read.'})
     except Notification.DoesNotExist:
         # Bildirim bulunamadıysa hata yanıtı döndür
-        return JsonResponse({'status': 'error', 'message': 'Bildirim bulunamadı.'}, status=404)
+        return JsonResponse({'status': 'error', 'message': 'No notification was found.'}, status=404)

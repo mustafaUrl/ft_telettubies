@@ -24,7 +24,7 @@ def logout_view(request):
 
     # Kullanıcıyı çıkış yap
     logout(request)
-    return Response({'success': 'Çıkış yapıldı'}, status=200)
+    return Response({'success': 'The user exit.'}, status=200)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

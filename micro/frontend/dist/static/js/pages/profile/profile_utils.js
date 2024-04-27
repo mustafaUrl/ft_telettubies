@@ -10,7 +10,7 @@ function addfriendListener() {
          listFriends();
        })
        .catch(error => {
-         console.error('İşlem hatası:', error);
+         console.error('Processing error:', error);
        });
    });
  
@@ -40,7 +40,7 @@ function addfriendListener() {
        }
        })
        .catch(error => {
-       console.error('İşlem hatası:', error);
+       console.error('Processing error:', error);
        });
      }
    }); 
@@ -82,34 +82,34 @@ function listFriends() {
           console.log('Arkadaş listesi:', data.friends);
           updateFriendList(data.friends);
         } else {
-          console.error('Hata:', data.error);
+          console.error('Error:', data.error);
         }
       })
-      .catch(error => console.error('İstek sırasında hata oluştu:', error));
+      .catch(error => console.error('An error occurred during the request:', error));
   }
   
   function acceptFriendRequest(friendUsername) {
     sendPostUserRequest('accept_friend_request', friendUsername)
       .then(data => {
         if (data.success) {
-          console.log('Arkadaşlık isteği kabul edildi:', data);
+          console.log('Friend request accepted:', data);
         } else {
-          console.error('Hata:', data.error);
+          console.error('Error', data.error);
         }
       })
-      .catch(error => console.error('İstek sırasında hata oluştu:', error));
+      .catch(error => console.error('An error occurred during the request:', error));
   }
   
   function rejectFriendRequest(friendUsername) {
     sendPostUserRequest('reject_friend_request', friendUsername)
       .then(data => {
         if (data.success) {
-          console.log('Arkadaşlık isteği reddedildi:', data);
+          console.log('Friend request rejected:', data);
         } else {
-          console.error('Hata:', data.error);
+          console.error('Error:', data.error);
         }
       })
-      .catch(error => console.error('İstek sırasında hata oluştu:', error));
+      .catch(error => console.error('An error occurred during the request:', error));
   }
 
   
@@ -117,7 +117,7 @@ function listFriends() {
     sendPostUserRequest('list_pending_friend_requests')
     .then(data => {
       if (!data.pending_requests || data.pending_requests.length === 0 || data.pending_requests === 'nonerequests') {
-        console.log('Bekleyen arkadaşlık isteği yok');
+        console.log('There are no pending friend requests');
         return; 
       }
       const list = document.getElementById('pendingFriendRequests');
@@ -131,12 +131,12 @@ function listFriends() {
   
         const acceptBtn = document.createElement('button');
         acceptBtn.className = 'btn btn-success btn-sm';
-        acceptBtn.textContent = 'Kabul Et';
+        acceptBtn.textContent = 'Accept';
         acceptBtn.onclick = function() { acceptFriendRequest(request.from_user); };
   
         const rejectBtn = document.createElement('button');
         rejectBtn.className = 'btn btn-danger btn-sm';
-        rejectBtn.textContent = 'Reddet';
+        rejectBtn.textContent = 'Decline';
         rejectBtn.onclick = function() { rejectFriendRequest(request.from_user); };
   
         listItem.appendChild(usernameSpan);
@@ -145,7 +145,7 @@ function listFriends() {
         list.appendChild(listItem);
       });
     })
-    .catch(error => console.error('Bekleyen arkadaşlık istekleri alınırken hata oluştu:', error));
+    .catch(error => console.error('An error occurred while receiving pending friend requests:', error));
   }
   
 

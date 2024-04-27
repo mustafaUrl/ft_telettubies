@@ -1,7 +1,7 @@
-import  {setCookie}  from '../../cookies/cookies.js';
-import  changeContent  from '../../uimodule/changeContent.js';
-import   openSocket  from '../../sockets/globalSocket.js';
-import  openSocketPrivate  from '../../sockets/privateSocket.js';
+import { setCookie } from '../../cookies/cookies.js';
+import changeContent from '../../uimodule/changeContent.js';
+import openSocket from '../../sockets/globalSocket.js';
+import openSocketPrivate from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
 
 
@@ -29,7 +29,7 @@ export default function login() {
   .then(data => {
     if (data.two_factor_required) {
       // 2FA kodunu girmek için pop-up pencere aç
-      const twoFactorCode = prompt('Lütfen iki faktörlü doğrulama kodunuzu giriniz:');
+      const twoFactorCode = prompt('Please write 2FA code:');
       if (twoFactorCode) {
         // 2FA kodunu doğrulamak için başka bir API isteği gönder
         fetch('api/auth/verify-2fa/', {
@@ -55,7 +55,7 @@ export default function login() {
           }
         })
         .catch(error => {
-          console.error('2FA doğrulama hatası:', error);
+          console.error('2FA authentication error:', error);
         });
       }
     } else if (data.access) {
@@ -71,11 +71,11 @@ export default function login() {
           changeContent('home');
     } else {
       // Hata mesajını göster
-      alert('Giriş başarısız: ' + data.error);
+      alert('Login failed: ' + data.error);
     }
   })
   .catch(error => {
-    console.error('Giriş işlemi sırasında bir hata oluştu:', error);
+    console.error('An error occurred during the login process:', error);
   });
 });
 

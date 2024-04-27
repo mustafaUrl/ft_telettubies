@@ -10,15 +10,15 @@ export default function openSocketPrivate() {
   if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
     return;
   }
-  console.log('openSocketPrivate çalıştı' + getCookie('accessToken'));
+  console.log('openSocketPrivate started' + getCookie('accessToken'));
   window.chatSocketPrivate = new WebSocket(`wss://${window.location.host}/ws/chatPrivate/?token=` + getCookie('accessToken'));
 
   window.chatSocketPrivate.onopen = function(e) {
-    console.log('WebSocket bağlantısı açıldı:', e);
+    console.log('WebSocket connection has been opened:', e);
   };
 
   window.chatSocketPrivate.onerror = function(e) {
-    console.error('WebSocket hatası:', e);
+    console.error('WebSocket error:', e);
   };
 
   window.chatSocketPrivate.onmessage = function(e) {
@@ -38,6 +38,6 @@ export default function openSocketPrivate() {
   };
 
   window.chatSocketPrivate.onclose = function(e) {
-    console.error('WebSocket bağlantısı kapandı:', e);
+    console.error('WebSocket connection closed:', e);
   };
 }

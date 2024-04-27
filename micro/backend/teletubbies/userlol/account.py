@@ -22,7 +22,7 @@ def update_user(request):
         try:
             user = User.objects.get(username=request.user.username)
         except User.DoesNotExist:
-            return JsonResponse({'error': 'Kullanıcı bulunamadı'}, status=404)
+            return JsonResponse({'error': 'The user was not found'}, status=404)
 
         # Verilerde değişiklik varsa güncelle
         if 'first_name' in data and user.first_name != data['first_name']:
@@ -34,10 +34,10 @@ def update_user(request):
         user.save()
         
         # Başarılı yanıt dön
-        return JsonResponse({'success': 'Kullanıcı güncellendi'}, status=200)
+        return JsonResponse({'success': 'User updated.'}, status=200)
     else:
         # Yanlış request tipi
-        return JsonResponse({'error': 'Geçersiz istek'}, status=400)
+        return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

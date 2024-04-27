@@ -31,7 +31,7 @@ export default function register() {
                 changeContent('home');
             } else {
                 // Hata mesajını göster
-                alert('Kayıt başarısız: ' + data.error);
+                alert('Registration failed: ' + data.error);
             }
         })
         .catch(error => {

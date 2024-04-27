@@ -33,7 +33,7 @@ export default async function changeContent(contentId) {
         history.pushState({ id: contentId, htmlContent: htmlContent }, null, null);
         triggerContentLoad(contentId);
       } else {
-        console.log('İçerik bulunamadı:', contentId);
+        console.log('Content could not be found:', contentId);
       }
     }
     

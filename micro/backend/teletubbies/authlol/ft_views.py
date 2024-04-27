@@ -134,12 +134,12 @@ def ft_auth(request):
                 uploaded_file_url = uploaded_file_url[len(settings.MEDIA_URL):]
             
             # UserProfile modeline kaydedilen dosya yolunu ilişkilendirme
-            print(f"Resim başarıyla kaydedildi: {uploaded_file_url}")
+            print(f"The image was successfully saved: {uploaded_file_url}")
             UserProfile.objects.create(
             user=user,
             profile_picture= uploaded_file_url  # Varsayılan resmin yolu
             )
-            print(f"Resim başarıyla kaydedild sssi: {uploaded_file_url}")
+            print(f"The image was successfully saved: {uploaded_file_url}")
             
         else:
             UserProfile.objects.create(

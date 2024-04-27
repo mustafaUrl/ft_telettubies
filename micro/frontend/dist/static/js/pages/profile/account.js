@@ -44,14 +44,14 @@ export default function accountListener() {
         sendPostWithJwt('api/2fa/disable/', { token: otpCode })
         .then(disableData => {
           if(disableData.error) {
-            popupWindow.alert('2FA devre dışı bırakılamadı: ' + disableData.error);
+            popupWindow.alert('2FA could not be disabled: ' + disableData.error);
           } else {
-            popupWindow.alert('2FA başarıyla devre dışı bırakıldı.');
+            popupWindow.alert('2FA has been successfully disabled.');
             popupWindow.close(); // İşlem başarılıysa pencereyi kapat
           }
         })
         .catch(error => {
-          console.error('2FA devre dışı bırakma sırasında bir hata oluştu:', error);
+          console.error('An error occurred during 2FA deactivation:', error);
         });
       };
     });
@@ -67,7 +67,7 @@ export default function accountListener() {
       .then(data => {
         // Sunucudan gelen yanıtı işleyin
         if(data.error) {
-          alert('Hata: ' + data.error);
+          alert('Error: ' + data.error);
         } else {
           // Popup penceresini oluşturun ve kullanıcıya gösterin
           let popupWindow = window.open('', '2FA Popup', 'width=400,height=400');
@@ -105,20 +105,20 @@ export default function accountListener() {
             sendPostWithJwt('api/2fa/verify/', { token: otpCode })
             .then(verificationData => {
               if(verificationData.error) {
-                popupWindow.alert('Doğrulama başarısız: ' + verificationData.error);
+                popupWindow.alert('Verification failed: ' + verificationData.error);
               } else {
-                popupWindow.alert('Doğrulama başarılı!' + verificationData.success);
+                popupWindow.alert('Verification is successful!' + verificationData.success);
                 popupWindow.close(); // Doğrulama başarılıysa pencereyi kapat
               }
             })
             .catch(verificationError => {
-              console.error('Doğrulama sırasında bir hata oluştu:', verificationError);
+              console.error('An error occurred during verification:', verificationError);
             });
           };
         }
       })
       .catch(error => {
-        console.error('Bir hata oluştu:', error);
+        console.error('An error has occurred:', error);
       });
     });
     
