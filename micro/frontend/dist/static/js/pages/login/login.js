@@ -3,12 +3,19 @@ import  changeContent  from '../../uimodule/changeContent.js';
 import   openSocket  from '../../sockets/globalSocket.js';
 import  openSocketPrivate  from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
-
+import ft_login from './42login.js'
 
 
 export default function login() {
-  // Giriş formu işlevselliğini burada etkinleştir
-document.getElementById('login-form').addEventListener('submit', function(e) {
+
+  document.getElementById('42intra').addEventListener('click', function(e) {
+    e.preventDefault();
+    console.log('42 login');
+    ft_login();
+
+  });
+
+  document.getElementById('login-form').addEventListener('submit', function(e) {
   e.preventDefault();
   const username_or_email = document.getElementById('InputUserOrEmail').value;
   const password = document.getElementById('InputPassword').value;

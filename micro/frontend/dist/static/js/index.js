@@ -14,7 +14,32 @@ import profileTrigger from './pages/profile/profileTrigger.js';
     }
     selectTab('tab1');
 
-
+    window.addEventListener('load', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const authCode = urlParams.get('code');
+      console.log(authCode);
+      if (authCode) {
+        // 'code' parametresini backend'e gönderin
+        fetch('api/auth/ft-auth/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ code: authCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Backend'den gelen yanıtı işleyin
+          console.log(data);
+        })
+        .catch(error => {
+          // Hata durumunda işlem yapın
+          console.error('error:', error);
+        });
+     
+      }
+     
+    });
 
   document.getElementById('tab1').addEventListener('click', function(event) {
     event.stopPropagation();

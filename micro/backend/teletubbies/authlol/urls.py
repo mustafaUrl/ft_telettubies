@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-
+from . import ft_views
 urlpatterns = [
     
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register_view, name='register'),
     path('verify-2fa/', views.verify_2fa, name='verify'),
+    path('ft-auth/', ft_views.ft_auth, name='ft_auth'),
     # path('get_username/', views.get_username, name='get_username'),
 
 ]
