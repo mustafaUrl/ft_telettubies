@@ -1,10 +1,6 @@
-{% load static %}
 
 <div class="profile-container">
-    <div class="profile-background" style="background-image: url('{% static "img/orange.jpeg" %}');">
-      <img src="{% static "img/pp.jpeg" %}" class="profile-picture" alt="Profile Picture">
-    </div>
-  
+    
   <div class="profile-row">
     <div class="link-container">
       <!-- Navigation links -->
@@ -59,9 +55,12 @@
                                                 </div>
                                               </div>
                                               
-                                            <div class="col">
-                                                <div class="mb-3"><label class="form-label" for="email"><strong>Email Address</strong></label><input id="email" class="form-control" type="email" placeholder="user@example.com" name="email" /></div>
-                                            </div>
+                                              <div class="col">
+                                                <div class="mb-3">
+                                                  <label class="form-label" for="email"><strong>Email Address</strong></label>
+                                                  <input id="email" class="form-control" type="email" placeholder="user@example.com" name="email" readonly />
+                                                </div>
+                                              </div>
                                         </div>
                                         <div class="row">
                                             <div class="col">

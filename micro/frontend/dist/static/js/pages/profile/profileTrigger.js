@@ -1,6 +1,7 @@
 import  
 { addfriendListener,  listFriends, 
-    pendingFriendRequests, accountListener } from './profile_utils.js'
+    pendingFriendRequests } from './profile_utils.js'
+import accountListener from './account.js'
 
 
 export default function profileTrigger(contentId) {

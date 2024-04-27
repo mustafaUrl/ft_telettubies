@@ -25,8 +25,6 @@ def update_user(request):
             return JsonResponse({'error': 'Kullanıcı bulunamadı'}, status=404)
 
         # Verilerde değişiklik varsa güncelle
-        if 'email' in data and user.email != data['email']:
-            user.email = data['email']
         if 'first_name' in data and user.first_name != data['first_name']:
             user.first_name = data['first_name']
         if 'last_name' in data and user.last_name != data['last_name']:
