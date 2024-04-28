@@ -16,16 +16,18 @@ export default function register() {
   document.getElementById('register-form').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const email = escapeHtml(document.querySelector('[name="email"]').value.trim());
-    const password = document.querySelector('[name="password"]').value;
-    const confirmPassword = document.querySelector('[name="confirmPassword"]').value;
-
-    if (!email || !password || !confirmPassword) {
+    const username = document.querySelector('[name="username"]').value;
+        const first_name = document.querySelector('[name="first_name"]').value;
+        const last_name = document.querySelector('[name="last_name"]').value;
+        const email = document.querySelector('[name="email"]').value;
+        const password = document.querySelector('[name="password"]').value;
+        const password_repeat = document.querySelector('[name="password_repeat"]').value;
+    if (!email || !password || !password_repeat) {
       alert('Email, password, and confirm password are required.');
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (password !== password_repeat) {
       alert('Passwords do not match.');
       return;
     }
@@ -39,8 +41,7 @@ export default function register() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email, password })
-    })
+      body: JSON.stringify({ username, first_name, last_name, email, password })    })
     .then(response => response.json())
     .then(data => {
       submitButton.disabled = false;

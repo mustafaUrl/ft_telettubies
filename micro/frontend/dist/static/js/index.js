@@ -9,12 +9,10 @@ import profileTrigger from './pages/profile/profileTrigger.js';
 import ft_login from './pages/login/42login.js';
 // import changeContent from './uimodule/changeContent.js';
 
-<<<<<<< HEAD
-=======
 deleteCookie('contentData');
 
->>>>>>> 8a2f8b75d595807f71fc6968f5914477757edc7a
-    checkAuthStatus();
+      
+checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {
       openSocketPrivate();

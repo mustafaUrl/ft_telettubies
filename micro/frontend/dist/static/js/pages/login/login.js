@@ -9,14 +9,11 @@ import { selectTab } from '../../uimodule/chatBox.js';
 
 export default function login() {
 
-<<<<<<< HEAD
   document.getElementById('42intra').addEventListener('click', function(e) {
     e.preventDefault();
   
     window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-16b6c7462b738938b4c6b763f4d804a957769bb2e68fc5e727f86a1e219347e5&redirect_uri=https%3A%2F%2Flocalhost&response_type=code";
-=======
- // login.js dosyası
->>>>>>> 8a2f8b75d595807f71fc6968f5914477757edc7a
+  });
 
 document.getElementById('login-form').addEventListener('submit', function(e) {
   e.preventDefault();
