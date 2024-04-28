@@ -86,7 +86,6 @@ export default function ft_login(authCode) {
               setCookie('accessToken', data.access, {secure: true});
               setCookie('refreshToken', data.refresh, {secure: true});
               setCookie('username', data.username, {secure: true});
-              console.log(data);
               // selectTab('tab1');
               openSocket();
               openSocketPrivate();

@@ -8,7 +8,6 @@ export default function hrefListener() {
         event.preventDefault();
         const contentId = this.id.replace('-link', '');
         changeContent(contentId);
-        console.log('hrefListener.js ok', contentId);
       });
     });
   }

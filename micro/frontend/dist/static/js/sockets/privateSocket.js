@@ -10,11 +10,10 @@ export default function openSocketPrivate() {
   if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
     return;
   }
-  console.log('openSocketPrivate çalıştı' + getCookie('accessToken'));
   window.chatSocketPrivate = new WebSocket(`wss://${window.location.host}/ws/chatPrivate/?token=` + getCookie('accessToken'));
 
   window.chatSocketPrivate.onopen = function(e) {
-    console.log('WebSocket bağlantısı açıldı:', e);
+    // console.log('WebSocket bağlantısı açıldı:', e);
   };
 
   window.chatSocketPrivate.onerror = function(e) {

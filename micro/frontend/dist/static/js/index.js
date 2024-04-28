@@ -9,8 +9,6 @@ import profileTrigger from './pages/profile/profileTrigger.js';
 import ft_login from './pages/login/42login.js';
 // import changeContent from './uimodule/changeContent.js';
 
-
-
     checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {
