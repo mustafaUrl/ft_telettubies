@@ -33,7 +33,7 @@ function showTab2WithUsername(username) {
 // Bildirim butonunu güncelleme fonksiyonu
 function updateNotificationButton(username) {
   const notificationButton = document.getElementById('notification_button');
-  notificationButton.textContent = `Yeni mesajlar (${username})`;
+  notificationButton.textContent = `New messages (${username})`;
   notificationButton.style.display = 'block'; // Bildirim butonunu göster
 }
 
@@ -118,7 +118,7 @@ function fetchAndDisplayFriends() {
       displayFriends(friends);
     })
     .catch(error => {
-      console.error('Arkadaş listesi alınamadı:', error);
+      console.error('Friend list could not be retrieved:', error);
     });
 }
 

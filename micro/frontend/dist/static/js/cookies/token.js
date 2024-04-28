@@ -12,7 +12,7 @@ export default async function refreshAccessToken() {
     });
   
     if (!response.ok) {
-      throw new Error('Token yenileme isteği başarısız oldu.');
+      throw new Error('The token renewal request failed.');
     }
   
     const data = await response.json();

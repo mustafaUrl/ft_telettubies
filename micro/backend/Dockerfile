@@ -17,8 +17,7 @@ COPY teletubbies/ /code/
 
 RUN python manage.py makemigrations
 
-ENTRYPOINT ["./entrypoint.sh"]
-# RUN python manage.py migrate
+RUN python manage.py migrate
 
 # RUN python create_super_user.py
 

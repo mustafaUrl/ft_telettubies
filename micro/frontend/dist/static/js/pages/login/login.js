@@ -1,23 +1,29 @@
-import  {setCookie}  from '../../cookies/cookies.js';
-import  changeContent  from '../../uimodule/changeContent.js';
-import   openSocket  from '../../sockets/globalSocket.js';
-import  openSocketPrivate  from '../../sockets/privateSocket.js';
+import { setCookie } from '../../cookies/cookies.js';
+import changeContent from '../../uimodule/changeContent.js';
+import openSocket from '../../sockets/globalSocket.js';
+import openSocketPrivate from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
+
+
 
 
 export default function login() {
 
+<<<<<<< HEAD
   document.getElementById('42intra').addEventListener('click', function(e) {
     e.preventDefault();
   
     window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-16b6c7462b738938b4c6b763f4d804a957769bb2e68fc5e727f86a1e219347e5&redirect_uri=https%3A%2F%2Flocalhost&response_type=code";
+=======
+ // login.js dosyası
+>>>>>>> 8a2f8b75d595807f71fc6968f5914477757edc7a
 
-  });
-
-  document.getElementById('login-form').addEventListener('submit', function(e) {
+document.getElementById('login-form').addEventListener('submit', function(e) {
   e.preventDefault();
-  const username_or_email = document.getElementById('InputUserOrEmail').value;
+
+  const username_or_email = escapeHtml(document.getElementById('InputUserOrEmail').value);
   const password = document.getElementById('InputPassword').value;
+
   fetch('api/auth/login/', {
     method: 'POST',
     headers: {
@@ -29,7 +35,7 @@ export default function login() {
   .then(data => {
     if (data.two_factor_required) {
       // 2FA kodunu girmek için pop-up pencere aç
-      const twoFactorCode = prompt('Lütfen iki faktörlü doğrulama kodunuzu giriniz:');
+      const twoFactorCode = prompt('Please write 2FA code:');
       if (twoFactorCode) {
         // 2FA kodunu doğrulamak için başka bir API isteği gönder
         fetch('api/auth/verify-2fa/', {
@@ -42,42 +48,43 @@ export default function login() {
         .then(response => response.json())
         .then(data => {
           if (data.access){
-          setCookie('accessToken', data.access, {secure: true});
-          setCookie('refreshToken', data.refresh, {secure: true});
-          setCookie('username', data.username, {secure: true});
-          selectTab('tab1');
-          openSocket();
-          openSocketPrivate();
-          // setInterval(refreshAccessToken, 4 * 60 * 1000); 
-          // Login başarılı, ana sayfaya yönlendir
-          // window.location.href = '/user_profile'; // Örnek bir yönlendirme
-          changeContent('home');
+            setCookie('accessToken', data.access, {secure: true});
+            setCookie('refreshToken', data.refresh, {secure: true});
+            setCookie('username', escapeHtml(data.username), {secure: true}); // Escape username before setting cookie
+            selectTab('tab1');
+            openSocket();
+            openSocketPrivate();
+            // setInterval(refreshAccessToken, 4 * 60 * 1000); 
+            // Login başarılı, ana sayfaya yönlendir
+            // window.location.href = '/user_profile'; // Örnek bir yönlendirme
+            changeContent('home');
           }
         })
         .catch(error => {
-          console.error('2FA doğrulama hatası:', error);
+          console.error('2FA authentication error:', error);
         });
       }
     } else if (data.access) {
       setCookie('accessToken', data.access, {secure: true});
-          setCookie('refreshToken', data.refresh, {secure: true});
-          setCookie('username', data.username, {secure: true});
-          selectTab('tab1');
-          openSocket();
-          openSocketPrivate();
-          // setInterval(refreshAccessToken, 4 * 60 * 1000); 
-          // Login başarılı, ana sayfaya yönlendir
-          // window.location.href = '/user_profile'; // Örnek bir yönlendirme
-          changeContent('home');
+      setCookie('refreshToken', data.refresh, {secure: true});
+      setCookie('username', escapeHtml(data.username), {secure: true}); // Escape username before setting cookie
+      selectTab('tab1');
+      openSocket();
+      openSocketPrivate();
+      // setInterval(refreshAccessToken, 4 * 60 * 1000); 
+      // Login başarılı, ana sayfaya yönlendir
+      // window.location.href = '/user_profile'; // Örnek bir yönlendirme
+      changeContent('home');
     } else {
       // Hata mesajını göster
-      alert('Giriş başarısız: ' + data.error);
+      alert('Login failed: ' + data.error);
     }
   })
   .catch(error => {
-    console.error('Giriş işlemi sırasında bir hata oluştu:', error);
+    console.error('An error occurred during the login process:', error);
   });
 });
+
 
 }
 

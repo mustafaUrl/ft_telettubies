@@ -47,7 +47,7 @@ export default async function sendPostWithJwt(url, bodyData, method = 'POST') {
       return data; // İşlem başarılıysa veriyi dön
     } catch (error) {
       // Hata oluşursa burada ele al
-      console.error('İstek sırasında bir hata oluştu:', error);
+      console.error('An error occurred during the request:', error);
       throw error; // Hata bilgisini dışarı fırlat
     }
   }

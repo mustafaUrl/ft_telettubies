@@ -6,7 +6,7 @@ function joinRoom(friendUsername) {
       };
       window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket bağlantısı açık değil.');
+      console.error('WebSocket connection is not open.');
     }
   }
   
@@ -19,7 +19,7 @@ function joinRoom(friendUsername) {
       };
       window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket bağlantısı açık değil.');
+      console.error('WebSocket connection is not open.');
     }
   }
   
@@ -33,7 +33,7 @@ function joinRoom(friendUsername) {
       };
       window.chatSocketPrivate.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket bağlantısı açık değil.');
+      console.error('WebSocket connection is not open.');
     }
   }
   
