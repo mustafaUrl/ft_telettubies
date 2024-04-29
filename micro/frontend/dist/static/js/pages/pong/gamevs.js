@@ -216,7 +216,7 @@ export default function pongVS(){
   window.opponent = getCookie('username') == 'ara' ? 'bab' : 'ara';
   openPongSocket();
   
-  render();
+  // render();
   console.log('pongVS çalıştı');
 }
 

@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "./examples/jsm/controls/OrbitControls.js";
 
-export default function pong(){
    
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({
@@ -136,7 +135,6 @@ function render() {
 
     ball.position.z += ballVelocityX;
     ball.position.x += ballVelocityY;
-    const now = Date.now(); // Şu anki zamanı al
 
     // check collision with player
     const playerCollide =
@@ -174,6 +172,7 @@ function render() {
     renderer.render(scene, currentCamera);
     }
 
-    // render();
+    export default function pong(){
+     render();
 }
 
