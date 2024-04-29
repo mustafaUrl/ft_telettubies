@@ -1,7 +1,7 @@
 import  login  from '../pages/login/login.js';
 import  logout  from '../pages/logout/logout.js';
 import  register  from '../pages/register/register.js';
-import  pong from '../pages/pong/game.js';
+// import  pong from '../pages/pong/game.js';
 import  pongVS from '../pages/pong/gamevs.js';
 import  profile  from '../pages/profile/profile.js';
 import  tournament  from '../pages/tournament/tournament.js';
@@ -21,9 +21,9 @@ export default function triggerContentLoad(contentId) {
       case 'pong':
         pongVS();
         break; 
-      case 'game':
-        pong();
-        break;
+      // case 'game':
+      //   pong();
+      //   break;
       case 'profile':
       case 'friends':
       case 'account':
