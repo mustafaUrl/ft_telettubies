@@ -1,5 +1,5 @@
 
-export default function pong() {
+/*export default function pong() {
   const CANVAS = document.getElementById('canvas');
 
   CANVAS.style.backgroundColor = 'black';
@@ -722,3 +722,4 @@ document.getElementById('btn-toggle-sound').addEventListener('click', function()
   toggleSound();
 });
 }
+*/
