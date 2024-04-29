@@ -36,7 +36,12 @@ class GameRoom:
         # X ekseni sınırlarla çarpışma kontrolü
         if abs(self.ball_position['x']) >= self.border_x:
             self.ball_velocity['x'] = -self.ball_velocity['x']
-
+         # Y ekseni sınırlarla çarpışma kontrolü (topun oyuncu paletine çarpması)
+        if self.ball_position['x'] <= 0 or self.ball_position['x'] >= self.border_y:
+            # Burada topun oyuncu paletine çarptığını kontrol eden koşulu ekleyin
+            # Eğer top paletin içindeyse, yönünü değiştir
+            # Aksi takdirde, oyuncunun puanını azaltın ve topu başlangıç konumuna getirin
+            pass  # Bu kısmı oyununuzun mantığına göre doldurun
 
     def update_game_state(self):
         for username, player in self.players.items():
@@ -46,15 +51,20 @@ class GameRoom:
                 hit_position = self.ball_position['z']
                 distance_from_center = hit_position - paddle_center
                 bounce_angle = distance_from_center / (self.paddle_length / 2)
-                # Adjust the ball's velocity based on the bounce angle
-                self.ball_velocity['x'] = abs(self.ball_velocity['x']) * (-1 if hit_position < paddle_center else 1)
-                self.ball_velocity['z'] = abs(self.ball_velocity['z']) * (-1 if hit_position < paddle_center else 1)
+                
+                # Calculate new velocities based on the bounce angle
+                new_velocity_x = abs(self.ball_velocity['x']) * (-1 if hit_position < paddle_center else 1)
+                new_velocity_z = abs(self.ball_velocity['z']) * bounce_angle
+                
+                # Update the ball's velocity
+                self.ball_velocity['x'] = new_velocity_x
+                self.ball_velocity['z'] = new_velocity_z
+                
                 # Ensure the ball's velocity doesn't exceed a maximum value
                 max_velocity = 1.0
-                if abs(self.ball_velocity['x']) > max_velocity:
-                    self.ball_velocity['x'] = max_velocity if self.ball_velocity['x'] > 0 else -max_velocity
-                if abs(self.ball_velocity['z']) > max_velocity:
-                    self.ball_velocity['z'] = max_velocity if self.ball_velocity['z'] > 0 else -max_velocity
+                self.ball_velocity['x'] = max(min(self.ball_velocity['x'], max_velocity), -max_velocity)
+                self.ball_velocity['z'] = max(min(self.ball_velocity['z'], max_velocity), -max_velocity)
+
 
 
     # def update_game_state(self):
