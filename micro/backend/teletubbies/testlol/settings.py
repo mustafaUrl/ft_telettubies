@@ -156,8 +156,12 @@ WSGI_APPLICATION = 'testlol.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mydatabase',
+        'USER': 'myuser',
+        'PASSWORD': 'mypassword',
+        'HOST': 'db',  # Use the service name from docker-compose.yml
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
 

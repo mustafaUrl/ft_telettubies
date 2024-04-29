@@ -4,21 +4,22 @@ FROM python:3.8-slim
 # Ortam değişkenlerini ayarla
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
+ENV PGPASSWORD mypassword
+ENV POSTGRES_USER myuser
 
-# Çalışma dizinini oluştur
+# Create working directory
 RUN mkdir /code
 WORKDIR /code
 
-# Gereksinimleri yükle
+# Install dependencies
 COPY requirements.txt /code/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+# Install postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client
+
 COPY teletubbies/ /code/
+COPY wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /wait-for-postgres.sh
 
-RUN python manage.py makemigrations
-
-RUN python manage.py migrate
-
-# RUN python create_super_user.py
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD /wait-for-postgres.sh db python manage.py migrate && python manage.py runserver 0.0.0.0:8000
