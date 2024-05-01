@@ -157,21 +157,14 @@ WSGI_APPLICATION = 'testlol.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mydatabase',
+        'USER': 'myuser',
+        'PASSWORD': 'mypassword',
+        'HOST': 'db',  # Use the service name from docker-compose.yml
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         "ENGINE": 'django.db.backends.postgresql',  # THIS IS SO STUPID FIX YOUR PDF
-#         "NAME": os.environ.get("POSTGRES_DB", "postgres" ),
-#         "USER": os.environ.get("POSTGRES_USER", "user"),
-#         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "password"),
-#         "HOST": os.environ.get("POSTGRES_HOST", "postgres"),
-#         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-#     }
-# }
 
 
 # Password validation
