@@ -1,1 +1,33 @@
-<div id='gameCanvas'></div>
+<!-- Offcanvas Sidebar için HTML yapısı -->
+<div id="offcanvas-list" class="offcanvas offcanvas-start" tabindex="-1">
+  <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasLabel">Game Lobby</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+      <!-- Online oyuncular listesi -->
+      <div>
+          <h6>Online Players</h6>
+          <ul id="playerList" class="list-group mb-3">
+              <!-- JavaScript ile dinamik olarak doldurulacak -->
+          </ul>
+      </div>
+      <!-- Oda listesi -->
+      <div>
+          <h6>Rooms</h6>
+          <ul id="roomList" class="list-group">
+              <!-- JavaScript ile dinamik olarak doldurulacak -->
+          </ul>
+      </div>
+  </div>
+</div>
+
+<!-- Sidebar'ı açacak buton -->
+<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-list" aria-controls="offcanvas-list">
+  Game Lobby
+</button>
+
+<!-- Oyun Canvas'ı -->
+<div class="canvas-container" style="text-align: center;">
+  <canvas id="myCanvas" width="800" height="600"></canvas>
+</div>

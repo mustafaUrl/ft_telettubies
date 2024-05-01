@@ -23,7 +23,7 @@ checkAuthStatus();
     window.addEventListener('load', function() {
       const urlParams = new URLSearchParams(window.location.search);
       const authCode = urlParams.get('code');
-      console.log(authCode);
+      // console.log(authCode);
       if (authCode) {
 
         ft_login(authCode);

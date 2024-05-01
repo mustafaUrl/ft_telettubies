@@ -3,7 +3,7 @@ import changeContent from '../../uimodule/changeContent.js';
 import openSocket from '../../sockets/globalSocket.js';
 import openSocketPrivate from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
-
+import {openPongSocket} from '../../sockets/pongSocket.js'
 
 
 
@@ -51,6 +51,7 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
             selectTab('tab1');
             openSocket();
             openSocketPrivate();
+            openPongSocket();
             // setInterval(refreshAccessToken, 4 * 60 * 1000); 
             // Login başarılı, ana sayfaya yönlendir
             // window.location.href = '/user_profile'; // Örnek bir yönlendirme
@@ -68,6 +69,7 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
       selectTab('tab1');
       openSocket();
       openSocketPrivate();
+      openPongSocket();
       // setInterval(refreshAccessToken, 4 * 60 * 1000); 
       // Login başarılı, ana sayfaya yönlendir
       // window.location.href = '/user_profile'; // Örnek bir yönlendirme
