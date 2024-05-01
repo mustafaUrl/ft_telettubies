@@ -1,7 +1,11 @@
 import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async, async_to_sync
 from channels.db import database_sync_to_async
+from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 from .models import Game
+
 
 class oneVone(AsyncWebsocketConsumer):
     async def connect(self):
