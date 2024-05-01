@@ -44,9 +44,9 @@ class Notification(models.Model):
     UNREAD_MESSAGE = 'unread_message'
     
     NOTIFICATION_TYPES = [
-        (FRIEND_REQUEST, 'Arkadaşlık İsteği'),
-        (GAME_INVITE, 'Oyun Daveti'),
-        (UNREAD_MESSAGE, 'Okunmamış Mesaj'),
+        (FRIEND_REQUEST, 'Friend Request'),
+        (GAME_INVITE, 'Game Invite'),
+        (UNREAD_MESSAGE, 'Unread Message'),
     ]
 
     # Bildirim alanları
@@ -62,31 +62,3 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
-
-# # Arkadaşlık isteği kabul edildiğinde bildirim oluştur
-# @receiver(post_save, sender=FriendRequest)
-# def create_friend_request_notification(sender, instance, created, **kwargs):
-#     if created:
-#         Notification.objects.create(
-#             recipient=instance.to_user,
-#             sender=instance.from_user,
-#             notification_type=Notification.FRIEND_REQUEST
-#         )
-
-# # Kullanıcı profilinde değişiklik olduğunda bildirim oluştur
-# @receiver(post_save, sender=UserProfile)
-# def create_profile_update_notification(sender, instance, created, **kwargs):
-#     if not created:
-#         Notification.objects.create(
-#             recipient=instance.user,
-#             sender=instance.user,
-#             notification_type='profile_update',
-#             message='Profil güncellemesi yapıldı.'
-#         )
-
-
-# # Bildirim oluşturulduğunda WebSocket üzerinden göndermek için sinyal
-# @receiver(post_save, sender=Notification)
-# def send_notification_via_websocket(sender, instance, created, **kwargs):
-#     if created:
-#         instance.send_websocket_notification()

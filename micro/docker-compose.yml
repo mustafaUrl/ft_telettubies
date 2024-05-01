@@ -1,5 +1,14 @@
 services:
 
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - backend_network
   backend:
     container_name: backend
     build: ./backend
@@ -31,6 +40,7 @@ services:
 
 volumes:
   media_volume:
+  postgres_data:
 
 networks:
   backend_network:

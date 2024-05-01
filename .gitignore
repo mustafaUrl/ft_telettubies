@@ -2,7 +2,6 @@ myenv
 testlol/media/profile_pictures/*
 !testlol/media/profile_pictures/.gitkeep
 *.pyc
-.env
 frontend/dist/static/img/
 others
 micro/data
