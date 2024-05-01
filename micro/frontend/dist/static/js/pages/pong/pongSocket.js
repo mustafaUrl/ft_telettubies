@@ -1,8 +1,7 @@
-import  {getCookie}  from '../cookies/cookies.js';
+import  {getCookie , setCookie}  from '../../cookies/cookies.js';
+import { startGame } from './startGame.js';
 
-window.onlinePlayers = '';
 window.pongSocket = '';
-// let activeTab = 'tab1';
 function commandSocket(command, data=null) {
     if (window.pongSocket && window.pongSocket.readyState === WebSocket.OPEN) {
 
@@ -79,43 +78,6 @@ function listOnlinePlayers(onlinePlayers) {
   });
 }
 
-// function listRooms(rooms) {
-//   const roomListElement = document.getElementById('roomList');
-//   roomListElement.innerHTML = ''; // Oda listesini temizle
-//   const username = getCookie('username'); // Kullanıcı adını cookie'den al
-
-//   Object.values(rooms).forEach(roomInfo => {
-//     const roomItem = document.createElement('li');
-//     roomItem.classList.add('list-group-item');
-
-//     const roomDetailsSpan = document.createElement('span');
-//     roomDetailsSpan.textContent = `${roomInfo.room_name} - Players: ${roomInfo.players.join(', ')}`;
-
-//     const joinButton = document.createElement('button');
-//     joinButton.textContent = 'Join';
-//     joinButton.classList.add('btn', 'btn-success', 'me-2');
-//     joinButton.onclick = function() {
-//       commandSocket('join_room', roomInfo.room_name);
-//     };
-
-//     const leaveButton = document.createElement('button');
-//     leaveButton.textContent = 'Leave';
-//     leaveButton.classList.add('btn', 'btn-danger', 'me-2');
-//     leaveButton.onclick = function() {
-//       commandSocket('leave_room', roomInfo.room_name);
-//     };
-
-//     // Eğer kullanıcı bu odada ise 'Leave' butonunu göster, değilse 'Join' butonunu göster
-//     if (roomInfo.players.includes(username)) {
-//       roomItem.appendChild(leaveButton);
-//     } else {
-//       roomItem.appendChild(joinButton);
-//     }
-
-//     roomItem.appendChild(roomDetailsSpan);
-//     roomListElement.appendChild(roomItem);
-//   });
-// }
 
 
 function listRooms(rooms) {
@@ -193,8 +155,9 @@ function openPongSocket() {
         listRooms(data.rooms);
     }
     if (data.type === 'game_start'){
-        console.log('game start:', data.game_id);
-    }
+        setCookie('game_id', data.content);
+        startGame();
+      }
     
   };
 
@@ -216,19 +179,3 @@ export {openPongSocket, commandSocket};
 
 
 
-
-
-
-
-
-// function updatePlayerList(players) {
-//     const playerListElement = document.getElementById('playerList');
-//     playerListElement.innerHTML = ''; // Listeyi temizle
-
-//     players.forEach(player => {
-//         const listItem = document.createElement('li');
-//         listItem.className = 'list-group-item';
-//         listItem.textContent = player;
-//         playerListElement.appendChild(listItem);
-//     });
-// }

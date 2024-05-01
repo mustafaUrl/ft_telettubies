@@ -182,27 +182,24 @@
 }
 
 /* Container içindeki sidebar ve canvas için stil */
-#myContainer .sidebar {
-  width: 200px; /* Sidebar genişliği */
-  background-color: #eb0000; /* Sidebar arkaplan rengi */
-  /* Diğer sidebar stilleri */
+/* #myContainer .sidebar {
+  width: 200px; 
+  background-color: #eb0000; 
+
+} */
+
+.canvas-container {
+  text-align: center;
+  background-color: black; /* Arka planı siyah yap */
+  padding: 20px; /* İçerik etrafında biraz boşluk bırak */
 }
 
-#myContainer .canvas-container {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* Diğer canvas-container stilleri */
+#myCanvas {
+  display: inline-block; /* Canvas'ı blok olarak değil, satır içi olarak hizalama */
+  background-color: black; /* Canvas arka planını siyah yap */
+  border: 1px solid white; /* Canvas etrafında beyaz bir çerçeve oluştur */
 }
 
-#myContainer .canvas-container canvas {
-  width: 800px;
-  height: 600px;
-  border: 1px solid #000; /* Canvas çerçevesi */
-  background-color: #0d61d7;
-  /* Diğer canvas stilleri */
-}
 
 
 /* 

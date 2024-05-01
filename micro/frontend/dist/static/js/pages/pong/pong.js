@@ -1,5 +1,5 @@
-import {openPongSocket, commandSocket} from '../../sockets/pongSocket.js'
-
+import {openPongSocket, commandSocket} from './pongSocket.js'
+import {initGame} from './startGame.js'
 
 
   
@@ -71,5 +71,6 @@ export default function pong(){
     players();
     rooms();
     commandSocket('list_rooms');
+    // initGame();
     
 }
