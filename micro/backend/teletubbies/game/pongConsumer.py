@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 # from .gameRoom import GameRoom
 import asyncio
 from .models import Game
-
+from django.db import models
 class PongConsumer(AsyncWebsocketConsumer):
     online_users = set()  # Tüm bağlı kullanıcıları tutacak set
     user_rooms = {}
@@ -75,6 +75,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
     async def create_room(self):
         username = self.user.username
+
+        # Kullanıcı zaten bir maçta ise başka bir maç oluşturamaz
+        continuing_game = await self.continuing_game()
+        if continuing_game:
+            await self.send(text_data=json.dumps({
+                'error': 'You are already in a game.'
+            }))
+            return
         room_name = self.generate_room_name()
         self.room_group_name = f"group_{room_name}"
         
@@ -158,11 +166,10 @@ class PongConsumer(AsyncWebsocketConsumer):
             PongConsumer.ready_status[self.user.username] = True
             if PongConsumer.ready_status.get(player1_username) and PongConsumer.ready_status.get(player2_username):
                 # Oyunu oluştur ve başlat
-                # game = await self.create_game(player1_username, player2_username)
-                game= True
+                game = await self.create_game(player1_username, player2_username)
                 if game:
                     # Oyun başarıyla oluşturulduysa, oyunculara oyun ID'sini gönder
-                    await self.send_event_message('game_start', {'game_id': '8'})
+                    await self.send_event_message('game_start', {'game_id': game.id})
                 else:
                     # Oyun oluşturulamadıysa hata mesajı gönder
                     await self.send(text_data=json.dumps({
@@ -286,27 +293,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             'type': event_type,
             'content': message
         }))
-    # async def send_event_message(self, event, message):
-    #     # Oda bilgilerini al
-    #     room_name = self.room_group_name
-    #     # Odaya mesaj gönder
-    #     await self.channel_layer.group_send(
-    #         room_name,
-    #         {
-    #             'type': 'chat_message',
-    #             'message': message
-    #         }
-    #     )
-
-    # # 'chat_message' tipindeki olayları işleyecek metod
-    # async def chat_message(self, event):
-    #     message = event['message']
-    #     # WebSocket'e mesaj gönder
-    #     await self.send(text_data=json.dumps({
-    #         'message': message
-    #     }))
-
-    
 
     @database_sync_to_async
     def create_game(self, player1_username, player2_username):
@@ -318,14 +304,18 @@ class PongConsumer(AsyncWebsocketConsumer):
         except User.DoesNotExist:
             return None
 
+    @database_sync_to_async
+    def continuing_game(self):
+        self.user = self.scope["user"]
+        # Kullanıcının player1 veya player2 olarak yer aldığı ve kazananın henüz belirlenmediği oyunları filtrele
+        game_without_winner = Game.objects.filter(
+            models.Q(player1=self.user) | models.Q(player2=self.user),
+            winner__isnull=True
+        )
+        # Eğer böyle bir oyun varsa 1, yoksa 0 döndür
+        return 1 if game_without_winner.exists() else 0
 
-
-    # async def send_event_message(self, event_type, message):
-    #     # Event tipine göre mesajı WebSocket üzerinden kullanıcılara gönder
-    #     await self.send(text_data=json.dumps({
-    #         'type': event_type,
-    #         'content': message
-    #     }))
+            
 
     async def chat_message(self, event):
         # Oda bilgisini WebSocket üzerinden kullanıcılara gönder
