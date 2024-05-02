@@ -161,7 +161,7 @@ DATABASES = {
         'NAME': 'mydatabase',
         'USER': 'myuser',
         'PASSWORD': 'mypassword',
-        'HOST': 'db',  # Use the service name from docker-compose.yml
+        'HOST': 'localhost',  # Since both DB and backend are in the same container
         'PORT': '5432',  # Default PostgreSQL port
     }
 }
