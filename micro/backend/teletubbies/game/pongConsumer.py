@@ -49,6 +49,17 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if command == "online_players":
             await self.list_online_players()
+        if command == "continue_game":
+            continuing_game = await self.continuing_game()
+            if continuing_game:
+                await self.send(text_data=json.dumps({
+                    'type': 'already_in_game',
+                    'game_id': continuing_game
+                }))
+            else:
+                await self.send(text_data=json.dumps({
+                    'type': 'not_in_game'
+                }))
         elif command == "create_room":
             await self.create_room()
         elif command == "join_room":
@@ -80,7 +91,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         continuing_game = await self.continuing_game()
         if continuing_game:
             await self.send(text_data=json.dumps({
-                'error': 'You are already in a game.'
+                'type': 'already_in_game',
+                'game_id': continuing_game
             }))
             return
         room_name = self.generate_room_name()
@@ -311,10 +323,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         game_without_winner = Game.objects.filter(
             models.Q(player1=self.user) | models.Q(player2=self.user),
             winner__isnull=True
-        )
-        # Eğer böyle bir oyun varsa 1, yoksa 0 döndür
-        return 1 if game_without_winner.exists() else 0
+        ).first()  # İlk eşleşen oyunu al
 
+        # Eğer böyle bir oyun varsa oyunun ID'sini, yoksa 0 döndür
+        return game_without_winner.id if game_without_winner else 0
+    
             
 
     async def chat_message(self, event):

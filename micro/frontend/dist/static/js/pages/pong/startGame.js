@@ -36,24 +36,56 @@ function openGameSocket() {
   socket.onopen = function(e) {
     console.log('Pong socket açıldı');
      // Oyunu başlat ve canvas'ı hazırla
-    socket.send(JSON.stringify({ command: 'start' })); // Oyunu başlat komutunu gönder
   };
 
-  socket.onmessage = function(event) {
-    try {
+  // socket.onmessage = function(event) {
+  //   try {
+  //     const data = JSON.parse(event.data);
+  //     if (data && data.type === 'game_state') {
+  //       // Gelen verileri kullanarak palet ve topun pozisyonlarını güncelle
+  //       leftPaddle.y = data.game_state.paddle1_position;
+  //       rightPaddle.y = data.game_state.paddle2_position;
+  //       ball.x = data.game_state.ball_position.x;
+  //       ball.y = data.game_state.ball_position.y;
+  //     }
+  //   } catch (error) {
+  //     console.error('Veri işlenirken bir hata oluştu:', error);
+  //   }
+  // };
+  
+socket.onmessage = function(event) {
+  try {
       const data = JSON.parse(event.data);
       if (data && data.type === 'game_state') {
-        // Gelen verileri kullanarak palet ve topun pozisyonlarını güncelle
-        leftPaddle.y = data.game_state.paddle1_position;
-        rightPaddle.y = data.game_state.paddle2_position;
-        ball.x = data.game_state.ball_position.x;
-        ball.y = data.game_state.ball_position.y;
+          // Gelen verileri kullanarak palet ve topun pozisyonlarını ve skoru güncelle
+          leftPaddle.y = data.game_state.paddle1_position;
+          rightPaddle.y = data.game_state.paddle2_position;
+          ball.x = data.game_state.ball_position.x;
+          ball.y = data.game_state.ball_position.y;
+          
+          // Skoru güncelle
+          document.getElementById('scorePlayer1').textContent = data.game_state.score_player1;
+          document.getElementById('scorePlayer2').textContent = data.game_state.score_player2;
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Veri işlenirken bir hata oluştu:', error);
-    }
-  };
-  
+  }
+};
+
+// Oyun kontrol butonları için event listener'lar
+document.getElementById('startButton').addEventListener('click', function() {
+  // Oyunu başlatma komutunu server'a gönder
+  socket.send(JSON.stringify({ command: 'start' }));
+});
+
+
+
+document.getElementById('leaveButton').addEventListener('click', function() {
+  // Oyundan ayrılma komutunu server'a gönder ve sayfayı yenile
+  socket.send(JSON.stringify({ command: 'leave' }));
+  location.reload();
+});
+
   // socket.onmessage = function(event) {
   //   const data = JSON.parse(event.data);
   //   // Gelen verileri kullanarak palet ve topun pozisyonlarını güncelle

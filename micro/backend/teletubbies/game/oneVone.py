@@ -74,6 +74,7 @@ class oneVone(AsyncWebsocketConsumer):
         if command == 'leave':
             await self.leave_game()
             await self.close()
+     
 
     async def start_game(self):
         await self.pong_game.start_game()
@@ -100,15 +101,37 @@ class oneVone(AsyncWebsocketConsumer):
             'type': 'game_state',
             'game_state': event['game_state']
         }))
+    # async def game_state(self, event):
+    # # Oyun durumunu grup üzerinden tüm oyunculara gönder
+    # await self.channel_layer.group_send(
+    #     self.game_id,
+    #     {
+    #         'type': 'send.game_state',
+    #         'game_state': event['game_state']
+    #     }
+    # )
+
+    # # Grup mesajını işleyecek olan metod
+    # async def send_game_state(self, event):
+    #     # Oyun durumunu WebSocket üzerinden tüm oyunculara gönder
+    #     await self.send(text_data=json.dumps({
+    #         'type': 'game_state',
+    #         'game_state': event['game_state']
+    #     }))
 
     async def leave_game(self):
-        await self.leave()
+        self.leave()
+        
         await self.channel_layer.group_send(
             self.game_id,
             {
                 'type': 'game.leave',
                 'player': self.user.username
             }
+        )
+        await self.channel_layer.group_discard(
+            self.game_id,
+            self.channel_name
         )
     
     @database_sync_to_async
@@ -128,10 +151,7 @@ class oneVone(AsyncWebsocketConsumer):
         elif self.user == game.player2:
             game.player2_state = 'left'
         game.save()
-        await self.channel_layer.group_discard(
-            self.game_id,
-            self.channel_name
-        )
+        
 
     @database_sync_to_async
     def get_game(self, game_id):

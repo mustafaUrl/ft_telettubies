@@ -17,7 +17,9 @@ class PongGame:
         self.paddle2 = self.create_paddle(self.width - self.grid * 3)
         self.ball = self.create_ball()
         self.running = True
-
+        self.score_to_win = 5
+        self.score_player1 = 0
+        self.score_player2 = 0
     def create_paddle(self, x):
         return {'x': x, 'y': self.height / 2, 'dy': 0, 'width': self.grid, 'height': self.paddle_height}
 
@@ -58,10 +60,22 @@ class PongGame:
             if self.ball['y'] <= 0 or self.ball['y'] >= self.height - self.grid:
                 self.ball['dy'] *= -1
 
-            # Topun sol veya sağ duvara çarpması
-            if self.ball['x'] <= 0 or self.ball['x'] >= self.width - self.grid:
-                self.ball['dx'] *= -1
+            # # Topun sol veya sağ duvara çarpması
+            # if self.ball['x'] <= 0 or self.ball['x'] >= self.width - self.grid:
+            #     self.ball['dx'] *= -1
+            #     self.reset_ball()
+        ############################################################################################################
+            if self.ball['x'] <= 0:  # Top sol duvara çarptıysa
+                self.score_player2 += 1
                 self.reset_ball()
+                if self.score_player2 >= self.score_to_win:
+                    self.running = False
+            elif self.ball['x'] >= self.width - self.grid:  # Top sağ duvara çarptıysa
+                self.score_player1 += 1
+                self.reset_ball()
+                if self.score_player1 >= self.score_to_win:
+                    self.running = False
+        ############################################################################################################
 
             # Paletlerin sınırlar içinde kalmasını sağlama
             self.paddle1['y'] = max(self.grid, min(self.paddle1['y'], self.max_paddle_y))
@@ -71,6 +85,19 @@ class PongGame:
             if self.collides(self.ball, self.paddle1) or self.collides(self.ball, self.paddle2):
                 self.ball['dx'] *= -1
 
+    def get_game_state(self):
+        # Oyun durumunu döndürürken skorları da ekleyin
+        return {
+            'paddle1_position': self.paddle1['y'],
+            'paddle2_position': self.paddle2['y'],
+            'ball_position': {
+                'x': self.ball['x'],
+                'y': self.ball['y']
+            },
+            'score_player1': self.score_player1,
+            'score_player2': self.score_player2,
+            'running': self.running  # Oyunun devam edip etmediği bilgisi
+        }
 # class PongGame:
 #     def __init__(self, player1_user, player2_user, width, height):
 #         self.player1_user = player1_user
@@ -123,16 +150,18 @@ class PongGame:
 #             # Top ile paletlerin çarpışma kontrolü
 #             if self.collides(self.ball, self.paddle1) or self.collides(self.ball, self.paddle2):
 #                 self.ball['dx'] *= -1
+############################################################################################################
+    # def get_game_state(self):
+    #     return {
+    #         'paddle1_position': self.paddle1['y'],
+    #         'paddle2_position': self.paddle2['y'],
+    #         'ball_position': {
+    #             'x': self.ball['x'],
+    #             'y': self.ball['y']
+    #         }
+    #     }
+############################################################################################################
 
-    def get_game_state(self):
-        return {
-            'paddle1_position': self.paddle1['y'],
-            'paddle2_position': self.paddle2['y'],
-            'ball_position': {
-                'x': self.ball['x'],
-                'y': self.ball['y']
-            }
-        }
     # def reset_ball(self):
     #     self.ball['x'] = self.width / 2
     #     self.ball['y'] = self.height / 2

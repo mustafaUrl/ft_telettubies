@@ -30,6 +30,13 @@ function commandSocket(command, data=null) {
               }));
               console.log('ready:', data);
             }
+        else if (data && command === 'continue_game') {
+            window.pongSocket.send(JSON.stringify({
+                'command': command,
+                'game_id': data
+              }));
+            }
+
         else{
             window.pongSocket.send(JSON.stringify({
                 'command': command,
@@ -155,14 +162,22 @@ function openPongSocket() {
         listRooms(data.rooms);
     }
     if (data.type === 'game_start'){
-        setCookie('game_id', '8');
+        setCookie('game_id', data.game_id );
+        console.log('game start:', data.game_id);
         startGame();
       }
+    if (data.type === 'already_in_game'){
+      setCookie('game_id', data.game_id);
+      console.log('already_in_game :', data.game_id);
+
+      startGame();
+    }
     
   };
 
   window.pongSocket.onopen = function(e) {
     console.log('pong socket open', e );
+    commandSocket('continue_game');
   };
 
   window.pongSocket.onclose = function(e) {
