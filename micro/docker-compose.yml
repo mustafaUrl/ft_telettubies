@@ -3,10 +3,8 @@ services:
   db:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_USER: myuser
-      POSTGRES_DB: mydatabase
+    env_file:
+      - ./envfiles/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     networks:
