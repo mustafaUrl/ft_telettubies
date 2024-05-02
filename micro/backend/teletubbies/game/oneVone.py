@@ -10,6 +10,38 @@ import asyncio
 class oneVone(AsyncWebsocketConsumer):
     games = {}
     active_users = {}
+    # async def connect(self):
+    #     self.user = self.scope["user"]
+    #     self.game_id = self.scope['url_route']['kwargs']['game_id']
+
+    #     # Kullanıcı anonimse bağlantıyı kapat
+    #     if self.user.is_anonymous:
+    #         await self.close()
+    #         return
+
+    #     # Oyun ID'sine göre oyunu al veya oluştur
+        
+    #     if self.game_id not in self.games:
+    #         player1_username, player2_username = await self.get_game_usernames(self.game_id)
+    #         if player1_username is None or player2_username is None:
+    #             print("Oyun bulunamadı")
+    #             await self.close()
+    #             return
+    #         print(player1_username, player2_username,self.game_id)
+    #         # Yeni bir PongGame nesnesi oluştur ve games sözlüğünde sakla
+    #         self.games[self.game_id] = PongGame(player1_username, player2_username, 800, 600)
+
+    #     # Oyun ID'sine göre PongGame nesnesini al
+    #     self.pong_game = self.games[self.game_id]
+
+    #     # Oyun odasına katıl
+    #     await self.channel_layer.group_add(
+    #         self.game_id,
+    #         self.channel_name
+    #     )
+
+    #     # WebSocket bağlantısını kabul et
+    #     await self.accept()
     async def connect(self):
         self.user = self.scope["user"]
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -20,6 +52,7 @@ class oneVone(AsyncWebsocketConsumer):
             return
 
         # Oyun ID'sine göre oyunu al veya oluştur
+        
         if self.game_id not in self.games:
             player1_username, player2_username = await self.get_game_usernames(self.game_id)
             if player1_username is None or player2_username is None:
@@ -41,17 +74,16 @@ class oneVone(AsyncWebsocketConsumer):
 
         # WebSocket bağlantısını kabul et
         await self.accept()
-
     async def disconnect(self, close_code):
         if self.user.is_anonymous:
             await self.close()
             return
-        if self.game_id in self.games:
-            del self.games[self.game_id]
-        await self.channel_layer.group_discard(
-            self.game_id,
-            self.channel_name
-        )
+        # if self.game_id in self.games:
+        #     del self.games[self.game_id]
+        # await self.channel_layer.group_discard(
+        #     self.game_id,
+        #     self.channel_name
+        # )
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         command = text_data_json['command']
@@ -79,13 +111,74 @@ class oneVone(AsyncWebsocketConsumer):
     async def start_game(self):
         await self.pong_game.start_game()
 
+
+    @database_sync_to_async
+    def save_game_result(self, score_player1, score_player2, winner_username):
+        # Oyun sonucunu veritabanına kaydet
+        try:
+            # Kazananın User nesnesini al
+            winner = User.objects.get(username=winner_username)
+            
+            # Oyunu al ve güncelle
+            game = Game.objects.get(id=self.game_id)
+            game.player1_score = score_player1
+            game.player2_score = score_player2
+            game.winner = winner  # winner alanını User nesnesi ile güncelle
+            game.save()
+
+            data = {
+                'player1_score': score_player1,
+                'player2_score': score_player2,
+                'winner': winner_username
+            }
+            self.channel_layer.group_send(
+                self.game_id,
+                {
+                    'type': 'game.over',
+                    'data': data,
+                }
+            )
+        except User.DoesNotExist:
+            # Kullanıcı bulunamadıysa hata döndür
+            print(f"User {winner_username} does not exist.")
+        except Game.DoesNotExist:
+            # Oyun bulunamadıysa hata döndür
+            print(f"Game with id {self.game_id} does not exist.")
+
+
+
+    async def stop_broadcast(self):
+        # Yayını kes
+
+        await self.channel_layer.group_discard(
+            self.game_id,
+            self.channel_name
+        )
+
+    async def game_over(self, event):
+        # Oyun bittiğinde tüm oyunculara mesaj gönder
+        await self.send(text_data=json.dumps({
+            'type': 'game_over',
+            'data': event['data']
+        }))
+
     async def broadcast_game_state(self):
         # Oyun ID'sine göre oyun durumunu yayınla
         game = self.games.get(self.game_id)
+         
         if game:
             while True:
                 game.update_positions()
                 game_state = game.get_game_state()
+                if game_state['score_player1'] >= game.score_to_win or game_state['score_player2'] >= game.score_to_win:
+                    game.running = False
+                    if game_state['score_player1'] >= game.score_to_win:
+                        winner = game_state['player1_user']
+                    else:
+                        winner = game_state['player2_user']
+                    await self.save_game_result(game_state['score_player1'], game_state['score_player2'], winner )
+                    await self.stop_broadcast()
+                    break
                 # Oyun durumunu her iki oyuncuya da gönder
                 await self.channel_layer.group_send(
                     self.game_id,
@@ -94,7 +187,7 @@ class oneVone(AsyncWebsocketConsumer):
                         'game_state': game_state
                     }
                 )
-                await asyncio.sleep(1/60)
+                await asyncio.sleep(1/30)
     
     async def game_state(self, event):
         await self.send(text_data=json.dumps({
@@ -164,6 +257,16 @@ class oneVone(AsyncWebsocketConsumer):
         try:
             game = Game.objects.get(id=game_id)
             return game.player1.username, game.player2.username
+        except Game.DoesNotExist:
+            return None, None
+
+    
+    
+    @database_sync_to_async
+    def get_user_id(self, game_id):
+        try:
+            game = Game.objects.get(id=game_id)
+            return game.player1.id, game.player2.id
         except Game.DoesNotExist:
             return None, None
 

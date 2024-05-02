@@ -24,6 +24,7 @@ function startGame() {
   ball = { x: canvas.width / 2, y: canvas.height / 2, width: grid, height: grid, dx: 5, dy: -5 };
   initGame();
   openGameSocket();
+  
 }
 
 // WebSocket bağlantısını açan fonksiyon
@@ -35,6 +36,8 @@ function openGameSocket() {
 
   socket.onopen = function(e) {
     console.log('Pong socket açıldı');
+    socket.send(JSON.stringify({ command: 'start' }));
+
      // Oyunu başlat ve canvas'ı hazırla
   };
 
@@ -66,6 +69,14 @@ socket.onmessage = function(event) {
           // Skoru güncelle
           document.getElementById('scorePlayer1').textContent = data.game_state.score_player1;
           document.getElementById('scorePlayer2').textContent = data.game_state.score_player2;
+      }
+      if (data.type === 'game_over') {
+          // Oyun bittiğinde skoru ve kazananı göster
+          document.getElementById('scorePlayer1').textContent = data.game_over.score_player1;
+          document.getElementById('scorePlayer2').textContent = data.game_over.score_player2;
+          document.getElementById('winner').textContent = data.game_over.winner;
+          document.getElementById('gameOver').style.display = 'block';
+          console.log('Oyun bitti:', data.game_over);
       }
   } catch (error) {
       console.error('Veri işlenirken bir hata oluştu:', error);
@@ -144,124 +155,12 @@ function loop() {
     context.fillRect(canvas.width / 2 - grid / 2, i, grid, grid);
   }
 }
-// Oyunu ve canvas'ı başlatan fonksiyon
 function initGame() {
 
-
-
-  // Palet ve top nesnelerini başlat
-  // leftPaddle = { x: grid * 2, y: canvas.height / 2 - paddleHeight / 2, width: grid, height: paddleHeight, dy: 0 };
-  // rightPaddle = { x: canvas.width - grid * 3, y: canvas.height / 2 - paddleHeight / 2, width: grid, height: paddleHeight, dy: 0 };
-  // ball = { x: canvas.width / 2, y: canvas.height / 2, width: grid, height: grid, dx: 5, dy: -5 };
-
-  // Oyun döngüsünü başlat
   loop();
-
  
 }
 
-// Sayfa yüklendiğinde oyunu başlat
-
-
-
-// function hamlet() {
-
-//   const canvas = document.getElementById('game');
-// const context = canvas.getContext('2d');
-// const grid = 15;
-// const paddleHeight = grid * 5; // 80
-// const maxPaddleY = canvas.height - grid - paddleHeight;
-
-// function loop() {
-//   requestAnimationFrame(loop);
-//   context.clearRect(0, 0, canvas.width, canvas.height);
-
-//   // Paletleri ve topu çiz
-//   context.fillStyle = 'white';
-//   context.fillRect(grid * 2, leftPaddle.y, grid, paddleHeight);
-//   context.fillRect(canvas.width - grid * 3, rightPaddle.y, grid, paddleHeight);
-//   context.fillRect(ball.x, ball.y, grid, grid);
-
-//   // Orta çizgiyi çiz
-//   context.fillStyle = 'lightgrey';
-//   for (let i = grid; i < canvas.height - grid; i += grid * 2) {
-//     context.fillRect(canvas.width / 2 - grid / 2, i, grid, grid);
-//   }
-// }
-
-// loop();
-// }
-
-// function openGameSocket() {
-//     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
-//       console.log('Pong socket zaten açık');
-//       return;}
-//       window.game_id = getCookie('game_id');
-//     window.gameSocket = new WebSocket(`wss://${window.location.host}/ws/pongVersus/${game_id}/?token=` + getCookie('accessToken'));
-   
-    
-//     function startGame() {
-//       socket.send(JSON.stringify({ command: 'start' }));
-//     }
-    
-//     // Paleti hareket ettirmek için 'move' komutunu gönder
-//     function movePaddle(paddle, direction) {
-//       socket.send(JSON.stringify({
-//         command: 'move',
-//         paddle: paddle,
-//         direction: direction
-//       }));
-//     }
-
-//     window.gameSocket.onmessage = function(e) {
-//       let data = JSON.parse(event.data);
-//       // Gelen verileri kullanarak palet ve topun pozisyonlarını güncelle
-//       leftPaddle.y = data.paddle1_position;
-//       rightPaddle.y = data.paddle2_position;
-//       ball.x = data.ball_position.x;
-//       ball.y = data.ball_position.y;
-//     };
-  
-//     window.gameSocket.onopen = function(e) {
-//       startGame();
-//     };
-  
-//     window.gameSocket.onclose = function(e) {
-//       console.error('pong socket closed ', e);
-//     };
-//     document.addEventListener('keydown', function(e) {
-//       // Sağ palet için yukarı ve aşağı ok tuşları
-//       if (e.which === 38) { // Yukarı ok
-//         movePaddle('rightPaddle', -1);
-//       } else if (e.which === 40) { // Aşağı ok
-//         movePaddle('rightPaddle', 1);
-//       }
-    
-//       // Sol palet için W ve S tuşları
-//       if (e.which === 87) { // W tuşu
-//         movePaddle('leftPaddle', -1);
-//       } else if (e.which === 83) { // S tuşu
-//         movePaddle('leftPaddle', 1);
-//       }
-//     });
-    
-//     // Klavye olaylarını dinle ve paleti durdur
-//     document.addEventListener('keyup', function(e) {
-//       if (e.which === 38 || e.which === 40) {
-//         movePaddle('rightPaddle', 0);
-//       }
-//       if (e.which === 87 || e.which === 83) {
-//         movePaddle('leftPaddle', 0);
-//       }
-//     });
-//   }
-
-// function startGame() {
-
-
-//     openGameSocket();
-//     hamlet();
-// }
 
 
 export { startGame, initGame};

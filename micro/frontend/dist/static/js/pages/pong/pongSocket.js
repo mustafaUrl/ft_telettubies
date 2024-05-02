@@ -23,13 +23,6 @@ function commandSocket(command, data=null) {
                 'room_name': data
               }));
             }
-        else if (data && command === 'ready') {
-            window.pongSocket.send(JSON.stringify({
-                'command': command,
-                'room_name': data
-              }));
-              console.log('ready:', data);
-            }
         else if (data && command === 'continue_game') {
             window.pongSocket.send(JSON.stringify({
                 'command': command,
@@ -110,16 +103,7 @@ function listRooms(rooms) {
       };
       roomItem.appendChild(leaveButton);
 
-      // Eğer odada iki oyuncu varsa 'Ready' butonunu göster
-      if (roomInfo.players.length === 2) {
-        const readyButton = document.createElement('button');
-        readyButton.textContent = 'Ready';
-        readyButton.classList.add('btn', 'btn-warning', 'me-2');
-        readyButton.onclick = function() {
-          commandSocket('ready', roomInfo.room_name);
-        };
-        roomItem.appendChild(readyButton);
-      }
+     
     } else if (roomInfo.players.length < 2) {
       // Eğer kullanıcı bu odada değilse ve odada yer varsa 'Join' butonunu göster
       const joinButton = document.createElement('button');
@@ -134,6 +118,7 @@ function listRooms(rooms) {
     roomListElement.appendChild(roomItem);
   });
 }
+
 
 
 function openPongSocket() {
@@ -161,10 +146,11 @@ function openPongSocket() {
     if (data.type === 'list_rooms'){
         listRooms(data.rooms);
     }
-    if (data.type === 'game_start'){
-        setCookie('game_id', data.game_id );
-        console.log('game start:', data.game_id);
-        startGame();
+    if (data.type === 'game_started'){
+      
+      setCookie('game_id', data.game_id );
+      startGame();
+      
       }
     if (data.type === 'already_in_game'){
       setCookie('game_id', data.game_id);
