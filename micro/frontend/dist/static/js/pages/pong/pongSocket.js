@@ -155,7 +155,7 @@ function openPongSocket() {
         listRooms(data.rooms);
     }
     if (data.type === 'game_start'){
-        setCookie('game_id', data.content);
+        setCookie('game_id', '8');
         startGame();
       }
     

@@ -28,9 +28,10 @@ function startGame() {
 
 // WebSocket bağlantısını açan fonksiyon
 function openGameSocket() {
-  // const game_id = getCookie('game_id'); // game_id'yi cookie'den al
-  // const socket = new WebSocket(`wss://${window.location.host}/ws/pongVersus/${game_id}/?token=` + getCookie('accessToken'));
-  const socket = new WebSocket(`wss://${window.location.host}/ws/pongVersus/41/?token=` + getCookie('accessToken'));
+  const game_id = getCookie('game_id'); // game_id'yi cookie'den al
+  console.log('game_id:', game_id);
+  const socket = new WebSocket(`wss://${window.location.host}/ws/pongVersus/${game_id}/?token=` + getCookie('accessToken'));
+  // const socket = new WebSocket(`wss://${window.location.host}/ws/pongVersus/41/?token=` + getCookie('accessToken'));
 
   socket.onopen = function(e) {
     console.log('Pong socket açıldı');
@@ -41,8 +42,7 @@ function openGameSocket() {
   socket.onmessage = function(event) {
     try {
       const data = JSON.parse(event.data);
-      console.log('Pong socket mesajı:', data);
-      if (data && data.type === 'game_state' && data.game_state && data.game_state.ball_position) {
+      if (data && data.type === 'game_state') {
         // Gelen verileri kullanarak palet ve topun pozisyonlarını güncelle
         leftPaddle.y = data.game_state.paddle1_position;
         rightPaddle.y = data.game_state.paddle2_position;

@@ -13,7 +13,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     online_users = set()  # Tüm bağlı kullanıcıları tutacak set
     user_rooms = {}
     invites = {}  # Davetlerin tutulacağı sözlük
-    
+    ready_status = {} 
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
@@ -142,23 +142,47 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def ready(self, data):
         room_name = data['room_name']
         # Oda bilgilerini al
-        room_info = next((info for key, info in PongConsumer.user_rooms.items() if info['room_name'] == room_name), None)
+        print(PongConsumer.user_rooms)
+        room_info = None
+        # 'user_rooms' içinde 'room_name' ile eşleşen oda bilgilerini ara
+        for user_room_key, user_room_info in PongConsumer.user_rooms.items():
+            if user_room_info["room_name"] == room_name:
+                room_info = user_room_info
+                break
+
+        print(room_info)
         if room_info:
-            # Oyuncuların kullanıcı adlarını al
-            player1_username = room_info.get('player1')
-            player2_username = room_info.get('player2')
-           
-            # Oyunu oluştur
-            game = await self.create_game(player1_username, player2_username)
-            if game:
-                # if game is created successfully, send the game id to the players
-                await self.send_event_message('game_start', game.id)
+            player1_username = room_info['player1']
+            player2_username = room_info['player2']
+            # Her iki oyuncu da hazırsa oyunu başlat
+            PongConsumer.ready_status[self.user.username] = True
+            if PongConsumer.ready_status.get(player1_username) and PongConsumer.ready_status.get(player2_username):
+                # Oyunu oluştur ve başlat
+                # game = await self.create_game(player1_username, player2_username)
+                game= True
+                if game:
+                    # Oyun başarıyla oluşturulduysa, oyunculara oyun ID'sini gönder
+                    await self.send_event_message('game_start', {'game_id': '8'})
+                else:
+                    # Oyun oluşturulamadıysa hata mesajı gönder
+                    await self.send(text_data=json.dumps({
+                        'error': 'Game could not be created.'
+                    }))
+            else:
+                # Her iki oyuncu da hazır değilse hata mesajı gönder
+                await self.send(text_data=json.dumps({
+                    'error': 'Both players are not ready.'
+                }))
         else:
             # Oda bulunamadıysa hata mesajı gönder
             await self.send(text_data=json.dumps({
                 'error': f'Room {room_name} does not exist.'
             }))
 
+
+
+
+  
 
 
     async def invite_room(self, data):
@@ -262,6 +286,25 @@ class PongConsumer(AsyncWebsocketConsumer):
             'type': event_type,
             'content': message
         }))
+    # async def send_event_message(self, event, message):
+    #     # Oda bilgilerini al
+    #     room_name = self.room_group_name
+    #     # Odaya mesaj gönder
+    #     await self.channel_layer.group_send(
+    #         room_name,
+    #         {
+    #             'type': 'chat_message',
+    #             'message': message
+    #         }
+    #     )
+
+    # # 'chat_message' tipindeki olayları işleyecek metod
+    # async def chat_message(self, event):
+    #     message = event['message']
+    #     # WebSocket'e mesaj gönder
+    #     await self.send(text_data=json.dumps({
+    #         'message': message
+    #     }))
 
     
 

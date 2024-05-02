@@ -9,7 +9,7 @@ from .game import PongGame
 import asyncio
 class oneVone(AsyncWebsocketConsumer):
     games = {}
-
+    active_users = {}
     async def connect(self):
         self.user = self.scope["user"]
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -26,6 +26,7 @@ class oneVone(AsyncWebsocketConsumer):
                 print("Oyun bulunamadı")
                 await self.close()
                 return
+            print(player1_username, player2_username,self.game_id)
             # Yeni bir PongGame nesnesi oluştur ve games sözlüğünde sakla
             self.games[self.game_id] = PongGame(player1_username, player2_username, 800, 600)
 
