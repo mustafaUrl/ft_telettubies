@@ -120,7 +120,7 @@ class oneVone(AsyncWebsocketConsumer):
         game.save()
 
     @database_sync_to_async
-    def leave(self):
+    async def leave(self):
         # Oyuncuyu oyun odasından çıkar
         game = Game.objects.get(id=self.game_id)
         if self.user == game.player1:
