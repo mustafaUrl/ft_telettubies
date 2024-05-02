@@ -4,7 +4,7 @@ services:
     image: postgres
     restart: always
     env_file:
-      - .env
+      - ./envfiles/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     networks:
@@ -47,34 +47,3 @@ networks:
     driver: bridge
   frontend_network:
     driver: bridge
-
-
-     # nginx:
-  #   container_name: nginx
-  #   image: nginx:alpine
-  #   networks:
-  #     - frontend_network
-  #     - backend_network
-  #   ports:
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d:ro # Nginx konfigürasyon dosyalarını kopyalayın
-  #     - ./certs:/etc/ssl/certs:ro # SSL sertifikalarını kopyalayın
-  #     - ./certs:/etc/ssl/private:ro # SSL anahtar dosyasını kopyalayın
-  #   depends_on:
-  #     - frontend
-
-# volumes:
-#   postgres_data:
-#   media_volume:
-#   static_volume:
-
-  # db:
-  #   container_name: db
-  #   image: postgres:latest
-  #   networks:
-  #     - backend_network
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   env_file:
-  #     - .env
