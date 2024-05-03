@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 import requests
 import os
@@ -100,7 +101,7 @@ def ft_auth(request):
         user = User.objects.create_user(
             username=username, 
             email= user_info.get('email'), 
-            password=password, 
+            password=make_password(password), #hashli şifre için <3 
             first_name=user_info.get('first_name'), 
             last_name= user_info.get('last_name'),
             is_active=True
