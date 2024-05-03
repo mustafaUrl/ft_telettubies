@@ -1,16 +1,17 @@
 # Dockerfile
 FROM python:3.8-slim
 
+# Argümanları tanımla
+ARG POSTGRES_USER
+ARG POSTGRES_PASSWORD
+ARG POSTGRES_DB
+ARG SUPERUSER_EMAIL
 # Ortam değişkenlerini ayarla
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV POSTGRES_USER myuser
-ENV POSTGRES_PASSWORD mypassword
-ENV POSTGRES_DB mydatabase
-# Django superuser environment variables
-ENV DJANGO_SUPERUSER_USERNAME admin
-ENV DJANGO_SUPERUSER_EMAIL admin@example.com
-ENV DJANGO_SUPERUSER_PASSWORD admin
+ENV POSTGRES_USER=$POSTGRES_USER
+ENV POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+ENV POSTGRES_DB=$POSTGRES_DB
+ENV SUPERUSER_EMAIL=$SUPERUSER_EMAIL
+
 
 # Create working directory
 RUN mkdir /code
@@ -30,11 +31,14 @@ COPY teletubbies/ /code/
 RUN service postgresql start && \
     su - postgres -c "psql -c \"CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';\"" && \
     su - postgres -c "psql -c \"CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;\"" && \
-    su - postgres -c "psql -d $POSTGRES_DB -c \"CREATE EXTENSION IF NOT EXISTS hstore;\"" && \
+    su - postgres -c "psql -d $POSTGRES_DB -c 'CREATE EXTENSION IF NOT EXISTS hstore;'" && \
     python manage.py makemigrations && \
     python manage.py migrate && \
-    python manage.py createsuperuser --noinput && \
+    python manage.py createsuperuser --username=$POSTGRES_USER --email=$SUPERUSER_EMAIL && \
+    #
+
     service postgresql stop
+
 
 # Start the server
 CMD service postgresql start && python manage.py runserver 0.0.0.0:8000
