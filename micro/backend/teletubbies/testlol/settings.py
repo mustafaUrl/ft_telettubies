@@ -155,14 +155,24 @@ WSGI_APPLICATION = 'testlol.wsgi.application'
 
 # Çevre değişkenlerini os.environ.get ile alın
 
+from decouple import Config, Csv
+import os
+
+# Get the base directory of your project
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Define the location of your .env file
+env_file = os.path.join(BASE_DIR, '../../', '.env')
+config = Config(env_file)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydatabase',
-        'USER': 'myuser',
-        'PASSWORD': 'mypassword',
-        'HOST': 'localhost',  # Since both DB and backend are in the same container
-        'PORT': '5432',  # Default PostgreSQL port
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
