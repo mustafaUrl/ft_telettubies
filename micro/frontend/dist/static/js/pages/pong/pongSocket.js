@@ -29,7 +29,13 @@ function commandSocket(command, data=null) {
                 'game_id': data
               }));
             }
-
+        else if (( command === 'join_tournament' || command === "creat_tournament"  || command === 'leave_tournament')) {
+            window.pongSocket.send(JSON.stringify({
+                'command': command,
+                'tournament_id': data,
+              
+              }));
+        }
         else{
             window.pongSocket.send(JSON.stringify({
                 'command': command,
@@ -131,7 +137,6 @@ function openPongSocket() {
  
   window.pongSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log('type:', data.type , 'data:', data);
     if (data.type === 'online_players') {
      
         listOnlinePlayers(data.players);
@@ -158,7 +163,21 @@ function openPongSocket() {
 
       startGame();
     }
+    if (data.type === 'tournaments_list'){
+      
     
+     if (Array.isArray(data.tournaments)){
+
+       populateTournamentList(data.tournaments);
+     }else {
+        console.log('Tournament:', data.tournaments);
+     }
+    
+    }
+    console.log('Pong socket mesajı:', data);
+    
+
+   
   };
 
   window.pongSocket.onopen = function(e) {
@@ -171,6 +190,86 @@ function openPongSocket() {
   };
   
 }
+
+
+function populateTournamentList(tournaments) {
+  const tournamentList = document.getElementById('tournamentList');
+  tournamentList.innerHTML = ''; // Listeyi temizle
+
+  // Her turnuva için bir liste elemanı oluştur
+  tournaments.forEach((tournament, index) => {
+    const tournamentItem = document.createElement('li');
+    tournamentItem.id = `tournamentItem-${tournament.tournament_id}`; // Benzersiz bir ID ver
+    tournamentItem.classList.add('list-group-item');
+    tournamentItem.textContent = `Tournament ID: ${tournament.tournament_id} - Player Count: ${tournament.player_count} - Status: ${tournament.status}`;
+
+    // Eğer turnuva 'waiting' durumunda ise, katılma ve ayrılma butonlarını ekle
+    if (tournament.status === 'waiting') {
+      const joinButton = document.createElement('button');
+      joinButton.textContent = 'Join';
+      joinButton.classList.add('btn', 'btn-success', 'me-2');
+      joinButton.id = `joinButton-${tournament.tournament_id}`; // Benzersiz bir ID ver
+      joinButton.onclick = function() {
+        commandSocket('join_tournament', tournament.tournament_id);
+      };
+
+      const leaveButton = document.createElement('button');
+      leaveButton.textContent = 'Leave';
+      leaveButton.classList.add('btn', 'btn-danger', 'me-2');
+      leaveButton.id = `leaveButton-${tournament.tournament_id}`; // Benzersiz bir ID ver
+      leaveButton.onclick = function() {
+        commandSocket('leave_tournament', tournament.tournament_id);
+      };
+
+      tournamentItem.appendChild(joinButton);
+      tournamentItem.appendChild(leaveButton);
+    }
+
+    tournamentList.appendChild(tournamentItem);
+  });
+}
+
+
+// WebSocket üzerinden komut gönderme fonksiyonu
+// function commandSocket(command, tournamentId, player1, player2) {
+//   // WebSocket bağlantısı üzerinden komut gönderme işlemleri burada yapılacak
+//   // Örneğin:
+//   const data = {
+//     type: command,
+//     tournament_id: tournamentId,
+//     player1: player1,
+//     player2: player2
+//   };
+//   // socket.send(JSON.stringify(data));
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export {openPongSocket, commandSocket};
 

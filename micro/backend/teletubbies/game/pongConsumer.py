@@ -9,16 +9,19 @@ from django.contrib.auth.models import User
 import asyncio
 from .models import Game
 from django.db import models
+import uuid
 class PongConsumer(AsyncWebsocketConsumer):
     online_users = set()  # Tüm bağlı kullanıcıları tutacak set
     user_rooms = {}
     invites = {}  # Davetlerin tutulacağı sözlük
+    tournament = {}
+
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
             await self.close()
             return
-
+        self.tournament_lock = asyncio.Lock() 
         await self.accept()
         self.rooms = {}
         PongConsumer.online_users.add(self.user.username)  
@@ -73,6 +76,177 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.get_invite()
         elif command == "list_rooms":
             await self.list_rooms()
+        elif command == "create_tournament":
+            await self.create_tournament()
+        elif command == "join_tournament":
+            await self.join_tournament(text_data_json)
+        elif command == "leave_tournament":
+            await self.leave_tournament(text_data_json)
+        elif command == "start_tournament":
+            await self.start_tournament(text_data_json)
+        elif command == "list_tournaments":
+            await self.list_tournaments()
+    async def create_tournament(self):
+        async with self.tournament_lock:
+            if len(self.tournament) >= 10:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_full',
+                    'message': 'Tournament is already full.'
+                }))
+                return
+
+            tournament_id = self.generate_tournament_id()
+            self.tournament[tournament_id] = {
+                'players': [],
+                'matches': [],
+                'status': 'waiting'  # 'waiting', 'ongoing', 'completed'
+            }
+            await self.send(text_data=json.dumps({
+                'type': 'tournament_created',
+                'tournament_id': tournament_id
+            }))
+
+    async def join_tournament(self, data):
+        tournament_id = data['tournament_id']
+        async with self.tournament_lock:
+            if tournament_id not in self.tournament:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_not_found',
+                    'message': 'Tournament not found.'
+                }))
+                return
+
+            if len(self.tournament[tournament_id]['players']) >= 10:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_full',
+                    'message': 'Tournament is already full.'
+                }))
+                return
+
+            if self.user.username in self.tournament[tournament_id]['players']:
+                await self.send(text_data=json.dumps({
+                    'type': 'already_joined',
+                    'message': 'You have already joined this tournament.'
+                }))
+                return
+
+            self.tournament[tournament_id]['players'].append(self.user.username)
+            await self.send(text_data=json.dumps({
+                'type': 'joined_tournament',
+                'tournament_id': tournament_id
+        }))
+
+    # async def join_tournament(self, data):
+    #     tournament_id = data['tournament_id']
+    #     async with self.tournament_lock:
+    #         if tournament_id not in self.tournament:
+    #             await self.send(text_data=json.dumps({
+    #                 'type': 'tournament_not_found',
+    #                 'message': 'Tournament not found.'
+    #             }))
+    #             return
+
+    #         if len(self.tournament[tournament_id]['players']) >= 10:
+    #             await self.send(text_data=json.dumps({
+    #                 'type': 'tournament_full',
+    #                 'message': 'Tournament is already full.'
+    #             }))
+    #             return
+
+    #         self.tournament[tournament_id]['players'].append(self.user.username)
+    #         await self.send(text_data=json.dumps({
+    #             'type': 'joined_tournament',
+    #             'tournament_id': tournament_id
+    #         }))
+
+    # Turnuvadan ayrılma metodu
+    async def leave_tournament(self, data):
+        tournament_id = data['tournament_id']
+        async with self.tournament_lock:
+            if tournament_id not in self.tournament:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_not_found',
+                    'message': 'Tournament not found.'
+                }))
+                return
+
+            if self.user.username not in self.tournament[tournament_id]['players']:
+                await self.send(text_data=json.dumps({
+                    'type': 'not_in_tournament',
+                    'message': 'You are not in this tournament.'
+                }))
+                return
+
+            # Kullanıcıyı turnuva oyuncuları listesinden çıkar
+            self.tournament[tournament_id]['players'].remove(self.user.username)
+
+            # Eğer turnuvada kimse kalmadıysa, turnuvayı sil
+            if not self.tournament[tournament_id]['players']:
+                del self.tournament[tournament_id]
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_deleted',
+                    'message': 'Tournament has been deleted as there are no more players.'
+                }))
+            else:
+                await self.send(text_data=json.dumps({
+                    'type': 'left_tournament',
+                    'tournament_id': tournament_id
+                }))
+
+    # Turnuva başlatma metodu
+    async def start_tournament(self, data):
+        tournament_id = data['tournament_id']
+        async with self.tournament_lock:
+            if tournament_id not in self.tournament:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_not_found',
+                    'message': 'Tournament not found.'
+                }))
+                return
+
+            if self.tournament[tournament_id]['status'] != 'waiting':
+                await self.send(text_data=json.dumps({
+                    'type': 'tournament_already_started',
+                    'message': 'Tournament has already started.'
+                }))
+                return
+
+            self.tournament[tournament_id]['status'] = 'ongoing'
+            # Burada turnuva eşleşmelerini oluşturabilirsiniz
+            # Örneğin, rastgele eşleşmeler veya belirli bir algoritma kullanarak
+
+            await self.send(text_data=json.dumps({
+                'type': 'tournament_started',
+                'tournament_id': tournament_id
+            }))
+
+    # Yardımcı metodlar
+    def generate_tournament_id(self):
+        # Turnuva ID'si üretmek için bir metod
+        return 'Tournament_' + str(uuid.uuid4())
+
+
+    async def list_tournaments(self):
+        async with self.tournament_lock:
+            if not self.tournament:
+                await self.send(text_data=json.dumps({
+                    'type': 'tournaments_list',
+                    'message': 'There are currently no tournaments available.'
+                }))
+                return
+
+            tournaments_info = []
+            for tournament_id, tournament_data in self.tournament.items():
+                tournaments_info.append({
+                    'tournament_id': tournament_id,
+                    'player_count': len(tournament_data['players']),
+                    'status': tournament_data['status']
+                })
+
+            await self.send(text_data=json.dumps({
+                'type': 'tournaments_list',
+                'tournaments': tournaments_info
+            }))
 
     async def list_online_players(self):
         # Bağlı olan tüm kullanıcıları döndür
