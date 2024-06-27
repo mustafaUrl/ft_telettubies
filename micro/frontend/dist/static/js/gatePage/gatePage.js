@@ -4,6 +4,7 @@ import  register  from '../pages/register/register.js';
 import  pong from '../pages/pong/pong.js';
 import  profile  from '../pages/profile/profile.js';
 import  tournament  from '../pages/tournament/tournament.js';
+import  game from '../pages/game/game.js';
 
 export default function triggerContentLoad(contentId) {
    
@@ -19,6 +20,9 @@ export default function triggerContentLoad(contentId) {
         break;
       case 'pong':
         pong();
+        break;
+      case 'game':
+        game();
         break;
       case 'profile':
       case 'friends':
