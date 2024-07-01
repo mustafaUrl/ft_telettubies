@@ -36,10 +36,10 @@ export default function register() {
             return;
         }
 
-        if (!isStrongPassword(password)) {
-            alert('Password should be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.');
-            return;
-        }
+        // if (!isStrongPassword(password)) {
+        //     alert('Password should be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.');
+        //     return;
+        // }
 
         fetch('api/auth/register/', {
             method: 'POST',

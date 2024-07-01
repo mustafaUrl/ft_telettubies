@@ -17,7 +17,7 @@ class PongGame:
         self.paddle2 = self.create_paddle(self.width - self.grid * 3)
         self.ball = self.create_ball()
         self.running = True
-        self.score_to_win = 12
+        self.score_to_win = 4
         self.score_player1 = 0
         self.score_player2 = 0
 
