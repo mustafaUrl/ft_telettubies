@@ -49,6 +49,11 @@ const htmlContent = `
 <div id="scoreBoard" style="text-align: center; font-size: 24px; margin-bottom: 10px;">
   Player 1: <span id="scorePlayer1">0</span> | Player 2: <span id="scorePlayer2">0</span>
 </div>
+
+<!-- Oyun alanı canvas'ı -->
+<div id="canvasContainer" style="text-align: center; position: relative;">
+  <!-- Canvas burada sonradan eklenecek -->
+</div>
 `;
 
 // Set the inner HTML of the main-content
@@ -56,22 +61,23 @@ gameContainer.innerHTML = htmlContent;
 
 // Canvas element properties
 const canvasWidth = 1300;
-const canvasHeight = 800;
+const canvasHeight = 700;
 
 // Create the canvas element and set its properties
 const canvas = document.createElement('canvas');
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
+canvas.id = 'gameCanvas'; // Canvas'a id ekleyin
 canvas.style.display = 'block';
 canvas.style.margin = 'auto';
 canvas.style.position = 'absolute';
-canvas.style.top = '50px'; // Adjust this if needed for the navbar height
-canvas.style.bottom = '0';
+canvas.style.top = '10px'; // Adjust this to move the canvas down if needed for the navbar height
 canvas.style.left = '0';
 canvas.style.right = '0';
 
-// Append the canvas to the gameContainer
-gameContainer.appendChild(canvas);
+// Append the canvas to the canvasContainer
+document.getElementById('canvasContainer').appendChild(canvas);
+
 
 // WebGL renderer
 const renderer = new THREE.WebGLRenderer({ canvas });
@@ -177,7 +183,7 @@ scene.add(centerGround);
     // Maintain a set of pressed keys
 const pressedKeys = new Set();
 let isCameraRotated = false; // Initialize camera rotation state
-let gameRunning = false; // Initialize game running state
+let gameRunning = true; // Initialize game running state
 
 // Update the set on keydown
 document.addEventListener('keydown', (event) => {
@@ -196,9 +202,6 @@ document.addEventListener('keyup', (event) => {
 
 // Define the game loop
 function gameLoop() {
-    if (pressedKeys.has('f')) {
-        isCameraRotated = !isCameraRotated; // F tuşuna basıldığında kamera durumunu değiştir
-    }
     if (pressedKeys.has('w')) {
         // Sol paddle'ı yukarı hareket ettir
         if (paddle1.position.y < canvasHeight / 2 - paddleHeight / 2) {
@@ -240,7 +243,7 @@ function gameLoop() {
     // Animasyon döngüsü
     function animate() {
         if (!gameRunning) return;
-    
+    requestAnimationFrame(animate);
        // Change camera angle
     if (isCameraRotated) {
         camera.position.set(0, -900, 150); // Rotate the camera
@@ -302,7 +305,7 @@ function gameLoop() {
         renderer.render(scene, camera);
     
         // Call the animation loop again on the next frame
-        requestAnimationFrame(animate);
+       
     }
     
 // Function to normalize and adjust the ball speed after collisions
@@ -330,6 +333,9 @@ function resetBall() {
     ballSpeed = 4; // Reset ball speed
 }
 
+gameRunning = true;
+gameLoop(); // Start the game loop
+animate(); // Start the animation loop
 
 document.getElementById('startButton').addEventListener('click', () => {
     if (gameRunning) return; // If the game is already running, return
