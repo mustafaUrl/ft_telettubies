@@ -40,6 +40,11 @@ export default function game() {
       Game Lobby
     </button>
 
+    <!-- Turnuva oluşturma butonu -->
+    <button id="createTournamentButton" class="btn btn-secondary" type="button">
+      Create Tournament
+    </button>
+
     <div style="text-align: center; margin-bottom: 10px;">
       <button id="startButton" class="btn btn-success">Start</button>
       <button id="stopButton" class="btn btn-danger">Stop</button>
@@ -53,6 +58,31 @@ export default function game() {
     <!-- Oyun alanı canvas'ı -->
     <div id="canvasContainer" style="text-align: center; position: relative;">
       <!-- Canvas burada sonradan eklenecek -->
+    </div>
+
+    <!-- Tournament modal -->
+    <div id="tournamentModal" class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Create Tournament</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="tournamentForm">
+              <div class="mb-3">
+                <label for="numPlayers" class="form-label">Number of Players</label>
+                <input type="number" class="form-control" id="numPlayers" required>
+              </div>
+              <div id="playerNamesContainer"></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="submitTournament" class="btn btn-primary">Create</button>
+          </div>
+        </div>
+      </div>
     </div>
     `;
 
@@ -133,6 +163,7 @@ export default function game() {
     // Paddle'ların geometri ve malzemelerini ayarla
     const paddleWidth = 30; // Canvas genişliğine göre paddle genişliğini ayarla
     const paddleHeight = 150; // Paddle yüksekliği
+
     const paddleDepth = 40; // Paddle derinliği
     const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
     const paddleMaterial = new THREE.MeshBasicMaterial({ color: 0xf0e6ff });
@@ -228,6 +259,59 @@ export default function game() {
     function updateScoreDisplay() {
         document.getElementById('scorePlayer1').textContent = scoreP1;
         document.getElementById('scorePlayer2').textContent = scoreP2;
+    }
+
+    document.getElementById('createTournamentButton').addEventListener('click', () => {
+        const tournamentModal = new bootstrap.Modal(document.getElementById('tournamentModal'));
+        tournamentModal.show();
+    });
+
+    // Tournament form submit event
+    document.getElementById('submitTournament').addEventListener('click', () => {
+        const numPlayers = parseInt(document.getElementById('numPlayers').value);
+        const playerNames = [];
+        for (let i = 0; i < numPlayers; i++) {
+            const playerName = document.getElementById(`playerName${i}`).value;
+            playerNames.push(playerName);
+        }
+        createTournament(playerNames);
+    });
+
+    // Update player name fields based on number of players
+    document.getElementById('numPlayers').addEventListener('input', () => {
+        const numPlayers = parseInt(document.getElementById('numPlayers').value);
+        const playerNamesContainer = document.getElementById('playerNamesContainer');
+        playerNamesContainer.innerHTML = '';
+        for (let i = 0; i < numPlayers; i++) {
+            const playerNameDiv = document.createElement('div');
+            playerNameDiv.className = 'mb-3';
+            playerNameDiv.innerHTML = `
+                <label for="playerName${i}" class="form-label">Player ${i + 1} Name</label>
+                <input type="text" class="form-control" id="playerName${i}" required>
+            `;
+            playerNamesContainer.appendChild(playerNameDiv);
+        }
+    });
+
+    // Tournament creation function
+    function createTournament(playerNames) {
+        console.log('Tournament created with players:', playerNames);
+        const tournamentList = document.getElementById('tournamentList');
+        tournamentList.innerHTML = '';
+
+        const shuffledPlayers = playerNames.sort(() => 0.5 - Math.random());
+        const halfSize = Math.ceil(shuffledPlayers.length / 2);
+        const teams = [
+            shuffledPlayers.slice(0, halfSize),
+            shuffledPlayers.slice(halfSize)
+        ];
+
+        teams.forEach((team, index) => {
+            const teamItem = document.createElement('li');
+            teamItem.className = 'list-group-item';
+            teamItem.innerText = `Team ${index + 1}: ${team.join(', ')}`;
+            tournamentList.appendChild(teamItem);
+        });
     }
 
     // Animasyon döngüsü
@@ -337,4 +421,3 @@ export default function game() {
     // Start with the game paused
     gameRunning = false;
 }
-
