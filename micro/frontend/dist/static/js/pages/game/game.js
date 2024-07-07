@@ -27,7 +27,11 @@ export default function game() {
               </ul>
           </div>
           <div>
-            <h6>My Tournament</h6>
+            <h6>Tournament</h6>
+            <button id="createTournamentButton" class="btn btn-secondary" type="button">
+                Create Tournament
+            </button>
+
             <ul id="tournamentList" class="list-group">
                 <!-- JavaScript ile dinamik olarak doldurulacak -->
             </ul>
@@ -41,10 +45,7 @@ export default function game() {
     </button>
 
     <!-- Turnuva oluşturma butonu -->
-    <button id="createTournamentButton" class="btn btn-secondary" type="button">
-      Create Tournament
-    </button>
-
+   
     <div style="text-align: center; margin-bottom: 10px;">
       <button id="startButton" class="btn btn-success">Start</button>
       <button id="stopButton" class="btn btn-danger">Stop</button>
@@ -261,27 +262,56 @@ export default function game() {
         document.getElementById('scorePlayer2').textContent = scoreP2;
     }
 
+
     document.getElementById('createTournamentButton').addEventListener('click', () => {
         const tournamentModal = new bootstrap.Modal(document.getElementById('tournamentModal'));
         tournamentModal.show();
     });
-
+    
     // Tournament form submit event
     document.getElementById('submitTournament').addEventListener('click', () => {
         const numPlayers = parseInt(document.getElementById('numPlayers').value);
+        if (numPlayers > 15) {
+            alert('The maximum number of players is 15.');
+            return;
+        }
+    
         const playerNames = [];
         for (let i = 0; i < numPlayers; i++) {
             const playerName = document.getElementById(`playerName${i}`).value;
             playerNames.push(playerName);
         }
         createTournament(playerNames);
+    
+        // Close the modal after creating the tournament
+        const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
+        tournamentModal.hide();
     });
-
+    
     // Update player name fields based on number of players
     document.getElementById('numPlayers').addEventListener('input', () => {
         const numPlayers = parseInt(document.getElementById('numPlayers').value);
         const playerNamesContainer = document.getElementById('playerNamesContainer');
         playerNamesContainer.innerHTML = '';
+    
+        if (numPlayers > 15) {
+            alert('The maximum number of players is 15.');
+            document.getElementById('numPlayers').value = 15;
+            const tournamentModal = new bootstrap.Modal(document.getElementById('tournamentModal'));
+            tournamentModal.show(); // Reopen the modal after alert
+    
+            for (let i = 0; i < 15; i++) {
+                const playerNameDiv = document.createElement('div');
+                playerNameDiv.className = 'mb-3';
+                playerNameDiv.innerHTML = `
+                    <label for="playerName${i}" class="form-label">Player ${i + 1} Name</label>
+                    <input type="text" class="form-control" id="playerName${i}" required>
+                `;
+                playerNamesContainer.appendChild(playerNameDiv);
+            }
+            return;
+        }
+    
         for (let i = 0; i < numPlayers; i++) {
             const playerNameDiv = document.createElement('div');
             playerNameDiv.className = 'mb-3';
@@ -292,20 +322,20 @@ export default function game() {
             playerNamesContainer.appendChild(playerNameDiv);
         }
     });
-
+    
     // Tournament creation function
     function createTournament(playerNames) {
         console.log('Tournament created with players:', playerNames);
         const tournamentList = document.getElementById('tournamentList');
         tournamentList.innerHTML = '';
-
+    
         const shuffledPlayers = playerNames.sort(() => 0.5 - Math.random());
         const halfSize = Math.ceil(shuffledPlayers.length / 2);
         const teams = [
             shuffledPlayers.slice(0, halfSize),
             shuffledPlayers.slice(halfSize)
         ];
-
+    
         teams.forEach((team, index) => {
             const teamItem = document.createElement('li');
             teamItem.className = 'list-group-item';
@@ -313,7 +343,9 @@ export default function game() {
             tournamentList.appendChild(teamItem);
         });
     }
+    
 
+    
     // Animasyon döngüsü
     function animate() {
         if (!gameRunning) return;
