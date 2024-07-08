@@ -46,10 +46,13 @@ export default function game() {
 
     <!-- Turnuva oluşturma butonu -->
    
+    <!-- Turnuva oluşturma butonu -->
     <div style="text-align: center; margin-bottom: 10px;">
-      <button id="startButton" class="btn btn-success">Start</button>
-      <button id="stopButton" class="btn btn-danger">Stop</button>
+        <button id="startButton" class="btn btn-success">Start</button>
+        <button id="stopButton" class="btn btn-danger">Stop</button>
+        <button id="revengeButton" class="btn btn-warning">Revenge</button> <!-- Added Revenge button -->
     </div>
+
 
     <!-- Skor göstergesi -->
     <div id="scoreBoard" style="text-align: center; font-size: 24px; margin-bottom: 10px;">
@@ -60,6 +63,18 @@ export default function game() {
     <div id="canvasContainer" style="text-align: center; position: relative;">
       <!-- Canvas burada sonradan eklenecek -->
     </div>
+    <div id="winnerPopup" class="modal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Winner</h5>
+      </div>
+      <div class="modal-body">
+        <p id="winnerMessage"></p>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Tournament modal -->
     <div id="tournamentModal" class="modal" tabindex="-1">
@@ -346,10 +361,68 @@ export default function game() {
     
 
     
+    let gameLoopId = null;
+    let animateId = null;
+
+    // Function to normalize and adjust the ball speed after collisions
+    function normalizeBallSpeed() {
+        const maxSpeed = 5; // Maximum speed threshold
+        const minSpeed = 1.3; // Minimum speed threshold
+
+        // Calculate current speed
+        let currentSpeed = ballDirection.length();
+
+        // Adjust speed if it exceeds maximum or falls below minimum
+        if (currentSpeed > maxSpeed) {
+            ballDirection.normalize().multiplyScalar(maxSpeed); // Cap the speed
+        } else if (currentSpeed < minSpeed) {
+            ballDirection.normalize().multiplyScalar(minSpeed); // Maintain minimum speed
+        }
+    }
+
+    // Reset the ball to the starting position with a random direction and speed
+    function resetBall() {
+        ball.position.set(0, 0, 0);
+        // Select a random direction
+        let randomAngle = Math.random() * Math.PI - Math.PI / 2; // Random angle between -π/2 and π/2
+        ballDirection.set(Math.cos(randomAngle), Math.sin(randomAngle), 0).normalize();
+        ballSpeed = 4; // Reset ball speed
+    }
+
+    // Define the game loop
+    function gameLoop() {
+        if (pressedKeys.has('w')) {
+            // Sol paddle'ı yukarı hareket ettir
+            if (paddle1.position.y < canvasHeight / 2 - paddleHeight / 2) {
+                paddle1.position.y += paddleMoveStep;
+            }
+        }
+        if (pressedKeys.has('s')) {
+            // Sol paddle'ı aşağı hareket ettir
+            if (paddle1.position.y > -canvasHeight / 2 + paddleHeight / 2) {
+                paddle1.position.y -= paddleMoveStep;
+            }
+        }
+        if (pressedKeys.has('ArrowUp')) {
+            // Sağ paddle'ı yukarı hareket ettir
+            if (paddle2.position.y < canvasHeight / 2 - paddleHeight / 2) {
+                paddle2.position.y += paddleMoveStep;
+            }
+        }
+        if (pressedKeys.has('ArrowDown')) {
+            // Sağ paddle'ı aşağı hareket ettir
+            if (paddle2.position.y > -canvasHeight / 2 + paddleHeight / 2) {
+                paddle2.position.y -= paddleMoveStep;
+            }
+        }
+        // Call the game loop again on the next frame
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+    let winScore = 3;
     // Animasyon döngüsü
     function animate() {
         if (!gameRunning) return;
-        requestAnimationFrame(animate);
+        animateId = requestAnimationFrame(animate);
 
         // Change camera angle
         if (isCameraRotated) {
@@ -408,35 +481,19 @@ export default function game() {
             resetBall();
         }
 
+        if (scoreP1 === winScore) {
+            showWinner("Player 1");
+            gameRunning = false;
+            return;
+        } else if (scoreP2 === winScore) {
+            showWinner("Player 2");
+            gameRunning = false;
+            return;
+        }
         // Render the scene and camera
         renderer.render(scene, camera);
 
         // Call the animation loop again on the next frame
-    }
-
-    // Function to normalize and adjust the ball speed after collisions
-    function normalizeBallSpeed() {
-        const maxSpeed = 5; // Maximum speed threshold
-        const minSpeed = 1.3; // Minimum speed threshold
-
-        // Calculate current speed
-        let currentSpeed = ballDirection.length();
-
-        // Adjust speed if it exceeds maximum or falls below minimum
-        if (currentSpeed > maxSpeed) {
-            ballDirection.normalize().multiplyScalar(maxSpeed); // Cap the speed
-        } else if (currentSpeed < minSpeed) {
-            ballDirection.normalize().multiplyScalar(minSpeed); // Maintain minimum speed
-        }
-    }
-
-    // Reset the ball to the starting position with a random direction and speed
-    function resetBall() {
-        ball.position.set(0, 0, 0);
-        // Select a random direction
-        let randomAngle = Math.random() * Math.PI - Math.PI / 2; // Random angle between -π/2 and π/2
-        ballDirection.set(Math.cos(randomAngle), Math.sin(randomAngle), 0).normalize();
-        ballSpeed = 4; // Reset ball speed
     }
 
     document.getElementById('startButton').addEventListener('click', () => {
@@ -448,8 +505,44 @@ export default function game() {
 
     document.getElementById('stopButton').addEventListener('click', () => {
         gameRunning = false; // Stop the game
+
+        // Cancel the animation frames
+        if (gameLoopId) {
+            cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+        }
+        if (animateId) {
+            cancelAnimationFrame(animateId);
+            animateId = null;
+        }
     });
 
+    document.getElementById('revengeButton').addEventListener('click', () => {
+        // Reset scores
+        scoreP1 = 0;
+        scoreP2 = 0;
+        updateScoreDisplay();
+        
+        // Reset the ball
+        resetBall();
+        
+        // Restart the game
+        gameRunning = true;
+        gameLoop(); // Restart the game loop
+        animate(); // Restart the animation loop
+    });
+    
+
+    function showWinner(winner) {
+        const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
+        document.getElementById('winnerMessage').textContent = `${winner} wins!`;
+        winnerPopup.show();
+        
+        setTimeout(() => {
+            winnerPopup.hide();
+        }, 3000); // 3 saniye sonra pop-up'ı gizle
+    }
+    
     // Start with the game paused
     gameRunning = false;
 }
