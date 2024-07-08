@@ -29,7 +29,7 @@ export default function triggerContentLoad(contentId) {
       case 'account':
         profile();
         break;
-      case 'tournament':
+      case 'mehmet':
         tournament();
         break;
       default:

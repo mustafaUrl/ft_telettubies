@@ -20,7 +20,7 @@ export default async function changeContent(contentId) {
     
     
     if (contentId !== 'logout' && contentData[contentId] === undefined) {
-      console.log('Content not found');
+      console.log('Content not found : ' + contentId);
       return;
     }
     

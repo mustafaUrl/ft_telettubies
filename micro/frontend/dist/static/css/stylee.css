@@ -172,3 +172,20 @@
   background-color: black; /* Canvas arka planını siyah yap */
   border: 1px solid white; /* Canvas etrafında beyaz bir çerçeve oluştur */
 }
+
+.tournament {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bracket {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+  list-style-type: none;
+  padding: 0;
+}
+.bracket li {
+  list-style-type: none;
+  margin: 5px 0;
+}
