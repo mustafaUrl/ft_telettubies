@@ -4,7 +4,7 @@ import game4 from './game4.js';
 export default function menu() {
 
     lobby();
-    game();
+    // game();
     // game4();
   
 }
