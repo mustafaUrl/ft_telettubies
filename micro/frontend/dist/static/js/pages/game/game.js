@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 export default function game() {
-
-
+    return new Promise((resolve) => {
+    let winner = null;
     // Canvas element properties
     const canvasWidth = 1300;
     const canvasHeight = 700;
@@ -299,12 +299,16 @@ export default function game() {
         }
 
         if (scoreP1 === winScore) {
-            showWinner("Player 1");
+            winner = "Player 1";
+            showWinner(winner);
             gameRunning = false;
+            resolve(winner); // Resolve the Promise with the winner
             return;
         } else if (scoreP2 === winScore) {
-            showWinner("Player 2");
+            winner = "Player 2";
+            showWinner(winner);
             gameRunning = false;
+            resolve(winner); // Resolve the Promise with the winner
             return;
         }
         // Render the scene and camera
@@ -348,7 +352,6 @@ export default function game() {
         gameLoop(); // Restart the game loop
         animate(); // Restart the animation loop
     });
-    
 
     function showWinner(winner) {
         const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
@@ -358,8 +361,11 @@ export default function game() {
         setTimeout(() => {
             winnerPopup.hide();
         }, 3000); // 3 saniye sonra pop-up'ı gizle
+       
     }
     
     // Start with the game paused
     gameRunning = false;
+
+});
 }

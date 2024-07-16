@@ -90,6 +90,10 @@ export default function lobby() {
         <div class="modal-body">
           <form id="tournamentForm">
             <div class="mb-3">
+              <label for="tournamentName" class="form-label">Tournament Name</label>
+              <input type="text" class="form-control" id="tournamentName" required>
+            </div>
+            <div class="mb-3">
               <label for="numPlayers" class="form-label">Number of Players</label>
               <input type="number" class="form-control" id="numPlayers" required>
             </div>
@@ -119,7 +123,6 @@ export default function lobby() {
             <select class="form-select" id="gameMode" required>
               <option value="normal">Normal Game</option>
               <option value="invited">Invited Game</option>
-              <option value="tournament">Tournament Game</option>
             </select>
           </div>
           <div class="mb-3" id="player2NameContainer">
@@ -169,35 +172,36 @@ export default function lobby() {
 
 // Submit Tournament Button
 document.getElementById('submitTournament').addEventListener('click', () => {
+  const tournamentName = document.getElementById('tournamentName').value.trim(); // Get tournament name
   const numPlayers = parseInt(document.getElementById('numPlayers').value);
   if (numPlayers > 15 || numPlayers < 2) {
-      alert('The number of players must be between 2 and 15.');
-      return;
+    alert('The number of players must be between 2 and 15.');
+    return;
   }
 
   const playerNames = [];
   const usedNames = new Set(); // To store used names
 
   for (let i = 0; i < numPlayers; i++) {
-      const playerName = document.getElementById(`playerName${i}`).value.trim(); // Trim whitespace
+    const playerName = document.getElementById(`playerName${i}`).value.trim(); // Trim whitespace
 
-      // Check for empty names
-      if (playerName === '') {
-          alert('Player names cannot be empty.');
-          return;
-      }
+    // Check for empty names
+    if (playerName === '') {
+      alert('Player names cannot be empty.');
+      return;
+    }
 
-      // Check for duplicate names
-      if (usedNames.has(playerName)) {
-          alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
-          return;
-      }
+    // Check for duplicate names
+    if (usedNames.has(playerName)) {
+      alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
+      return;
+    }
 
-      playerNames.push(playerName);
-      usedNames.add(playerName); // Add name to set to track uniqueness
+    playerNames.push(playerName);
+    usedNames.add(playerName); // Add name to set to track uniqueness
   }
 
-  createTournament(playerNames);
+  createTournament(tournamentName, playerNames);
 
   // Close the modal after creating the tournament
   const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
@@ -255,9 +259,18 @@ function rebuildPlayerNameFields(numPlayers) {
 }
 
 
+// Attach startTournament function to the window object
+window.startTournament = function(tournamentName) {
+  console.log(`Starting tournament: ${tournamentName}`);
+  const tournamentData = tournaments[tournamentName];
+  startNextMatch(tournamentName, tournamentData);
+};
+
+// Tournament data storage
+const tournaments = {};
 
 // Tournament creation function
-function createTournament(playerNames) {
+function createTournament(tournamentName, playerNames) {
   console.log('Tournament created with players:', playerNames);
   const tournamentList = document.getElementById('tournamentList');
   tournamentList.innerHTML = '';
@@ -268,32 +281,38 @@ function createTournament(playerNames) {
   // If odd number of players, keep the last player in waiting
   let waitingPlayer = null;
   if (shuffledPlayers.length % 2 !== 0) {
-      waitingPlayer = shuffledPlayers.pop();
+    waitingPlayer = shuffledPlayers.pop();
   }
 
   // Create teams
   const teams = [];
   for (let i = 0; i < shuffledPlayers.length; i += 2) {
-      const team = [shuffledPlayers[i], shuffledPlayers[i + 1]];
-      teams.push(team);
+    const team = [shuffledPlayers[i], shuffledPlayers[i + 1]];
+    teams.push(team);
   }
 
-  // Display teams in tournament list
-  teams.forEach((team, index) => {
-      const teamItem = document.createElement('li');
-      teamItem.className = 'list-group-item';
-      teamItem.innerText = `Match ${index + 1}: ${team[0]} vs ${team[1]}`;
-      tournamentList.appendChild(teamItem);
-  });
+  // Store tournament data
+  tournaments[tournamentName] = {
+    teams: teams,
+    waitingPlayer: waitingPlayer,
+    currentMatch: 0,
+    winners: []
+  };
 
-  // If there's a waiting player, display them in waiting
-  if (waitingPlayer) {
-      const waitingItem = document.createElement('li');
-      waitingItem.className = 'list-group-item';
-      waitingItem.innerText = `Waiting: ${waitingPlayer}`;
-      tournamentList.appendChild(waitingItem);
-  }
+  // Display tournament name and teams in tournament list
+  const tournamentItem = document.createElement('li');
+  tournamentItem.className = 'list-group-item';
+  tournamentItem.innerHTML = `
+    <div>${tournamentName}</div>
+    <ul id="matches-${tournamentName}">
+      ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team[0]} vs ${team[1]}</li>`).join('')}
+      ${waitingPlayer ? `<li id="waiting-${tournamentName}">Waiting: ${waitingPlayer}</li>` : ''}
+    </ul>
+    <button class="btn btn-primary" onclick="startTournament('${tournamentName}')">Start Tournament</button>
+  `;
+  tournamentList.appendChild(tournamentItem);
 }
+
 
 // Function to shuffle array (Fisher-Yates shuffle)
 function shuffleArray(array) {
@@ -304,13 +323,51 @@ function shuffleArray(array) {
   return array;
 }
 
+// In the startNextMatch function
+function startNextMatch(tournamentName, tournamentData) {
+  // Check if there are still matches left
+  if (tournamentData.currentMatch < tournamentData.teams.length) {
+    const match = tournamentData.teams[tournamentData.currentMatch];
+    const matchId = `match-${tournamentName}-${tournamentData.currentMatch}`;
+
+    console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
+    startGame(match[0], match[1], tournamentName);
+  } else {
+    // Check if there are winners to proceed with
+    if (tournamentData.winners.length > 1) {
+      console.log(`Proceeding to next round with winners: ${tournamentData.winners}`);
+      tournamentData.teams = [];
+      
+      // Create teams for the next round
+      while (tournamentData.winners.length > 1) {
+        const team = [tournamentData.winners.shift(), tournamentData.winners.shift()];
+        tournamentData.teams.push(team);
+      }
+      
+      // Handle the case if there's a waiting player
+      if (tournamentData.winners.length === 1 && tournamentData.waitingPlayer) {
+        tournamentData.teams.push([tournamentData.winners.pop(), tournamentData.waitingPlayer]);
+        tournamentData.waitingPlayer = null;
+      }
+      
+      tournamentData.currentMatch = 0; // Reset current match for the next round
+      startNextMatch(tournamentName, tournamentData); // Start the next round
+    } else {
+      // Declare the winner of the tournament
+      console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
+      alert(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
+    }
+  }
+}
+
+
+
   // Add event listener to Create Game button to open game creation modal
   document.getElementById('createGameButton').addEventListener('click', () => {
       const gameModal = new bootstrap.Modal(document.getElementById('gameModal'));
       gameModal.show();
   });
 
-  // Add event listener to submit game form
  // Add event listener to submit game form
 document.getElementById('submitGame').addEventListener('click', () => {
   const player2Name = document.getElementById('player2Name').value;
@@ -344,24 +401,27 @@ document.getElementById('submitGame').addEventListener('click', () => {
   gameModal.hide();
 });
 
+
 // Game creation function
 function startGame(player1Name, player2Name, gameMode) {
-  console.log(gameMode,'Game started with players:', player1Name, player2Name);
+  console.log(gameMode, 'Game started with players:', player1Name, player2Name);
   document.getElementById('scorePlayer1').textContent = '0';
   document.getElementById('scorePlayer2').textContent = '0';
   document.getElementById('gameModeDisplay').textContent = gameMode;
 
-  // Update the player labels with the input names
- 
   document.querySelector('#scoreBoard div').innerHTML = `${player1Name}: <span id="scorePlayer1">0</span> | ${player2Name}: <span id="scorePlayer2">0</span>`;
 
-  // Show the game controls and scoreboard
   document.getElementById('gameControls').style.display = 'block';
   document.getElementById('scoreBoard').style.display = 'block';
 
-  // Initialize and start the game here
-  game();
-
+  game().then(() => {
+    const tournamentData = tournaments[gameMode]; // Adjust this to access the right tournament
+    tournamentData.currentMatch++;
+    startNextMatch(tournamentName, tournamentData);
+  }).catch((error) => {
+    console.error('Error during the game:', error);
+  });
 }
+
 
 }
