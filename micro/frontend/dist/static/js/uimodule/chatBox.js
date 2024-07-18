@@ -167,6 +167,21 @@ function displayFriends(friends) {
       inviteUser(username);
     });
   });
+
+  document.querySelectorAll('.username-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+      const username = this.getAttribute('data-username');
+      if (window.otherUser !== username) {
+        window.otherUser = username;
+      }
+      selectTab('tab2');
+      var chatContainer = document.getElementById('chat_container');
+      var chatBar = document.getElementById('chat_bar');
+      chatContainer.style.height = '285px';
+      chatBar.style.bottom = '310px';
+    });
+  });
+
 }
 
 // Profile viewing function
