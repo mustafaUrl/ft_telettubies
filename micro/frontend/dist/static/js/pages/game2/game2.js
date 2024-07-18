@@ -22,7 +22,7 @@ function checkAnswer(correctanswer, answer) {
     return eval(correctanswer) === answer;
 }
 
-export default function game2() {
+export default function Game2() {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
