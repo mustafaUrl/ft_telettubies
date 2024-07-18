@@ -189,3 +189,49 @@
   list-style-type: none;
   margin: 5px 0;
 }
+
+/* Add this CSS to your stylesheet */
+
+/* Style for friend item */
+.friend-item {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Style for the profile picture */
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Style for the username button */
+.username-btn {
+  background-color: #0d61d7;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.username-btn:hover {
+  background-color: #0b4fa2;
+}
+
+.custom-btn {
+  background-color: #0d61d7;
+  color: white;
+  border: none;
+  padding: 3px 8px; /* Küçük bir padding ayarı */
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px; /* Yazı boyutunu ayarla */
+}
+
+.custom-btn:hover {
+  background-color: #0b4fa2;
+}

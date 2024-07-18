@@ -4,64 +4,62 @@ import { sendMessage } from '../utils/SocketHelper.js';
 
 let activeTab = 'tab1';
 function selectTab(selectedTabId) {
-    // Sekmelerin stilini sıfırla
+    // Reset tab styles
     const tabs = document.querySelectorAll('#tabs > div');
     tabs.forEach(function(tab) {
       tab.style.backgroundColor = '';
       tab.style.color = '';
     });
   
-    // Seçili sekme stilini ayarla
+    // Set selected tab style
     const selectedTab = document.getElementById(selectedTabId);
     selectedTab.style.backgroundColor = '#0d61d7';
     selectedTab.style.color = 'black';
   
-    // Mesaj kutularının görünürlüğünü ayarla
+    // Adjust visibility of message boxes
     document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
     document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
     activeTab = selectedTabId;
-  
-  }
+}
 
-  
 function showTab2WithUsername(username) {
   const tab2 = document.getElementById('tab2');
-  tab2.textContent = username; // Sekme 2'nin metnini güncelle
-  tab2.style.display = 'block'; // Sekme 2'yi göster
-  selectTab('tab2'); // Sekme 2'yi seçili hale getir
+  tab2.textContent = username; // Update tab 2 text
+  tab2.style.display = 'block'; // Show tab 2
+  selectTab('tab2'); // Select tab 2
 }
-// Bildirim butonunu güncelleme fonksiyonu
+
+// Update notification button function
 function updateNotificationButton(username) {
   const notificationButton = document.getElementById('notification_button');
   notificationButton.textContent = `New messages (${username})`;
-  notificationButton.style.display = 'block'; // Bildirim butonunu göster
+  notificationButton.style.display = 'block'; // Show notification button
 }
 
 document.getElementById('chat_send').onclick = function() {
   const messageInput = document.getElementById('chat_input');
   const message = messageInput.value;
-  const username = getCookie('username'); // Gönderen kullanıcının adını al
+  const username = getCookie('username'); // Get sender's username
 
   if (chatSocketPrivate && activeTab === 'tab2') {
     sendMessage(message);
     showTab2WithUsername(window.otherUser);
   } else {
-  // Mesajı WebSocket üzerinden gönder
-  if (window.chatSocket) {
-    window.chatSocket.send(JSON.stringify({
-      'message': message,
-      'username': username,
-      'room': 'global'
-    }));
-  }}
+    // Send message via WebSocket
+    if (window.chatSocket) {
+      window.chatSocket.send(JSON.stringify({
+        'message': message,
+        'username': username,
+        'room': 'global'
+      }));
+    }
+  }
   messageInput.value = '';
 };
 
-
-
-// İkona tıklama olayını dinleme ve arkadaş listesini göster
+// Listen to icon click event and show friend list
 document.getElementById('chat_icon').addEventListener('click', function() {
-  toggleFriendList(); // Bu fonksiyon daha önce tanımlanmış olmalı
+  toggleFriendList(); // This function should be defined earlier
   // fetchAndDisplayFriends();
 });
 
@@ -69,52 +67,46 @@ document.getElementById('chat_bar').addEventListener('click', function() {
   var chatContainer = document.getElementById('chat_container');
   var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
 
-  // Sohbet penceresinin yüksekliğini ve gri çubuğun alt pozisyonunu güncelle
+  // Update chat window height and gray bar bottom position
   chatContainer.style.height = isClosed ? '285px' : '0px';
-  this.style.bottom = isClosed ? '310px' : '10px'; // 'this' ile chatBar'ı güncelle
+  this.style.bottom = isClosed ? '310px' : '10px'; // Update chatBar with 'this'
 });
 
-
 document.getElementById('chat_input').onkeypress = function(e) {
-  if (e.keyCode === 13) {  // Enter tuşu
+  if (e.keyCode === 13) {  // Enter key
     document.getElementById('chat_send').click();
-   }
- };
+  }
+};
 
- 
- // Toggle chat box function
-
-// Add event listener to chat bar
-
- function toggleFriendList() {
+// Toggle chat box function
+function toggleFriendList() {
   var friendList = document.getElementById('friend-list');
   var chatContainer = document.getElementById('chat_container');
-  var chatBbar = document.getElementById('chat_bar');
+  var chatBar = document.getElementById('chat_bar');
   var chatIcon = document.getElementById('chat_icon');
-
 
   var isFriendListVisible = friendList.style.display === 'block';
 
-  // Arkadaş listesinin görünürlüğünü değiştir
+  // Toggle friend list visibility
   friendList.style.display = isFriendListVisible ? 'none' : 'block';
 
-  // Eğer arkadaş listesi görünürse, chat_container'ı sola kaydır
+  // Shift chat_container if friend list is visible
   chatContainer.style.right = isFriendListVisible ? '10px' : '250px';
-  chatBbar.style.right = isFriendListVisible ? '10px' : '250px';
+  chatBar.style.right = isFriendListVisible ? '10px' : '250px';
   chatIcon.style.right = isFriendListVisible ? '330px' : '600px';
   if (!isFriendListVisible) {
-    fetchAndDisplayFriends(); // Arkadaş listesini temizle
+    fetchAndDisplayFriends(); // Clear friend list
   }
 }
 
-// get_user_info fonksiyonundan gelen veriyi işleme
-// Arkadaş listesini al ve ekranda göster
+// Handle data from get_user_info function
+// Fetch and display friends
 function fetchAndDisplayFriends() {
   sendPostUserRequest('list_friends')
     .then(data => {
-      // Arkadaş listesini al
+      // Get friend list
       const friends = data.friends;
-      // Arkadaş listesini ekranda göster
+      // Display friend list
       displayFriends(friends);
     })
     .catch(error => {
@@ -122,62 +114,69 @@ function fetchAndDisplayFriends() {
     });
 }
 
-
 function updateNotificationCount(username, count) {
   const userLink = document.querySelector(`[data-username="${username}"]`);
   let notificationSpan = userLink.querySelector('.notification-count');
   
   if (!notificationSpan) {
-    // Eğer bildirim sayacı span'ı yoksa, yeni bir tane oluştur
+    // Create a new notification span if not exists
     notificationSpan = document.createElement('span');
     notificationSpan.classList.add('notification-count');
     userLink.appendChild(notificationSpan);
   }
   
   if (count > 0) {
-    notificationSpan.textContent = count; // Bildirim sayısını güncelle
-    notificationSpan.style.display = 'block'; // Bildirim sayacını göster
+    notificationSpan.textContent = count; // Update notification count
+    notificationSpan.style.display = 'block'; // Show notification span
   } else {
-    notificationSpan.style.display = 'none'; // Bildirim sayacını gizle
+    notificationSpan.style.display = 'none'; // Hide notification span
   }
 }
 
-
-// Arkadaş listesini güncelleyen ve olay dinleyicileri ekleyen fonksiyon
 function displayFriends(friends) {
   const friendListContainer = document.getElementById('friend-list');
-  friendListContainer.innerHTML = ''; // Mevcut listeyi temizle
+  friendListContainer.innerHTML = ''; // Clear existing list
 
   friends.forEach(friend => {
     const friendElement = document.createElement('div');
     friendElement.classList.add('friend-item');
     friendElement.innerHTML = `
       <p>
-        <a href="#" class="link-underline-dark" data-username="${friend.username}">
-          <img src="${friend.profile_picture}" alt="${friend.username}">
-          <span>${friend.username}</span>
-        </a>
+        <img src="${friend.profile_picture}" alt="${friend.username}" class="profile-picture">
+        <button class="username-btn" data-username="${friend.username}">
+          ${friend.username}
+        </button>
+        <button class="view-profile-btn custom-btn" data-username="${friend.username}">View Profile</button>
+        <button class="invite-btn custom-btn" data-username="${friend.username}">Invite</button>
       </p>`;
     friendListContainer.appendChild(friendElement);
   });
 
-  // Kullanıcı adına tıklama olayını tanımla
-  document.querySelectorAll('.friend-item .link-underline-dark').forEach(item => {
-    item.addEventListener('click', function(event) {
-      event.preventDefault();
+  // "View Profile" button click event
+  document.querySelectorAll('.view-profile-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
       const username = this.getAttribute('data-username');
-     // Bildirim sayısını sıfırla
-      // Görünümü güncelle
-      if (window.otherUser !== username) {
-          window.otherUser = username; // Diğer kullanıcının adını güncelle
-        }
-      selectTab('tab2');     
-      var chatContainer = document.getElementById('chat_container');
-      var chatBar = document.getElementById('chat_bar');
-      chatContainer.style.height = '285px';
-      chatBar.style.bottom = '310px';
+      viewProfile(username);
+    });
+  });
+
+  // "Invite" button click event
+  document.querySelectorAll('.invite-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+      const username = this.getAttribute('data-username');
+      inviteUser(username);
     });
   });
 }
 
-export {  updateNotificationButton, showTab2WithUsername, selectTab };
+// Profile viewing function
+function viewProfile(username) {
+  console.log(`Viewing profile of ${username}`);
+}
+
+// User invite function
+function inviteUser(username) {
+  console.log(`Inviting ${username} to play`);
+}
+
+export { updateNotificationButton, showTab2WithUsername, selectTab };
