@@ -33,9 +33,6 @@ export default function triggerContentLoad(contentId) {
       case 'mehmet':
         tournament();
         break;
-      case 'game2':
-        game2();
-        break;
       default:
         console.log('Content not found ss');
         break;
