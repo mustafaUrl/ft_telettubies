@@ -26,7 +26,7 @@ export default function Game2() {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
-    document.body.appendChild(canvas);
+    document.getElementById('main-content').appendChild(canvas);
     const ctx = canvas.getContext('2d');
     ctx.font = '24px serif';
 
@@ -45,7 +45,7 @@ export default function Game2() {
     inputElement.id = 'inputField';
     inputElement.min = '-1000';
     inputElement.max = '1000';
-    document.body.appendChild(inputElement);
+    document.getElementById('main-content').appendChild(inputElement);
 
 
     // Submit button rectangle
