@@ -259,17 +259,62 @@ function rebuildPlayerNameFields(numPlayers) {
 }
 
 
-// Attach startTournament function to the window object
-window.startTournament = function(tournamentName) {
-  console.log(`Starting tournament: ${tournamentName}`);
-  const tournamentData = tournaments[tournamentName];
-  startNextMatch(tournamentName, tournamentData);
-};
+// // Attach startTournament function to the window object
+// window.startTournament = function(tournamentName) {
+//   console.log(`Starting tournament: ${tournamentName}`);
+//   const tournamentData = tournaments[tournamentName];
+//   startNextMatch(tournamentName, tournamentData);
+// };
 
 // Tournament data storage
 const tournaments = {};
 
 // Tournament creation function
+// function createTournament(tournamentName, playerNames) {
+//   console.log('Tournament created with players:', playerNames);
+//   const tournamentList = document.getElementById('tournamentList');
+//   tournamentList.innerHTML = '';
+
+//   // Shuffle player names to randomize teams
+//   const shuffledPlayers = shuffleArray(playerNames);
+
+//   // If odd number of players, keep the last player in waiting
+//   let waitingPlayer = null;
+//   if (shuffledPlayers.length % 2 !== 0) {
+//     waitingPlayer = shuffledPlayers.pop();
+//   }
+
+//   // Create teams
+//   const teams = [];
+//   for (let i = 0; i < shuffledPlayers.length; i += 2) {
+//     const team = [shuffledPlayers[i], shuffledPlayers[i + 1]];
+//     teams.push(team);
+//   }
+
+//   // Store tournament data
+//   tournaments[tournamentName] = {
+//     teams: teams,
+//     waitingPlayer: waitingPlayer,
+//     currentMatch: 0,
+//     winners: []
+//   };
+
+//   // Display tournament name and teams in tournament list
+//   const tournamentItem = document.createElement('li');
+//   tournamentItem.className = 'list-group-item';
+//   tournamentItem.innerHTML = `
+//     <div>${tournamentName}</div>
+//     <ul id="matches-${tournamentName}">
+//       ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team[0]} vs ${team[1]}</li>`).join('')}
+//       ${waitingPlayer ? `<li id="waiting-${tournamentName}">Waiting: ${waitingPlayer}</li>` : ''}
+//     </ul>
+//     <button class="btn btn-primary" onclick="startTournament('${tournamentName}')">Start Tournament</button>
+//   `;
+//   tournamentList.appendChild(tournamentItem);
+// }
+
+
+// Adjusted createTournament function
 function createTournament(tournamentName, playerNames) {
   console.log('Tournament created with players:', playerNames);
   const tournamentList = document.getElementById('tournamentList');
@@ -291,6 +336,8 @@ function createTournament(tournamentName, playerNames) {
     teams.push(team);
   }
 
+
+
   // Store tournament data
   tournaments[tournamentName] = {
     teams: teams,
@@ -299,13 +346,18 @@ function createTournament(tournamentName, playerNames) {
     winners: []
   };
 
-  // Display tournament name and teams in tournament list
+    // // Add waiting player if there is one
+    // if (waitingPlayer) {
+    //   tournaments.winners.push([waitingPlayer]);
+    // }
+
+  // Display tournament name and teams in tournament list (you may adjust this part based on your HTML structure)
   const tournamentItem = document.createElement('li');
   tournamentItem.className = 'list-group-item';
   tournamentItem.innerHTML = `
     <div>${tournamentName}</div>
     <ul id="matches-${tournamentName}">
-      ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team[0]} vs ${team[1]}</li>`).join('')}
+      ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team.join(' vs ')}</li>`).join('')}
       ${waitingPlayer ? `<li id="waiting-${tournamentName}">Waiting: ${waitingPlayer}</li>` : ''}
     </ul>
     <button class="btn btn-primary" onclick="startTournament('${tournamentName}')">Start Tournament</button>
@@ -323,17 +375,22 @@ function shuffleArray(array) {
   return array;
 }
 
-// In the startNextMatch function
 function startNextMatch(tournamentName, tournamentData) {
-  // Check if there are still matches left
+  // Check if there are still matches left in the current tournament
+  
+  
   if (tournamentData.currentMatch < tournamentData.teams.length) {
     const match = tournamentData.teams[tournamentData.currentMatch];
-    const matchId = `match-${tournamentName}-${tournamentData.currentMatch}`;
+    // const matchId = `match-${gameMode}-${tournamentData.currentMatch}`;
 
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    startGame(match[0], match[1], tournamentName);
+    startGame(match[0], match[1], tournamentName); // Start the game for this match
   } else {
-    // Check if there are winners to proceed with
+    // No more matches left, check if there are winners to proceed
+    if ( tournamentData.waitingPlayer) {
+      tournaments[tournamentName].winners.push( tournamentData.waitingPlayer); // Add winner to the array
+      tournamentData.waitingPlayer = null;
+    }
     if (tournamentData.winners.length > 1) {
       console.log(`Proceeding to next round with winners: ${tournamentData.winners}`);
       tournamentData.teams = [];
@@ -344,11 +401,7 @@ function startNextMatch(tournamentName, tournamentData) {
         tournamentData.teams.push(team);
       }
       
-      // Handle the case if there's a waiting player
-      if (tournamentData.winners.length === 1 && tournamentData.waitingPlayer) {
-        tournamentData.teams.push([tournamentData.winners.pop(), tournamentData.waitingPlayer]);
-        tournamentData.waitingPlayer = null;
-      }
+      
       
       tournamentData.currentMatch = 0; // Reset current match for the next round
       startNextMatch(tournamentName, tournamentData); // Start the next round
@@ -359,6 +412,19 @@ function startNextMatch(tournamentName, tournamentData) {
     }
   }
 }
+
+
+// Ensure startTournament function is properly defined
+window.startTournament = function(tournamentName) {
+  console.log(`Starting tournament: ${tournamentName}`);
+  const tournamentData = tournaments[tournamentName];
+  if (!tournamentData) {
+    console.error(`Tournament ${tournamentName} not found.`);
+    return;
+  }
+  startNextMatch(tournamentName, tournamentData);
+};
+
 
 
 
@@ -414,14 +480,116 @@ function startGame(player1Name, player2Name, gameMode) {
   document.getElementById('gameControls').style.display = 'block';
   document.getElementById('scoreBoard').style.display = 'block';
 
-  game().then(() => {
-    const tournamentData = tournaments[gameMode]; // Adjust this to access the right tournament
-    tournamentData.currentMatch++;
-    startNextMatch(tournamentName, tournamentData);
-  }).catch((error) => {
-    console.error('Error during the game:', error);
-  });
+ 
+  if (gameMode !== 'normal' || gameMode !== 'invited') {
+    game().then((winner) => {
+      console.log('Game finished');
+      if (winner === player1Name) {
+        showWinner(player1Name);
+        tournaments[gameMode].winners.push(player1Name); // Add winner to the array
+      } else {
+        showWinner(player2Name);
+        tournaments[gameMode].winners.push(player2Name); // Add winner to the array
+      }
+
+      const tournamentData = tournaments[gameMode];
+      tournamentData.currentMatch++;
+      startNextMatch(gameMode, tournamentData);
+    }).catch((error) => {
+      console.error('Error during the game:', error);
+    });
+  }else 
+  {
+    game().then((winner) => {
+      console.log('Game finished');
+      if( winner === "Player 1") {
+        showWinner(player1Name);
+      } else {
+        showWinner(player2Name);
+      }
+      
+    }).catch((error) => {
+      console.error('Error during the game:', error);
+    });
+
+  }
 }
 
 
+document.getElementById('resetButton').addEventListener('click', () => {
+  const player2Name = document.getElementById('player2Name').value;
+  const gameMode = document.getElementById('gameMode').value;
+  let inviteCode = null;
+
+  if (gameMode === 'invited') {
+    inviteCode = document.getElementById('inviteCode').value;
+    // Check if invite code is valid (for example, check if it's 42)
+    if (inviteCode !== '42') {
+      alert('Invalid invite code.');
+      return;
+    }
+  }
+
+  const player1Name = getCookie('username');
+  
+  if (player1Name === player2Name) {
+    alert('Player names cannot be the same.');
+    return;
+  }
+  if (!player1Name || !player2Name) {
+    alert('Both player names are required.');
+    return;
+  }
+
+  startGame(player1Name, player2Name, gameMode);
+
+  // Close the modal after creating the game
+  const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
+  gameModal.hide();
+});
+
+
+function showWinner(winner) {
+  const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
+  document.getElementById('winnerMessage').textContent = `${winner} wins!`;
+  winnerPopup.show();
+  
+  setTimeout(() => {
+      winnerPopup.hide();
+  }, 3000); // 3 saniye sonra pop-up'ı gizle
+ 
 }
+
+}
+
+// function startGame(player1Name, player2Name, gameMode) {
+//   console.log(`${gameMode} Game started with players: ${player1Name} vs ${player2Name}`);
+  
+//   // Adjust this to access the correct tournament data based on gameMode
+//   const tournamentData = tournaments[gameMode];
+
+//   if (!tournamentData) {
+//     console.error(`Tournament data not found for game mode: ${gameMode}`);
+//     return;
+//   }
+
+//   document.getElementById('scorePlayer1').textContent = '0';
+//   document.getElementById('scorePlayer2').textContent = '0';
+//   document.getElementById('gameModeDisplay').textContent = gameMode;
+
+//   // Update scoreboard with player names
+//   document.querySelector('#scoreBoard div').innerHTML = `${player1Name}: <span id="scorePlayer1">0</span> | ${player2Name}: <span id="scorePlayer2">0</span>`;
+
+//   document.getElementById('gameControls').style.display = 'block';
+//   document.getElementById('scoreBoard').style.display = 'block';
+
+//   game().then(() => {
+//     tournamentData.currentMatch++; // Increment current match in tournamentData
+//     startNextMatch(gameMode, tournamentData); // Start the next match in the tournament
+//   }).catch((error) => {
+//     console.error('Error during the game:', error);
+//   });
+// }
+
+
+
