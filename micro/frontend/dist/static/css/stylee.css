@@ -1,86 +1,147 @@
 #chat_container {
   position: fixed;
-  bottom: 10px;
-  right: 0;
-  width: 300px;
-  border: 1px solid #6cd2ae;
-  padding: 10px;
+  bottom: 20px; /* Spacing from bottom */
+  right: 20px; /* Spacing from right */
+  width: 280px; /* Slightly narrower */
+  max-height: 350px; /* Adjusted height */
+  border: none;
+  padding: 8px; /* Reduced padding */
   overflow: hidden;
-  transition: height 0.5s, background-color 0.3s, box-shadow 0.3s;
-  height: 0;
+  transition: all 0.3s ease; /* Smooth transition */
+  height: 0; /* Hidden by default */
   z-index: 1000;
-  background-color: rgba(0, 200, 255, 0.9); /* Daha canlı bir arka plan */
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4); /* Belirgin gölge */
-  border-radius: 10px; /* Yumuşak köşeler */
+  background: #ffffff; /* Clean white background */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  border-radius: 10px; /* Slightly rounded corners */
+  display: flex;
+  flex-direction: column;
 }
 
 #chat_bar {
   position: fixed;
-  bottom: 10px;
-  right: 0;
-  width: 300px;
-  height: 20px;
-  background: #0d61d7;
+  bottom: 20px;
+  right: 20px;
+  width: 280px; /* Match the container width */
+  height: 35px; /* Smaller height */
+  background: #ffffff; /* White background */
+  border: 1px solid #e0e0e0; /* Subtle border */
   cursor: pointer;
   z-index: 1001;
-  padding: 10px;
+  padding: 6px; /* Further reduced padding */
   text-align: center;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1); /* Light shadow */
   transition: background-color 0.3s, box-shadow 0.3s;
-  border-radius: 10px 10px 0 0; /* Üst köşeleri yuvarlat */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center horizontally */
 }
 
+#chat_bar:hover {
+  background-color: #f1f1f1; /* Slightly darker on hover */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+#chat_bar::before {
+  content: 'Chat';
+  font-size: 14px; /* Adjust the font size as needed */
+  color: #333; /* Dark text color */
+}
 #tabs {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   position: absolute;
-  bottom: -30px;
+  bottom: -30px; /* Adjusted for minimal spacing */
   left: 0;
   right: 0;
+  background-color: #ffffff; /* Matching chat container */
+  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
+  border-top: 1px solid #e0e0e0; /* Border to separate tabs from messages */
 }
 
 #tab1, #tab2 {
   flex: 1;
   text-align: center;
-  padding: 5px 10px;
+  padding: 6px; /* Further reduced padding */
   cursor: pointer;
-  border: 1px solid #ddd;
-  background-color: #fff0f0;
-  transition: background-color 0.3s;
-  border-radius: 5px;
+  background-color: #f9f9f9; /* Light grey background */
+  color: #333; /* Dark text color */
+  transition: background-color 0.3s, color 0.3s;
+  border: none;
+  border-radius: 0; /* No border radius */
+  font-size: 12px; /* Smaller font size */
+}
+
+#tab1.active, #tab2.active {
+  background-color: #007bff; /* Active tab color */
+  color: #ffffff; /* White text on active tab */
 }
 
 #tab1:hover, #tab2:hover {
-  background-color: #ddd;
+  background-color: #e0e0e0; /* Light grey on hover */
 }
 
 #chat_messages1, #chat_messages2 {
-  height: 200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 250px; /* Adjusted height */
   overflow-y: auto;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* Reduced margin */
+  padding: 6px; /* Reduced padding */
+  background-color: #f9f9f9; /* Light grey for messages */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.chat-message {
+  margin-bottom: 8px; /* Space between messages */
+  padding: 6px;
+  border-radius: 8px;
+  background-color: #ffffff; /* White background for each message */
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 #chat_input {
-  width: calc(100% - 60px);
-  margin-right: 10px;
+  width: calc(100% - 50px); /* Adjusted for minimal width */
+  padding: 6px; /* Reduced padding */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  border-radius: 8px;
+  background-color: #ffffff; /* Clean white input field */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  font-size: 10px; /* Smaller font size */
 }
 
 #chat_send {
-  width: 40px;
+  width: 35px; /* Reduced width */
+  padding: 6px; /* Reduced padding */
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff; /* Modern blue */
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 12px; /* Smaller font size */
+}
+
+#chat_send:hover {
+  background-color: #0056b3; /* Darker blue on hover */
 }
 
 #chat_icon {
   position: fixed;
-  bottom: 10px;
-  right: 320px;
-  width: 20px;
+  bottom: 20px;
+  right: 330px; /* Adjusted to match new sizes */
+  width: 20px; /* Slightly smaller icon */
   height: 20px;
   background: url('../img/chat.svg') no-repeat center center;
+  background-size: 16px; /* Adjust icon size */
   cursor: pointer;
   z-index: 1002;
-  border-radius: 50%; /* Yuvarlatılmış köşeler */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+  border-radius: 50%;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1); /* Light shadow */
 }
+
+
 
 #friend-list {
   display: none;
