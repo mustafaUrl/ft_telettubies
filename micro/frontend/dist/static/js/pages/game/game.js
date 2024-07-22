@@ -220,11 +220,11 @@ export default function game() {
  scene.add(ball);
 
     // Topun hızını ve yönünü ayarla (ilk olarak topu hareket ettir)
-    let ballSpeed = 5;
+    let ballSpeed = 10;
     let ballDirection = new THREE.Vector3(1, 1, 0).normalize();
 
     // Hareket miktarını ve klavye olaylarını sıklaştırma
-    const paddleMoveStep = 4; // Her klavye olayında paddle'ın hareket edeceği adım miktarı
+    const paddleMoveStep = 10; // Her klavye olayında paddle'ın hareket edeceği adım miktarı
 
     // Klavye olaylarını dinle
     // Maintain a set of pressed keys
@@ -346,7 +346,7 @@ export default function game() {
         // Call the game loop again on the next frame
         gameLoopId = requestAnimationFrame(gameLoop);
     }
-    let winScore = 5;
+    let winScore = 1;
     // Animasyon döngüsü
     function animate() {
         if (!gameRunning) return;
