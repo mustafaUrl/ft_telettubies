@@ -50,7 +50,8 @@ document.getElementById('chat_send').onclick = function() {
       window.chatSocket.send(JSON.stringify({
         'message': message,
         'username': username,
-        'room': 'global'
+        'room': 'global',
+        'command': 'message'
       }));
     }
   }

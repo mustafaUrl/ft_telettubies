@@ -141,12 +141,15 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    online_users = set()  # Tüm bağlı kullanıcıları tutacak set
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
             await self.close()
             return
-       
+
+        ChatConsumer.online_users.add(self.user.username)
+
         await self.update_user_status(self.user, True)
         self.roomGroupName = "group_chat_gfg"
         await self.channel_layer.group_add(
@@ -160,7 +163,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
         # Burada 'self.channel_name' kullanılmalı.
+
         self.user = self.scope['user']
+        ChatConsumer.online_users.discard(self.user.username)  
         await self.update_user_status(self.user, False)
         await self.channel_layer.group_discard(
             self.roomGroupName,
@@ -173,7 +178,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         username = text_data_json["username"]
+        command = text_data_json["command"]
 
+        if command == "online_players":
+            await self.list_online_players()
         await self.channel_layer.group_send(
             self.roomGroupName,{
                 "type": "sendMessage",
@@ -208,3 +216,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def update_user_status(self, user, is_online):
         # OnlineUserStatus nesnesini güncelle veya oluştur
         OnlineUserStatus.objects.update_or_create(user=user, defaults={'is_online': is_online})
+    async def list_online_players(self):
+        # Bağlı olan tüm kullanıcıları döndür
+        online_players_list = list(ChatConsumer.online_users)
+        await self.send(text_data=json.dumps({
+            'type': 'online_players',
+            'players': online_players_list
+        }))

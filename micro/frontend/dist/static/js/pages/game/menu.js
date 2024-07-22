@@ -6,5 +6,13 @@ export default function menu() {
     lobby();
     // game();
     // game4();
-  
+   
+    if (window.chatSocket) {
+        window.chatSocket.send(JSON.stringify({
+          'message':  "test", // Get sender's username,
+          'username': "test",
+          'room': 'test',
+          'command': 'online_players'
+        }));
+      }
 }
