@@ -241,19 +241,7 @@ document.getElementById('submitTournament').addEventListener('click', () => {
     usedNames.add(playerName); // Add name to set to track uniqueness
   }
 
-  // Create tournament HTML content
- /*  const tournamentItem = document.createElement('li');
-  tournamentItem.className = 'list-group-item';
-  tournamentItem.innerHTML = `
-    <h5>${tournamentName}</h5>
-    <ul id="participantList">
-      ${playerNames.map(name => `<li>${name}</li>`).join('')}
-    </ul>
-    <button id="joinTournamentButton" class="btn btn-primary">Join Tournament</button>
-  `;
 
-  // Append tournament to the tournament list
-  document.getElementById('tournamentList').appendChild(tournamentItem); */
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({
@@ -263,23 +251,6 @@ document.getElementById('submitTournament').addEventListener('click', () => {
       'command': 'create'
     }));
   }
-
-  /* // Add event listener for the join button
-  document.getElementById('joinTournamentButton').addEventListener('click', () => {
-    console.log('Join Tournament button clicked');
-    // Handle the join action here, e.g., show a prompt to enter a new player's name
-    const newPlayerName = player1Name;
-    if (newPlayerName) {
-      if (window.chatSocket) {
-        window.chatSocket.send(JSON.stringify({
-          'message': newPlayerName, // Send the new player's name
-          'username': player1Name,
-          'room': tournamentName,
-          'command': 'join'
-        }));
-      }
-    }
-  }); */
 
 
   // Close the modal after creating the tournament

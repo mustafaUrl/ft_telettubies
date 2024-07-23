@@ -139,10 +139,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         return '_'.join(sorted([username1, username2]))
     
 
-
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()  # Tüm bağlı kullanıcıları tutacak set
     tournaments = {}
+
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
@@ -163,7 +163,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.user.is_anonymous:
             await self.close()
             return
-        # Burada 'self.channel_name' kullanılmalı.
 
         self.user = self.scope['user']
         ChatConsumer.online_users.discard(self.user.username)  
@@ -172,6 +171,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.roomGroupName,
             self.channel_name
         )
+
     async def receive(self, text_data):
         if self.user.is_anonymous:
             await self.close()
@@ -182,32 +182,49 @@ class ChatConsumer(AsyncWebsocketConsumer):
         command = text_data_json["command"]
         room = text_data_json["room"]
 
-        if  command == "online_players":
+        if command == "online_players":
             await self.list_online_players()
             await self.update_tournaments()
         elif command == "create":
-            await self.create_tournament(room, message)
+            await self.create_tournament(room, message, username)
         elif command == "join":
             await self.join_tournament(room, username)
+        elif command == "leave":
+            await self.leave_tournament(room, username)
         else:
             await self.channel_layer.group_send(
-            self.roomGroupName,{
-                "type": "sendMessage",
-                "message": message, 
-                "username": username,
-            })
-        
-    async def create_tournament(self, tournament_name, player_names):
+                self.roomGroupName, {
+                    "type": "sendMessage",
+                    "message": message, 
+                    "username": username,
+                }
+            )
+
+    async def create_tournament(self, tournament_name, player_names, host_name):
         if tournament_name not in ChatConsumer.tournaments:
-            ChatConsumer.tournaments[tournament_name] = set(player_names.split(', '))
+            ChatConsumer.tournaments[tournament_name] = {
+                "players": set(player_names.split(', ')),
+                "host": host_name
+            }
             await self.update_tournaments()
         else:
             # Handle tournament already exists
             pass
 
+    async def leave_tournament(self, tournament_name, player_name):
+        if tournament_name in ChatConsumer.tournaments:
+            if ChatConsumer.tournaments[tournament_name]["host"] == player_name:
+                del ChatConsumer.tournaments[tournament_name]
+            else:
+                ChatConsumer.tournaments[tournament_name]["players"].discard(player_name)
+            await self.update_tournaments()
+        else:
+            # Handle tournament not found
+            pass
+
     async def join_tournament(self, tournament_name, player_name):
         if tournament_name in ChatConsumer.tournaments:
-            ChatConsumer.tournaments[tournament_name].add(player_name)
+            ChatConsumer.tournaments[tournament_name]["players"].add(player_name)
             await self.update_tournaments()
         else:
             # Handle tournament not found
@@ -217,44 +234,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def update_user_status(user, is_online):
         # Implement your user status update logic here
         pass
+
     async def sendMessage(self, event):
         message = event["message"]
         username = event["username"]
-    
-        # Eğer kullanıcı anonimse, bu kısmı atla
+
         if not self.scope['user'].is_anonymous:
             await self.send(text_data=json.dumps({
                 "message": message,
                 "username": username
             }))
+
     async def fetch_notifications(self, user):
         if not self.scope['user'].is_anonymous:
             notifications = Notification.objects.filter(recipient=user, is_read=False)
             for notification in notifications:
-            # Send notification to the user
                 await self.send(text_data=json.dumps({
-                    # 'type': notification.notification_type,
                     'type': "notification",
                     'message': 'You have a new notification!',
                     'from_user': notification.sender.username
                 }))
-            # Optionally, mark the notification as read
                 notification.is_read = True
                 notification.save()
+
     @database_sync_to_async
     def update_user_status(self, user, is_online):
-        # OnlineUserStatus nesnesini güncelle veya oluştur
         OnlineUserStatus.objects.update_or_create(user=user, defaults={'is_online': is_online})
+
     async def list_online_players(self):
-        # Bağlı olan tüm kullanıcıları döndür
         online_players_list = list(ChatConsumer.online_users)
         await self.send(text_data=json.dumps({
             'type': 'online_players',
             'players': online_players_list
         }))
+
     async def update_tournaments(self):
-        # Send the updated list of tournaments to the clients
-        tournaments_list = {t: list(p) for t, p in ChatConsumer.tournaments.items()}
+        tournaments_list = {t: {"players": list(p["players"]), "host": p["host"]} for t, p in ChatConsumer.tournaments.items()}
         await self.send(text_data=json.dumps({
             'type': 'tournaments',
             'tournaments': tournaments_list
