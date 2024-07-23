@@ -3,6 +3,7 @@ import { getCookie } from '../../cookies/cookies.js';
 export default function lobby() {
   // Select the main-content div
   const gameContainer = document.getElementById('main-content');
+  const player1Name = getCookie('username');
 
   const htmlContent = `
   <div id="offcanvas-list" class="offcanvas offcanvas-start" tabindex="-1">
@@ -170,7 +171,7 @@ export default function lobby() {
   });
 
 
-// Submit Tournament Button
+/* // Submit Tournament Button
 document.getElementById('submitTournament').addEventListener('click', () => {
   const tournamentName = document.getElementById('tournamentName').value.trim(); // Get tournament name
   const numPlayers = parseInt(document.getElementById('numPlayers').value);
@@ -201,7 +202,85 @@ document.getElementById('submitTournament').addEventListener('click', () => {
     usedNames.add(playerName); // Add name to set to track uniqueness
   }
 
-  createTournament(tournamentName, playerNames);
+  //createTournament(tournamentName, playerNames);
+
+  // Close the modal after creating the tournament
+  const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
+  tournamentModal.hide();
+});
+ */
+
+
+document.getElementById('submitTournament').addEventListener('click', () => {
+  const tournamentName = document.getElementById('tournamentName').value.trim(); // Get tournament name
+  const numPlayers = parseInt(document.getElementById('numPlayers').value);
+  if (numPlayers > 15 || numPlayers < 2) {
+    alert('The number of players must be between 2 and 15.');
+    return;
+  }
+
+  const playerNames = [];
+  const usedNames = new Set(); // To store used names
+
+  for (let i = 0; i < numPlayers; i++) {
+    const playerName = document.getElementById(`playerName${i}`).value.trim(); // Trim whitespace
+
+    // Check for empty names
+    if (playerName === '') {
+      alert('Player names cannot be empty.');
+      return;
+    }
+
+    // Check for duplicate names
+    if (usedNames.has(playerName)) {
+      alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
+      return;
+    }
+
+    playerNames.push(playerName);
+    usedNames.add(playerName); // Add name to set to track uniqueness
+  }
+
+  // Create tournament HTML content
+ /*  const tournamentItem = document.createElement('li');
+  tournamentItem.className = 'list-group-item';
+  tournamentItem.innerHTML = `
+    <h5>${tournamentName}</h5>
+    <ul id="participantList">
+      ${playerNames.map(name => `<li>${name}</li>`).join('')}
+    </ul>
+    <button id="joinTournamentButton" class="btn btn-primary">Join Tournament</button>
+  `;
+
+  // Append tournament to the tournament list
+  document.getElementById('tournamentList').appendChild(tournamentItem); */
+
+  if (window.chatSocket) {
+    window.chatSocket.send(JSON.stringify({
+      'message': playerNames.join(', '), // Send player names to backend
+      'username': player1Name, // Ensure you have the username defined
+      'room': tournamentName, // Define the room name
+      'command': 'create'
+    }));
+  }
+
+  /* // Add event listener for the join button
+  document.getElementById('joinTournamentButton').addEventListener('click', () => {
+    console.log('Join Tournament button clicked');
+    // Handle the join action here, e.g., show a prompt to enter a new player's name
+    const newPlayerName = player1Name;
+    if (newPlayerName) {
+      if (window.chatSocket) {
+        window.chatSocket.send(JSON.stringify({
+          'message': newPlayerName, // Send the new player's name
+          'username': player1Name,
+          'room': tournamentName,
+          'command': 'join'
+        }));
+      }
+    }
+  }); */
+
 
   // Close the modal after creating the tournament
   const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
@@ -259,59 +338,8 @@ function rebuildPlayerNameFields(numPlayers) {
 }
 
 
-// // Attach startTournament function to the window object
-// window.startTournament = function(tournamentName) {
-//   console.log(`Starting tournament: ${tournamentName}`);
-//   const tournamentData = tournaments[tournamentName];
-//   startNextMatch(tournamentName, tournamentData);
-// };
-
 // Tournament data storage
 const tournaments = {};
-
-// Tournament creation function
-// function createTournament(tournamentName, playerNames) {
-//   console.log('Tournament created with players:', playerNames);
-//   const tournamentList = document.getElementById('tournamentList');
-//   tournamentList.innerHTML = '';
-
-//   // Shuffle player names to randomize teams
-//   const shuffledPlayers = shuffleArray(playerNames);
-
-//   // If odd number of players, keep the last player in waiting
-//   let waitingPlayer = null;
-//   if (shuffledPlayers.length % 2 !== 0) {
-//     waitingPlayer = shuffledPlayers.pop();
-//   }
-
-//   // Create teams
-//   const teams = [];
-//   for (let i = 0; i < shuffledPlayers.length; i += 2) {
-//     const team = [shuffledPlayers[i], shuffledPlayers[i + 1]];
-//     teams.push(team);
-//   }
-
-//   // Store tournament data
-//   tournaments[tournamentName] = {
-//     teams: teams,
-//     waitingPlayer: waitingPlayer,
-//     currentMatch: 0,
-//     winners: []
-//   };
-
-//   // Display tournament name and teams in tournament list
-//   const tournamentItem = document.createElement('li');
-//   tournamentItem.className = 'list-group-item';
-//   tournamentItem.innerHTML = `
-//     <div>${tournamentName}</div>
-//     <ul id="matches-${tournamentName}">
-//       ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team[0]} vs ${team[1]}</li>`).join('')}
-//       ${waitingPlayer ? `<li id="waiting-${tournamentName}">Waiting: ${waitingPlayer}</li>` : ''}
-//     </ul>
-//     <button class="btn btn-primary" onclick="startTournament('${tournamentName}')">Start Tournament</button>
-//   `;
-//   tournamentList.appendChild(tournamentItem);
-// }
 
 
 // Adjusted createTournament function
@@ -449,7 +477,6 @@ document.getElementById('submitGame').addEventListener('click', () => {
     }
   }
 
-  const player1Name = getCookie('username');
   
   if (player1Name === player2Name) {
     alert('Player names cannot be the same.');
@@ -530,7 +557,6 @@ document.getElementById('resetButton').addEventListener('click', () => {
     }
   }
 
-  const player1Name = getCookie('username');
   
   if (player1Name === player2Name) {
     alert('Player names cannot be the same.');

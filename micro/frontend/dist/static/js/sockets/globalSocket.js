@@ -16,6 +16,26 @@ export default function openSocket() {
     console.log('type:', data.type , 'data:', data);
     if (data.type == "online_players"){
       updateOnlinePlayers(data.players);
+    }else if (data.type === 'tournaments') {
+      const tournaments = data.tournaments;
+      const tournamentList = document.getElementById('tournamentList');
+      tournamentList.innerHTML = '';
+    
+      for (const [tournament, players] of Object.entries(tournaments)) {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerHTML = `
+          <h5>${tournament}</h5>
+          <ul id="participantList">
+            ${players.map(name => `<li>${name}</li>`).join('')}
+          </ul>
+          <button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>
+        `;
+        tournamentList.appendChild(li);
+      }
+      
+      // Reapply event listeners
+      updateTournamentButtons();
     }else {
 
       // Mesajın hangi odaya ait olduğunu kontrol et
@@ -44,4 +64,24 @@ export default function openSocket() {
       playerList.appendChild(listItem);
     });
   }
+}
+
+
+function updateTournamentButtons() {
+  document.querySelectorAll('.joinTournamentButton').forEach(button => {
+    
+    button.addEventListener('click', (event) => {
+      const tournamentName = event.target.getAttribute('data-tournament');
+      console.log('Join Tournament button clicked for:', tournamentName);
+      
+      if (window.chatSocket) {
+        window.chatSocket.send(JSON.stringify({
+          'message':  "test", // Get sender's username,
+          'username': getCookie('username'),
+          'room': tournamentName,
+          'command': 'join',
+        }));
+      }
+    });
+  });
 }
