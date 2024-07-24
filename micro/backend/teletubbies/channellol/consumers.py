@@ -6,7 +6,11 @@ from userlol.models import PrivateChatMessage, FriendList
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
+import logging
+from datetime import datetime, timezone
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -177,7 +181,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
         username = text_data_json["username"]
         command = text_data_json["command"]
         room = text_data_json["room"]
@@ -186,12 +189,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.list_online_players()
             await self.update_tournaments()
         elif command == "create":
-            await self.create_tournament(room, message, username)
+            playerNames = text_data_json["playerNames"]
+            startTime = text_data_json["startTime"]
+            await self.create_tournament(room, playerNames, username, startTime)
         elif command == "join":
-            await self.join_tournament(room, username)
+            current_time = text_data_json["currentTime"]
+            await self.join_tournament(room, username, current_time)
         elif command == "leave":
             await self.leave_tournament(room, username)
+        elif command == "kick":
+            target = text_data_json["target"]
+            if username == ChatConsumer.tournaments[room]["host"]:
+                if target in ChatConsumer.tournaments[room]["players"]:
+                    await self.leave_tournament(room, target)
         else:
+            message = text_data_json["message"]
             await self.channel_layer.group_send(
                 self.roomGroupName, {
                     "type": "sendMessage",
@@ -200,17 +212,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    async def create_tournament(self, tournament_name, player_names, host_name):
+    async def create_tournament(self, tournament_name, player_names, host_name, start_time):
         if tournament_name not in ChatConsumer.tournaments:
+            # Veriyi UTC olarak alıyoruz
+            logging.info("start time: %s", start_time)
+            start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
             ChatConsumer.tournaments[tournament_name] = {
                 "players": set(player_names.split(', ')),
-                "host": host_name
+                "host": host_name,
+                "start_time": start_time.isoformat()  # UTC olarak kaydediyoruz
             }
+            logging.info("Tournament %s created by %s start time %s ", tournament_name, host_name, start_time)
             await self.update_tournaments()
         else:
             # Handle tournament already exists
             pass
 
+    async def update_tournaments(self):
+        tournaments_list = {t: {"players": list(p["players"]), "host": p["host"]} for t, p in ChatConsumer.tournaments.items()}
+        await self.send(text_data=json.dumps({
+            'type': 'tournaments',
+            'tournaments': tournaments_list,
+            'start_time': {t: p["start_time"] for t, p in ChatConsumer.tournaments.items()}
+        }))
+    
     async def leave_tournament(self, tournament_name, player_name):
         if tournament_name in ChatConsumer.tournaments:
             if ChatConsumer.tournaments[tournament_name]["host"] == player_name:
@@ -222,13 +247,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Handle tournament not found
             pass
 
-    async def join_tournament(self, tournament_name, player_name):
+
+
+
+    async def join_tournament(self, tournament_name, player_name, current_time):
         if tournament_name in ChatConsumer.tournaments:
-            ChatConsumer.tournaments[tournament_name]["players"].add(player_name)
-            await self.update_tournaments()
+            # Convert the string start time to a datetime object in UTC
+            
+            tournament_start_time_str = ChatConsumer.tournaments[tournament_name]["start_time"]
+            tournament_start_time = datetime.fromisoformat(tournament_start_time_str)
+            tournament_start_time = tournament_start_time.replace(tzinfo=timezone.utc)
+
+            # Convert milliseconds to seconds and then to a datetime object in UTC
+            current_time = datetime.fromtimestamp(current_time / 1000.0, tz=timezone.utc)
+            logging.info("şimdiki zaman: %s  %s", current_time, tournament_start_time_str)
+            # Debug logging
+            logging.info("Tournament Start Time: %s", tournament_start_time)
+            logging.info("Current Time: %s", current_time)
+            logging.info("Current Time Timestamp: %d", int(current_time.timestamp() * 1000))
+            logging.info("Tournament Start Time Timestamp: %d", int(tournament_start_time.timestamp() * 1000))
+
+            # Compare the times in milliseconds
+            if int(tournament_start_time.timestamp() * 1000) > int(current_time.timestamp() * 1000):
+                ChatConsumer.tournaments[tournament_name]["players"].add(player_name)
+                await self.update_tournaments()
+            else:
+                # Handle join attempt after start time
+                logging.info("Join time is over for tournament %s", tournament_name)
         else:
             # Handle tournament not found
-            pass
+            logging.warning("Tournament %s not found", tournament_name)
+
+
 
     @staticmethod
     async def update_user_status(user, is_online):
@@ -266,11 +316,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'online_players',
             'players': online_players_list
-        }))
-
-    async def update_tournaments(self):
-        tournaments_list = {t: {"players": list(p["players"]), "host": p["host"]} for t, p in ChatConsumer.tournaments.items()}
-        await self.send(text_data=json.dumps({
-            'type': 'tournaments',
-            'tournaments': tournaments_list
         }))

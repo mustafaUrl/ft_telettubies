@@ -1,4 +1,3 @@
-
 import { getCookie } from '../cookies/cookies.js';
 
 window.chatSocket = '';
@@ -20,22 +19,63 @@ export default function openSocket() {
       const tournamentList = document.getElementById('tournamentList');
       tournamentList.innerHTML = '';
 
+   
+      // Collect host information
+      const username = getCookie('username');
+      let isUserHost = false;
+
       for (const [tournament, details] of Object.entries(tournaments)) {
+        const startTimeUtc = new Date(data.start_time[tournament]);
+        const localStartTime = startTimeUtc.toLocaleString(); 
+        const currentTime = new Date();
+        const joinTime = startTimeUtc > currentTime;
+    
+        // Check if the user is already a participant
+        const userJoined = details.players.includes(username);
+    
         const li = document.createElement('li');
         li.className = 'list-group-item';
         li.innerHTML = `
-          <h5>${tournament} (Host: ${details.host})</h5>
-          <ul id="participantList">
-            ${details.players.map(name => `<li>${name}</li>`).join('')}
-          </ul>
-          <button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>
-          <button class="btn btn-danger leaveTournamentButton" data-tournament="${tournament}">Leave Tournament</button>
+            <h4>${tournament} (Host: ${details.host})</h4>
+            <h7>Start Time: ${localStartTime}</h7>
+            <ul id="participantList">
+                ${details.players.map(name => `
+                    <li>
+                        ${name} 
+                        ${username === details.host && name !== details.host ? `<button class="btn btn-danger btn-sm float-right kickPlayerButton" data-tournament="${tournament}" data-player="${name}">X</button>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
         `;
+    
+        // Conditionally add Join and Leave buttons
+        if (joinTime && !userJoined) {
+            li.innerHTML += `<button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>`;
+        }
+        if (userJoined) {
+            li.innerHTML += `<button class="btn btn-danger leaveTournamentButton" data-tournament="${tournament}">Leave Tournament</button>`;
+        } else if (!joinTime) {
+            li.innerHTML += '<h7>Join Time is Over</h7>';
+        }
+    
         tournamentList.appendChild(li);
-      }
 
-      // Reapply event listeners
+        // Check if the current user is the host of this tournament
+        if (username === details.host) {
+          isUserHost = true;
+        }
+      
+    }
+    
+
+
+      // Reapply event listeners for join and leave buttons
       updateTournamentButtons();
+
+      // Apply kick button event listeners if the user is a host
+      if (isUserHost) {
+        updateKickButtons();
+      }
     } else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');
@@ -65,19 +105,20 @@ export default function openSocket() {
 function updateTournamentButtons() {
   document.querySelectorAll('.joinTournamentButton').forEach(button => {
     button.addEventListener('click', (event) => {
-      const tournamentName = event.target.getAttribute('data-tournament');
-      console.log('Join Tournament button clicked for:', tournamentName);
+        const tournamentName = event.target.getAttribute('data-tournament');
+        console.log('Join Tournament button clicked for:', tournamentName, "time: ", new Date().getTime());
 
-      if (window.chatSocket) {
-        window.chatSocket.send(JSON.stringify({
-          'message': "test", // Get sender's username,
-          'username': getCookie('username'),
-          'room': tournamentName,
-          'command': 'join',
-        }));
-      }
+        if (window.chatSocket) {
+            window.chatSocket.send(JSON.stringify({
+                'username': getCookie('username'),
+                'room': tournamentName,
+                'command': 'join',
+                'currentTime': new Date().getTime()  // Milisaniye cinsinden UTC zamanı
+            }));
+        }
     });
-  });
+});
+
 
   document.querySelectorAll('.leaveTournamentButton').forEach(button => {
     button.addEventListener('click', (event) => {
@@ -86,10 +127,28 @@ function updateTournamentButtons() {
 
       if (window.chatSocket) {
         window.chatSocket.send(JSON.stringify({
-          'message': "test", // Get sender's username,
           'username': getCookie('username'),
           'room': tournamentName,
           'command': 'leave',
+        }));
+      }
+    });
+  });
+}
+
+function updateKickButtons() {
+  document.querySelectorAll('.kickPlayerButton').forEach(button => {
+    button.addEventListener('click', (event) => {
+      const tournamentName = event.target.getAttribute('data-tournament');
+      const playerName = event.target.getAttribute('data-player');
+      console.log('Kick Player button clicked for:', playerName, 'in tournament:', tournamentName);
+
+      if (window.chatSocket) {
+        window.chatSocket.send(JSON.stringify({
+          'username': getCookie('username'),
+          'room': tournamentName,
+          'command': 'kick',
+          'target': playerName,
         }));
       }
     });

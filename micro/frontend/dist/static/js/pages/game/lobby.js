@@ -89,6 +89,11 @@ export default function lobby() {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+        <div class="mb-3">
+            <label for="startTime" class="form-label">Start Time</label>
+            <input type="datetime-local" class="form-control" id="startTime" required>
+          </div>
+
           <form id="tournamentForm">
             <div class="mb-3">
               <label for="tournamentName" class="form-label">Tournament Name</label>
@@ -211,9 +216,30 @@ document.getElementById('submitTournament').addEventListener('click', () => {
  */
 
 
+// Submit Tournament Button
 document.getElementById('submitTournament').addEventListener('click', () => {
-  const tournamentName = document.getElementById('tournamentName').value.trim(); // Get tournament name
+  const tournamentName = document.getElementById('tournamentName').value.trim();
   const numPlayers = parseInt(document.getElementById('numPlayers').value);
+  const startTimeInput = document.getElementById('startTime').value;
+  const startTime = new Date(startTimeInput);
+
+  if (startTimeInput === '') {
+    alert('Start time cannot be empty.');
+    return;
+  }
+  if (tournamentName === '') {
+    alert('Tournament name cannot be empty.');
+    return;
+  }
+  // Check if the start time is at least 2 minutes in the future
+  const now = new Date();
+  const minStartTime = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
+  
+  if (startTime < minStartTime) {
+    alert('Start time must be at least 2 minutes from now.');
+    return;
+  } 
+
   if (numPlayers > 15 || numPlayers < 2) {
     alert('The number of players must be between 2 and 15.');
     return;
@@ -241,22 +267,25 @@ document.getElementById('submitTournament').addEventListener('click', () => {
     usedNames.add(playerName); // Add name to set to track uniqueness
   }
 
-
+  const localDateTime = new Date(startTimeInput);
+  const utcDateTime = localDateTime.toISOString(); // UTC'ye dönüştür
+  console.log("utccccc" ,utcDateTime);
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({
-      'message': playerNames.join(', '), // Send player names to backend
+      'playerNames': playerNames.join(', '), // Send player names to backend
       'username': player1Name, // Ensure you have the username defined
       'room': tournamentName, // Define the room name
-      'command': 'create'
+      'command': 'create',
+      'startTime': utcDateTime // Send start time to backend
     }));
   }
-
 
   // Close the modal after creating the tournament
   const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
   tournamentModal.hide();
 });
+
 
 
 // Update player name fields based on number of players
