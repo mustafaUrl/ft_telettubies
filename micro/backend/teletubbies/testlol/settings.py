@@ -276,7 +276,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
 # Rediriger les requêtes HTTP vers HTTPS
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = True
 
 # Utiliser des cookies sécurisés
 SESSION_COOKIE_SECURE = True

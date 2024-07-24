@@ -13,15 +13,9 @@ services:
 
   backend:
     env_file:
-      - .env    
+      - .env
     build:
       context: ./backend
-      dockerfile: Dockerfile
-      args:
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        POSTGRES_DB: ${POSTGRES_DB}
-        SUPERUSER_EMAIL: ${SUPERUSER_EMAIL}
     networks:
       - backend_network
       - frontend_network
@@ -46,6 +40,19 @@ services:
       - "443:443"
     depends_on:
       - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - backend_network
 
 volumes:
   media_volume:
