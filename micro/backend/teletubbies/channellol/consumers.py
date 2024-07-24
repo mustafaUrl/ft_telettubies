@@ -202,6 +202,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if username == ChatConsumer.tournaments[room]["host"]:
                 if target in ChatConsumer.tournaments[room]["players"]:
                     await self.leave_tournament(room, target)
+        elif command == "start":
+            if username == ChatConsumer.tournaments[room]["host"]:
+                # Turnuva başlatma işlemleri burada yapılacak
+                #takımları oluştur
+                #turnuvayı başlat
+                pass
         else:
             message = text_data_json["message"]
             await self.channel_layer.group_send(

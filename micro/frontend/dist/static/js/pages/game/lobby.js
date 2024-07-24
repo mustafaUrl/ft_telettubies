@@ -273,7 +273,7 @@ document.getElementById('submitTournament').addEventListener('click', () => {
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({
-      'playerNames': playerNames.join(', '), // Send player names to backend
+      'playerNames': playerNames.join(', ') +', ' +player1Name, // Send player names to backend
       'username': player1Name, // Ensure you have the username defined
       'room': tournamentName, // Define the room name
       'command': 'create',

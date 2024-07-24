@@ -58,24 +58,36 @@ export default function openSocket() {
             li.innerHTML += '<h7>Join Time is Over</h7>';
         }
     
-        tournamentList.appendChild(li);
-
-        // Check if the current user is the host of this tournament
-        if (username === details.host) {
-          isUserHost = true;
+        // Add Start button for the host after the join time is over
+        if (!joinTime && username === details.host) {
+          const startButton = document.createElement('button');
+          startButton.className = 'btn btn-success startTournamentButton';
+          startButton.dataset.tournament = tournament;
+          startButton.textContent = 'Start Tournament';
+          startButton.addEventListener('click', () => {
+            if (window.chatSocket) {
+              window.chatSocket.send(JSON.stringify({
+                'username': getCookie('username'),
+                'room': tournament,
+                'command': 'start',
+              }));
+            }
+          });
+          li.appendChild(startButton);
         }
-      
+    
+        tournamentList.appendChild(li);
     }
+    
     
 
 
       // Reapply event listeners for join and leave buttons
       updateTournamentButtons();
 
-      // Apply kick button event listeners if the user is a host
-      if (isUserHost) {
+     
         updateKickButtons();
-      }
+      
     } else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');
