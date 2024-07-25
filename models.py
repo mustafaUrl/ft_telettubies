@@ -60,3 +60,40 @@ class PongMatch(models.Model):
 
     def __str__(self):
         return f'{self.pkey} - {self.match_type} - {self.player1} vs {self.player2}'
+
+
+
+
+###second example  
+
+from django.db import models
+
+class Tournament(models.Model):
+    start_time = models.DateTimeField()
+    round_count = models.PositiveIntegerField()
+    winner = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Tournament {self.id}"
+
+class Round(models.Model):
+    tournament = models.ForeignKey(Tournament, related_name='rounds', on_delete=models.CASCADE)
+    round_number = models.PositiveIntegerField()
+    match_ids = models.CharField(max_length=255)
+    teams = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Round {self.round_number} of Tournament {self.tournament.id}"
+
+class Match(models.Model):
+    round = models.ForeignKey(Round, related_name='matches', on_delete=models.CASCADE)
+    player1_username = models.CharField(max_length=100)
+    player2_username = models.CharField(max_length=100)
+    player1_score = models.PositiveIntegerField()
+    player2_score = models.PositiveIntegerField()
+    winner_username = models.CharField(max_length=100, blank=True, null=True)
+    match_start_time = models.DateTimeField()
+    match_finish_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Match {self.id} of Round {self.round.round_number} in Tournament {self.round.tournament.id}"
