@@ -162,7 +162,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-
+        
+        await self.list_online_players()
     async def disconnect(self, close_code):
         if self.user.is_anonymous:
             await self.close()
@@ -175,6 +176,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.roomGroupName,
             self.channel_name
         )
+        await self.list_online_players()
 
     async def receive(self, text_data):
         if self.user.is_anonymous:
@@ -236,12 +238,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def update_tournaments(self):
         tournaments_list = {t: {"players": list(p["players"]), "host": p["host"]} for t, p in ChatConsumer.tournaments.items()}
-        await self.send(text_data=json.dumps({
-            'type': 'tournaments',
-            'tournaments': tournaments_list,
-            'start_time': {t: p["start_time"] for t, p in ChatConsumer.tournaments.items()}
-        }))
-    
+
+        await self.channel_layer.group_send(
+            self.roomGroupName, {
+                'type': 'tournaments_send',
+                'tournaments_list': tournaments_list,
+                'start_time': {t: p["start_time"] for t, p in ChatConsumer.tournaments.items()}
+            }
+        )
+    async def list_online_players(self):
+        online_players_list = list(ChatConsumer.online_users)
+        if online_players_list:
+            await self.channel_layer.group_send(
+                self.roomGroupName, {
+                'type': 'list_online_players_send',
+                'players': online_players_list
+                }
+            )
+        
     async def leave_tournament(self, tournament_name, player_name):
         if tournament_name in ChatConsumer.tournaments:
             if ChatConsumer.tournaments[tournament_name]["host"] == player_name:
@@ -317,9 +331,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def update_user_status(self, user, is_online):
         OnlineUserStatus.objects.update_or_create(user=user, defaults={'is_online': is_online})
 
-    async def list_online_players(self):
-        online_players_list = list(ChatConsumer.online_users)
-        await self.send(text_data=json.dumps({
-            'type': 'online_players',
-            'players': online_players_list
-        }))
+    
+
+    async def list_online_players_send(self, event):
+        online_players_list = event["players"]
+        if not self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                "type": "online_players",
+                'players': online_players_list
+            }))
+
+
+    async def tournaments_send(self, event):
+        tournaments_list = event["tournaments_list"]
+        start_time = event["start_time"]
+        if not self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                "type": "tournaments",
+                "tournaments":tournaments_list,
+                "start_time": start_time
+            }))

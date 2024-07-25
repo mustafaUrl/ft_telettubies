@@ -17,8 +17,10 @@ export default function openSocket() {
     } else if (data.type === 'tournaments') {
       const tournaments = data.tournaments;
       const tournamentList = document.getElementById('tournamentList');
+      if (!tournamentList) { 
+        return;
+      }
       tournamentList.innerHTML = '';
-
    
       // Collect host information
       const username = getCookie('username');
@@ -26,13 +28,23 @@ export default function openSocket() {
 
       for (const [tournament, details] of Object.entries(tournaments)) {
         const startTimeUtc = new Date(data.start_time[tournament]);
-        const localStartTime = startTimeUtc.toLocaleString(); 
+        const localStartTime = startTimeUtc.toLocaleString();
         const currentTime = new Date();
+        console.log('Current Time:', currentTime, 'Start Time:', startTimeUtc ,"localStartTime:", localStartTime, "za");
         const joinTime = startTimeUtc > currentTime;
     
         // Check if the user is already a participant
         const userJoined = details.players.includes(username);
-    
+        const checkTime = startTimeUtc - currentTime;
+        console.log('Check Time:', checkTime);
+        // Eğer fark pozitifse, yani başlangıç saati gelecekteyse
+        if (checkTime > 0) {
+            setTimeout(() => {
+                console.log('Belirlenen saat geldi ve fonksiyon çalıştı!');
+                // Burada checkTime fonksiyonunu çağırabilirsiniz
+                checkTimeFunction();
+            }, checkTime);
+          }
         const li = document.createElement('li');
         li.className = 'list-group-item';
         li.innerHTML = `
@@ -86,7 +98,8 @@ export default function openSocket() {
       updateTournamentButtons();
 
      
-        updateKickButtons();
+      updateKickButtons();
+
       
     } else {
       const chatMessages = document.getElementById('chat_messages1');
@@ -103,6 +116,9 @@ export default function openSocket() {
 
   function updateOnlinePlayers(players) {
     const playerList = document.getElementById('playerList');
+    if (!playerList) {
+      return;
+    }
     playerList.innerHTML = ''; // Clear existing player list
 
     players.forEach(player => {
@@ -166,3 +182,16 @@ function updateKickButtons() {
     });
   });
 }
+
+
+function checkTimeFunction() {
+  if (window.chatSocket) {
+    window.chatSocket.send(JSON.stringify({
+      'username': getCookie('username'),
+      'room': 'test',
+      'command': 'online_players'
+    }));
+  }
+}
+
+

@@ -9,7 +9,6 @@ export default function menu() {
    
     if (window.chatSocket) {
         window.chatSocket.send(JSON.stringify({
-          'message':  "test", // Get sender's username,
           'username': "test",
           'room': 'test',
           'command': 'online_players'
