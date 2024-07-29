@@ -3,8 +3,6 @@ import  logout  from '../pages/logout/logout.js';
 import  register  from '../pages/register/register.js';
 import  pong from '../pages/pong/pong.js';
 import  profile  from '../pages/profile/profile.js';
-import  tournament  from '../pages/tournament/tournament.js';
-import  game2  from '../pages/game2/game2.js';
 import  menu from '../pages/game/menu.js';
 
 export default function triggerContentLoad(contentId) {
@@ -29,12 +27,6 @@ export default function triggerContentLoad(contentId) {
       case 'friends':
       case 'account':
         profile();
-        break;
-      case 'mehmet':
-        tournament();
-        break;
-      case 'game2':
-        game2();
         break;
       default:
         console.log('Content not found ss');
