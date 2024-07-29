@@ -93,6 +93,7 @@ function listFriends() {
       .then(data => {
         if (data.success) {
           console.log('Friend request accepted:', data);
+          listFriends(); // Refresh the friend list to sync the view
         } else {
           console.error('Error', data.error);
         }
@@ -105,6 +106,7 @@ function listFriends() {
       .then(data => {
         if (data.success) {
           console.log('Friend request rejected:', data);
+          listFriends();
         } else {
           console.error('Error:', data.error);
         }
