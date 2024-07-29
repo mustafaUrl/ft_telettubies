@@ -190,9 +190,30 @@ function viewProfile(username) {
   console.log(`Viewing profile of ${username}`);
 }
 
-// User invite function
 function inviteUser(username) {
-  console.log(`Inviting ${username} to play`);
+  const message = `I wanna play with you ${username}`;
+  console.log(`Inviting ${username} with message: ${message}`);
+  const sender = getCookie('username');
+  
+  // Send the message through the WebSocket
+  if (window.chatSocket) {
+    window.chatSocket.send(JSON.stringify({
+      'message': message,
+      'username': sender,
+      'room': 'global',
+      'command': 'message'
+    }));
+  }
+
+  // Update the chat box in the DOM
+  const chatBox = document.getElementById('chat-box'); // Adjust the ID to match your chat box element
+  if (chatBox) {
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message'; // Adjust the class to match your chat message styling
+    messageElement.innerText = `${sender}: ${message}`;
+    chatBox.appendChild(messageElement);
+  }
 }
+
 
 export { updateNotificationButton, showTab2WithUsername, selectTab };
