@@ -14,94 +14,129 @@ export default function openSocket() {
     console.log('type:', data.type, 'data:', data);
     if (data.type === "online_players") {
       updateOnlinePlayers(data.players);
-    } else if (data.type === 'tournaments') {
+    }else if (data.type === 'tournaments') {
       const tournaments = data.tournaments;
       const tournamentList = document.getElementById('tournamentList');
       if (!tournamentList) { 
-        return;
+          return;
       }
       tournamentList.innerHTML = '';
-   
+  
       // Collect host information
       const username = getCookie('username');
-      let isUserHost = false;
-
+      console.log('Data:', data); // Debug data structure
+  
       for (const [tournament, details] of Object.entries(tournaments)) {
-        const startTimeUtc = new Date(data.start_time[tournament]);
-        const localStartTime = startTimeUtc.toLocaleString();
-        const currentTime = new Date();
-        console.log('Current Time:', currentTime, 'Start Time:', startTimeUtc ,"localStartTime:", localStartTime, "za");
-        const joinTime = startTimeUtc > currentTime;
-    
-        // Check if the user is already a participant
-        const userJoined = details.players.includes(username);
-        const checkTime = startTimeUtc - currentTime;
-        console.log('Check Time:', checkTime);
-        // Eğer fark pozitifse, yani başlangıç saati gelecekteyse
-        if (checkTime > 0) {
-            setTimeout(() => {
-                console.log('Belirlenen saat geldi ve fonksiyon çalıştı!');
-                // Burada checkTime fonksiyonunu çağırabilirsiniz
-                checkTimeFunction();
-            }, checkTime);
+          const startTimeUtc = new Date(details.start_time);
+          const localStartTime = startTimeUtc.toLocaleString();
+          const currentTime = new Date();
+          console.log('Current Time:', currentTime, 'Start Time:', startTimeUtc, 'Local Start Time:', localStartTime);
+          const joinTime = startTimeUtc > currentTime;
+  
+          // Check if the user is already a participant
+          const userJoined = details.players.includes(username);
+          const checkTime = startTimeUtc - currentTime;
+          console.log('Check Time:', checkTime);
+  
+          // If the difference is positive (start time is in the future)
+          if (checkTime > 0) {
+              setTimeout(() => {
+                  console.log('Scheduled check time function executed!');
+                  // Call your function here
+                  checkTimeFunction();
+              }, checkTime);
           }
-        const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.innerHTML = `
-            <h4>${tournament} (Host: ${details.host})</h4>
-            <h7>Start Time: ${localStartTime}</h7>
-            <ul id="participantList">
-                ${details.players.map(name => `
-                    <li>
-                        ${name} 
-                        ${username === details.host && name !== details.host ? `<button class="btn btn-danger btn-sm float-right kickPlayerButton" data-tournament="${tournament}" data-player="${name}">X</button>` : ''}
-                    </li>
-                `).join('')}
-            </ul>
-        `;
-    
-        // Conditionally add Join and Leave buttons
-        if (joinTime && !userJoined) {
-            li.innerHTML += `<button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>`;
-        }
-        if (userJoined) {
-            li.innerHTML += `<button class="btn btn-danger leaveTournamentButton" data-tournament="${tournament}">Leave Tournament</button>`;
-        } else if (!joinTime) {
-            li.innerHTML += '<h7>Join Time is Over</h7>';
-        }
-    
-        // Add Start button for the host after the join time is over
-        if (!joinTime && username === details.host) {
-          const startButton = document.createElement('button');
-          startButton.className = 'btn btn-success startTournamentButton';
-          startButton.dataset.tournament = tournament;
-          startButton.textContent = 'Start Tournament';
-          startButton.addEventListener('click', () => {
-            if (window.chatSocket) {
-              window.chatSocket.send(JSON.stringify({
-                'username': getCookie('username'),
-                'room': tournament,
-                'command': 'start',
-              }));
-            }
-          });
-          li.appendChild(startButton);
-        }
-    
-        tournamentList.appendChild(li);
-    }
-    
-    
-
-
+  
+          const li = document.createElement('li');
+          li.className = 'list-group-item';
+  
+          // Create HTML structure for each tournament
+          let playerListHtml = '';
+          let roundsHtml = '';
+  
+          if (details.status === 'started') {
+              // Show rounds and hide player list
+              if (Object.keys(details.rounds).length > 0) {
+                  roundsHtml = `
+                      <h5>Rounds:</h5>
+                      ${Object.entries(details.rounds).map(([round, matches]) => `
+                          <div>
+                              <h6>${round}</h6>
+                              <ul>
+                                  ${matches.map(match => `
+                                      <li>${match.join(' vs ')}</li>
+                                  `).join('')}
+                              </ul>
+                          </div>
+                      `).join('')}
+                      <h5>Waiting Players:</h5>
+                      <ul>
+                      <ul>
+                        ${details.waiting_player ? `<li>${details.waiting_player}</li>` : '<li>No waiting player</li>'}
+                    </ul>
+                  `;
+              } else {
+                  roundsHtml = '<p>No rounds available.</p>';
+              }
+          } else {
+              // Show player list and other details
+              playerListHtml = `
+                  <ul id="participantList">
+                      ${(details.players || []).map(name => `
+                          <li>
+                              ${name} 
+                              ${username === details.host && name !== details.host ? `<button class="btn btn-danger btn-sm float-right kickPlayerButton" data-tournament="${tournament}" data-player="${name}">X</button>` : ''}
+                          </li>
+                      `).join('')}
+                  </ul>
+              `;
+          }
+  
+          li.innerHTML = `
+              <h4>${tournament} (Host: ${details.host})</h4>
+              <h7>Start Time: ${localStartTime}</h7>
+              ${roundsHtml}
+              ${playerListHtml}
+          `;
+  
+          // Conditionally add Join and Leave buttons
+          if (joinTime && !userJoined) {
+              li.innerHTML += `<button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>`;
+          }
+          if (userJoined) {
+              li.innerHTML += `<button class="btn btn-danger leaveTournamentButton" data-tournament="${tournament}">Leave Tournament</button>`;
+          } else if (!joinTime) {
+              li.innerHTML += '<h7>Join Time is Over</h7>';
+          }
+  
+          // Add Start button for the host after the join time is over
+          if (!joinTime && username === details.host) {
+              const startButton = document.createElement('button');
+              startButton.className = 'btn btn-success startTournamentButton';
+              startButton.dataset.tournament = tournament;
+              startButton.textContent = 'Start Tournament';
+              startButton.addEventListener('click', () => {
+                  if (window.chatSocket) {
+                      window.chatSocket.send(JSON.stringify({
+                          'username': getCookie('username'),
+                          'room': tournament,
+                          'command': 'start',
+                      }));
+                  }
+              });
+              li.appendChild(startButton);
+          }
+  
+          tournamentList.appendChild(li);
+      }
+  
       // Reapply event listeners for join and leave buttons
       updateTournamentButtons();
-
-     
       updateKickButtons();
-
-      
-    } else {
+  }
+  
+  
+else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');
       messageDiv.textContent = data.username + ': ' + data.message;

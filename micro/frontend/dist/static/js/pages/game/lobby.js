@@ -235,10 +235,10 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   const now = new Date();
   const minStartTime = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
   
-  if (startTime < minStartTime) {
+ /*  if (startTime < minStartTime) {
     alert('Start time must be at least 2 minutes from now.');
     return;
-  } 
+  }  */
 
   if (numPlayers > 15 || numPlayers < 2) {
     alert('The number of players must be between 2 and 15.');
@@ -495,52 +495,6 @@ document.getElementById('submitGame').addEventListener('click', () => {
 });
 
 
-// Game creation function
-function startGame(player1Name, player2Name, gameMode) {
-  console.log(gameMode, 'Game started with players:', player1Name, player2Name);
-  document.getElementById('scorePlayer1').textContent = '0';
-  document.getElementById('scorePlayer2').textContent = '0';
-  document.getElementById('gameModeDisplay').textContent = gameMode;
-
-  document.querySelector('#scoreBoard div').innerHTML = `${player1Name}: <span id="scorePlayer1">0</span> | ${player2Name}: <span id="scorePlayer2">0</span>`;
-
-  document.getElementById('gameControls').style.display = 'block';
-  document.getElementById('scoreBoard').style.display = 'block';
-
- 
-  if (gameMode !== 'normal' || gameMode !== 'invited') {
-    game().then((winner) => {
-      console.log('Game finished');
-      if (winner === player1Name) {
-        showWinner(player1Name);
-        tournaments[gameMode].winners.push(player1Name); // Add winner to the array
-      } else {
-        showWinner(player2Name);
-        tournaments[gameMode].winners.push(player2Name); // Add winner to the array
-      }
-
-      const tournamentData = tournaments[gameMode];
-      tournamentData.currentMatch++;
-      startNextMatch(gameMode, tournamentData);
-    }).catch((error) => {
-      console.error('Error during the game:', error);
-    });
-  }else 
-  {
-    game().then((winner) => {
-      console.log('Game finished');
-      if( winner === "Player 1") {
-        showWinner(player1Name);
-      } else {
-        showWinner(player2Name);
-      }
-      
-    }).catch((error) => {
-      console.error('Error during the game:', error);
-    });
-
-  }
-}
 
 
 document.getElementById('resetButton').addEventListener('click', () => {
@@ -586,6 +540,97 @@ function showWinner(winner) {
  
 }
 
+
+// Game creation function
+function startGame(player1Name, player2Name, gameMode) {
+  console.log(gameMode, 'Game started with players:', player1Name, player2Name);
+  document.getElementById('scorePlayer1').textContent = '0';
+  document.getElementById('scorePlayer2').textContent = '0';
+  document.getElementById('gameModeDisplay').textContent = gameMode;
+
+  document.querySelector('#scoreBoard div').innerHTML = `${player1Name}: <span id="scorePlayer1">0</span> | ${player2Name}: <span id="scorePlayer2">0</span>`;
+
+  document.getElementById('gameControls').style.display = 'block';
+  document.getElementById('scoreBoard').style.display = 'block';
+
+  const matchResult = {
+    round_id: "",
+    player1_username: player1Name,
+    player2_username: player2Name,
+    player1_score: "",
+    player2_score: "",
+    winner_username: "",
+    match_start_time: new Date().toISOString(),
+    match_finish_time: "",
+  };
+  console.log('gamemode : ', gameMode);  
+
+  if (gameMode !== 'normal' && gameMode !== 'invited') {
+    game().then((winner) => {
+      console.log('Game finished');
+      if (winner === player1Name) {
+        showWinner(player1Name);
+        tournaments[gameMode].winners.push(player1Name); // Add winner to the array
+      } else {
+        showWinner(player2Name);
+        tournaments[gameMode].winners.push(player2Name); // Add winner to the array
+      }
+
+      const tournamentData = tournaments[gameMode];
+      tournamentData.currentMatch++;
+      startNextMatch(gameMode, tournamentData);
+    }).catch((error) => {
+      console.error('Error during the game:', error);
+    });
+  } else {
+    game().then((winner) => {
+      console.log('Game finished');
+      if (winner === "Player 1") {
+        showWinner(player1Name);
+        winner = player1Name;
+      } else {
+        showWinner(player2Name);
+        winner = player2Name;
+      }
+      matchResult.winner_username = winner;
+      matchResult.player1_score = document.getElementById('scorePlayer1').textContent;
+      matchResult.player2_score = document.getElementById('scorePlayer2').textContent;
+      matchResult.match_finish_time = new Date().toISOString();
+      console.log('Match Result:', matchResult);
+      if (gameMode == "normal") {
+        matchResult.player1_username = player1Name;
+        matchResult.player2_username = player2Name + "(anonim)";
+      } else if (gameMode == "invited") {
+        matchResult.player1_username = player1Name;
+        matchResult.player2_username = player2Name;
+      } else {
+        console.error('Invalid game mode:', gameMode);
+      }
+
+      const accessToken = getCookie('accessToken'); // Assuming the cookie name is 'accessToken'
+      console.log('Access Token:', accessToken);
+      fetch('api/game/create/', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(matchResult)
+      }).then((response) => {
+        if (response.ok) {
+          console.log('Match created successfully');
+        } else {
+          console.error('Error creating match:', response.statusText);
+        }
+      }).catch((error) => {
+        console.error('Error creating match:', error);
+      });
+    }).catch((error) => {
+      console.error('Error during the game:', error);
+    });
+  }
+}
+
 }
 
 // function startGame(player1Name, player2Name, gameMode) {
@@ -616,6 +661,8 @@ function showWinner(winner) {
 //     console.error('Error during the game:', error);
 //   });
 // }
+
+
 
 
 

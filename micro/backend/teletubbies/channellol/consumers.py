@@ -8,7 +8,7 @@ from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 import logging
 from datetime import datetime, timezone
-
+import random
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -206,10 +206,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     await self.leave_tournament(room, target)
         elif command == "start":
             if username == ChatConsumer.tournaments[room]["host"]:
-                # Turnuva başlatma işlemleri burada yapılacak
-                #takımları oluştur
-                #turnuvayı başlat
-                pass
+               await self.start_tournament(room)
         else:
             message = text_data_json["message"]
             await self.channel_layer.group_send(
@@ -220,6 +217,64 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+    ############################################################################################################
+    ############################################################################################################
+    ############################################################################################################
+
+    async def start_tournament(self, tournament_name):
+        if tournament_name in ChatConsumer.tournaments:
+            ChatConsumer.tournaments[tournament_name]["status"] = "started"
+            teams = list(ChatConsumer.tournaments[tournament_name]["players"])
+            # Create initial round matches
+            if len(teams) % 2 == 1:
+                ChatConsumer.tournaments[tournament_name]["waiting_player"] = teams.pop()
+            round_1_matches = self.create_matches(teams)
+            ChatConsumer.tournaments[tournament_name]["rounds"] = {"round_1": round_1_matches}
+            await self.update_tournaments()
+            logging.info("Tournament %s started rounds %s", tournament_name , ChatConsumer.tournaments[tournament_name]["rounds"])
+        else:
+            # Handle tournament not found
+            pass
+
+    def create_matches(self, players):
+        if len(players) < 2:
+            return "Oyuncu sayısı en az 2 olmalıdır."
+        
+        random.shuffle(players)  # Oyuncuları rastgele karıştır
+        matches = []
+        
+        # Oyuncuları eşleştir
+        for i in range(0, len(players) - 1, 2):
+            matches.append((players[i], players[i + 1]))
+        
+        # Tek sayıda oyuncu varsa, son oyuncuyu son maça ekleyin
+        if len(players) % 2 == 1:
+            matches[-1] = matches[-1] + (players[-1],)
+        
+        return matches
+
+    async def next_round(self, winners):
+        if len(winners) < 2:
+            return "Kazanan sayısı en az 2 olmalıdır."
+        
+        random.shuffle(winners)  # Kazananları rastgele karıştır
+        next_matches = []
+        
+        # Kazananları eşleştir
+        for i in range(0, len(winners) - 1, 2):
+            next_matches.append((winners[i], winners[i + 1]))
+        
+        # Tek sayıda kazanan varsa, son kazananı son maça ekleyin
+        if len(winners) % 2 == 1:
+            next_matches[-1] = next_matches[-1] + (winners[-1],)
+        
+        return next_matches
+
+    ############################################################################################################
+    ############################################################################################################
+    ############################################################################################################
+
+
     async def create_tournament(self, tournament_name, player_names, host_name, start_time):
         if tournament_name not in ChatConsumer.tournaments:
             # Veriyi UTC olarak alıyoruz
@@ -228,7 +283,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             ChatConsumer.tournaments[tournament_name] = {
                 "players": set(player_names.split(', ')),
                 "host": host_name,
-                "start_time": start_time.isoformat()  # UTC olarak kaydediyoruz
+                "start_time": start_time.isoformat(),  # UTC olarak kaydediyoruz
+                "status": "waiting",
+                "rounds": {},
+                "waiting_player ": ""
             }
             logging.info("Tournament %s created by %s start time %s ", tournament_name, host_name, start_time)
             await self.update_tournaments()
@@ -237,13 +295,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             pass
 
     async def update_tournaments(self):
-        tournaments_list = {t: {"players": list(p["players"]), "host": p["host"]} for t, p in ChatConsumer.tournaments.items()}
-
+        tournaments_list = {t: {"players": list(p.get("players", [])), "host": p.get("host", ""), "start_time": p.get("start_time", ""), "status": p.get("status", ""), "rounds": p.get("rounds", {}), "waiting_player": p.get("waiting_player", None )} for t, p in ChatConsumer.tournaments.items()}      
         await self.channel_layer.group_send(
             self.roomGroupName, {
                 'type': 'tournaments_send',
                 'tournaments_list': tournaments_list,
-                'start_time': {t: p["start_time"] for t, p in ChatConsumer.tournaments.items()}
             }
         )
     async def list_online_players(self):
@@ -344,10 +400,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def tournaments_send(self, event):
         tournaments_list = event["tournaments_list"]
-        start_time = event["start_time"]
         if not self.scope['user'].is_anonymous:
             await self.send(text_data=json.dumps({
                 "type": "tournaments",
                 "tournaments":tournaments_list,
-                "start_time": start_time
             }))

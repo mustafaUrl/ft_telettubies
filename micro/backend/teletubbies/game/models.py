@@ -1,14 +1,31 @@
 from django.db import models
-from django.contrib.auth.models import User
 
-class Game(models.Model):
-    player1 = models.ForeignKey(User, related_name='games_as_player1', on_delete=models.CASCADE)
-    player2 = models.ForeignKey(User, related_name='games_as_player2', on_delete=models.CASCADE)
-    player1_state = models.CharField(max_length=255, blank=True)
-    player2_state = models.CharField(max_length=255, blank=True)
-    player1_score = models.IntegerField(default=0)
-    player2_score = models.IntegerField(default=0)
-    winner = models.ForeignKey(User, related_name='won_games', on_delete=models.SET_NULL, null=True, blank=True)
+class Tournament(models.Model):
+    start_time = models.DateTimeField()
+    round_count = models.PositiveIntegerField()
+    winner = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"Game between {self.player1.username} and {self.player2.username}"
+        return f"Tournament {self.id}"
+
+class Round(models.Model):
+    tournament = models.ForeignKey(Tournament, related_name='rounds', on_delete=models.CASCADE)
+    round_number = models.PositiveIntegerField()
+    matches = models.JSONField(default=dict)  # { "match1": match_id, "match2": match_id }
+    teams = models.JSONField(default=dict)  # { "team01": "a vs b", "team02": "c vs d", "waiting_players": "lol" }
+
+    def __str__(self):
+        return f"Round {self.round_number} of Tournament {self.tournament.id}"
+
+class Match(models.Model):
+    round = models.ForeignKey(Round, related_name='match_list', on_delete=models.CASCADE, null=True, blank=True)
+    player1_username = models.CharField(max_length=100)
+    player2_username = models.CharField(max_length=100)
+    player1_score = models.PositiveIntegerField()
+    player2_score = models.PositiveIntegerField()
+    winner_username = models.CharField(max_length=100, blank=True, null=True)
+    match_start_time = models.DateTimeField()
+    match_finish_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Match {self.id} of Round {self.round.round_number} in Tournament {self.round.tournament.id}"

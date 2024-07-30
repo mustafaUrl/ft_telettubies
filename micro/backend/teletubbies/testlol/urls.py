@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/chat/', include('channellol.urls')),
     path('api/user/', include('userlol.urls')),
     path('api/2fa/', include('twofa.urls')),
+    path('api/game/', include('game.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

@@ -6,10 +6,17 @@ while ! nc -z db 5432; do
   sleep 2
 done
 
-# Run migrations and create superuser
+# Run migrations
 python ../code/manage.py makemigrations
 python ../code/manage.py migrate
-echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$POSTGRES_USER', '$SUPERUSER_EMAIL', '$POSTGRES_PASSWORD')" | python ../code/manage.py shell
+
+# Check if superuser already exists, if not create one
+python ../code/manage.py shell -c "
+from django.contrib.auth import get_user_model; 
+User = get_user_model(); 
+if not User.objects.filter(username='$POSTGRES_USER').exists(): 
+    User.objects.create_superuser(username='$POSTGRES_USER', email='$SUPERUSER_EMAIL', password='$POSTGRES_PASSWORD')
+"
 
 # Start the Django development server
 python ../code/manage.py runserver 0.0.0.0:8000

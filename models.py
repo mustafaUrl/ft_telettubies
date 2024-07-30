@@ -65,7 +65,6 @@ class PongMatch(models.Model):
 
 
 ###second example  
-
 from django.db import models
 
 class Tournament(models.Model):
@@ -79,8 +78,8 @@ class Tournament(models.Model):
 class Round(models.Model):
     tournament = models.ForeignKey(Tournament, related_name='rounds', on_delete=models.CASCADE)
     round_number = models.PositiveIntegerField()
-    match_ids = models.CharField(max_length=255)
-    teams = models.CharField(max_length=255, blank=True, null=True)
+    matches = models.JSONField(default=dict)  # { "match1": match_id, "match2": match_id }
+    teams = models.JSONField(default=dict)  # { "team01": "a vs b", "team02": "c vs d", "waiting_players": "lol" }
 
     def __str__(self):
         return f"Round {self.round_number} of Tournament {self.tournament.id}"
