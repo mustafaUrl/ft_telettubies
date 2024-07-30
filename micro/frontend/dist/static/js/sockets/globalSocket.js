@@ -26,6 +26,7 @@ export default function openSocket() {
       console.log('Data:', data); // Debug data structure
   
       for (const [tournament, details] of Object.entries(tournaments)) {
+          console.log('Tournament:', tournament, 'Details:', details);  
           const startTimeUtc = new Date(details.start_time);
           const localStartTime = startTimeUtc.toLocaleString();
           const currentTime = new Date();
@@ -50,6 +51,7 @@ export default function openSocket() {
           let roundsHtml = '';
   
           if (details.status === 'started') {
+              console.log('details', details);
               if (Object.keys(details.rounds).length > 0) {
                   roundsHtml = `
                       <h5>Rounds:</h5>
@@ -57,11 +59,19 @@ export default function openSocket() {
                           <div>
                               <h6>${round}</h6>
                               <ul>
-                                  ${matches.map(match => `
-                                      <li>${match.join(' vs ')} 
-                                          <button class="btn btn-primary btn-sm playButton" data-tournament="${tournament}" data-player1="${match[0]}" data-player2="${match[1]}">Play</button>
-                                      </li>
-                                  `).join('')}
+                                  ${matches.map(match => {
+                                      // Check if match is an array before using join
+                                      if (Array.isArray(match) && match.length === 2) {
+                                          return `
+                                              <li>${match.join(' vs ')} 
+                                                  <button class="btn btn-primary btn-sm playButton" data-tournament="${tournament}" data-player1="${match[0]}" data-player2="${match[1]}">Play</button>
+                                              </li>
+                                          `;
+                                      } else {
+                                          // Handle cases where match is not a player array
+                                          return '';
+                                      }
+                                  }).join('')}
                               </ul>
                           </div>
                       `).join('')}
@@ -106,6 +116,7 @@ export default function openSocket() {
               const startButton = document.createElement('button');
               startButton.className = 'btn btn-success startTournamentButton';
               startButton.dataset.tournament = tournament;
+              startButton.dataset.rounds = details.rounds;
               startButton.textContent = 'Start Tournament';
               startButton.addEventListener('click', () => {
                   if (window.chatSocket) {
@@ -132,11 +143,14 @@ export default function openSocket() {
           button.addEventListener('click', (event) => {
               const player1 = event.target.dataset.player1;
               const player2 = event.target.dataset.player2;
-              const gameMode = event.target.dataset.tournament;
-              startGame(player1, player2, gameMode);
+              const tournament_name = event.target.dataset.tournament;
+              const rounds = event.target.dataset.rounds;
+              console.log('ronddddd ', rounds);
+              startGame(player1, player2, "tournament", tournament_name);
           });
       });
-  }  
+  }
+   
 else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');

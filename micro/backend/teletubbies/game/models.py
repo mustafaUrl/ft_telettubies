@@ -1,6 +1,7 @@
 from django.db import models
 
 class Tournament(models.Model):
+    name = models.CharField(max_length=100, default="Default Tournament Name")
     start_time = models.DateTimeField()
     round_count = models.PositiveIntegerField()
     winner = models.CharField(max_length=100, blank=True, null=True)

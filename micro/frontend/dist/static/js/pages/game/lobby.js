@@ -413,7 +413,7 @@ function startNextMatch(tournamentName, tournamentData) {
     // const matchId = `match-${gameMode}-${tournamentData.currentMatch}`;
 
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    startGame(match[0], match[1], tournamentName); // Start the game for this match
+    startGame(match[0], match[1], "tournament",tournamentName); // Start the game for this match
   } else {
     // No more matches left, check if there are winners to proceed
     if ( tournamentData.waitingPlayer) {

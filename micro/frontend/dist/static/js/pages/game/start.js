@@ -1,6 +1,7 @@
 import game from './game.js';
+import { getCookie } from '../../cookies/cookies.js';
 
-export default function startGame(player1Name, player2Name, gameMode) {
+export default function startGame(player1Name, player2Name, gameMode, tournamentName = null , roundId = null) {
 
 
 function showWinner(winner) {
@@ -25,7 +26,7 @@ function showWinner(winner) {
     document.getElementById('scoreBoard').style.display = 'block';
   
     const matchResult = {
-      round_id: "",
+      tournament_name: "",
       player1_username: player1Name,
       player2_username: player2Name,
       player1_score: "",
@@ -62,7 +63,9 @@ function showWinner(winner) {
           matchResult.player1_username = player1Name;
           matchResult.player2_username = player2Name;
         } else {
-          console.error('Invalid game mode:', gameMode);
+          matchResult.player1_username = player1Name;
+          matchResult.player2_username = player2Name;
+          matchResult.tournament_name = gameMode;
         }
   
         const accessToken = getCookie('accessToken'); // Assuming the cookie name is 'accessToken'

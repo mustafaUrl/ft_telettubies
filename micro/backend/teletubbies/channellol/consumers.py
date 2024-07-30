@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 import logging
 from datetime import datetime, timezone
 import random
+import math
+from game.models import Tournament, Round, Match
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -221,20 +223,58 @@ class ChatConsumer(AsyncWebsocketConsumer):
     ############################################################################################################
     ############################################################################################################
 
+
     async def start_tournament(self, tournament_name):
         if tournament_name in ChatConsumer.tournaments:
             ChatConsumer.tournaments[tournament_name]["status"] = "started"
             teams = list(ChatConsumer.tournaments[tournament_name]["players"])
-            # Create initial round matches
+            round_count = math.ceil(math.log2(len(teams)))  # Takım sayısını log2 ile hesaplayarak tur sayısını bul
+
+            # İlk tur eşleşmelerini oluştur
             if len(teams) % 2 == 1:
-                ChatConsumer.tournaments[tournament_name]["waiting_player"] = teams.pop()
+                waiting_player = teams.pop()  # Eğer tek sayıda takım varsa, bir takımı beklemeye al
+                ChatConsumer.tournaments[tournament_name]["waiting_player"] = waiting_player 
+            else:
+                waiting_player = None
+ 
+           
+
             round_1_matches = self.create_matches(teams)
-            ChatConsumer.tournaments[tournament_name]["rounds"] = {"round_1": round_1_matches}
+
+            if waiting_player:
+                round_1_matches.append({"waiting_player": waiting_player})
+
+            ChatConsumer.tournaments[tournament_name]["rounds"] = {"round_1": round_1_matches }
+
+            await self.create_objects(tournament_name, round_count, round_1_matches)
+
             await self.update_tournaments()
-            logging.info("Tournament %s started rounds %s", tournament_name , ChatConsumer.tournaments[tournament_name]["rounds"])
+            logging.info("Tournament %s started with rounds %s", tournament_name, ChatConsumer.tournaments[tournament_name]["rounds"])
         else:
-            # Handle tournament not found
-            pass
+            # Turnuva bulunamazsa yapılacak işlemler
+            logging.error("Tournament %s not found", tournament_name)
+
+    @database_sync_to_async
+    def create_objects(self, tournament_name, round_count, round_1_matches):
+        # Turnuva nesnesi oluştur
+        tournament = Tournament.objects.create(
+            name=tournament_name,
+            start_time=datetime.now(),
+            round_count=round_count,
+            winner=""
+        )
+
+        # Tur nesneleri oluştur
+        for i in range(1, round_count + 1):
+            round = Round.objects.create(
+                tournament=tournament,
+                round_number=i,
+                matches={},
+                teams={} if i > 1 else round_1_matches,  
+            )
+
+        tournament.save()
+      
 
     def create_matches(self, players):
         if len(players) < 2:

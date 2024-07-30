@@ -17,7 +17,14 @@ logger = logging.getLogger(__name__)
 def create_match(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        round_instance = None
+        
+        if data['tournament_name'] == '':
+            round_instance = None
+        else:
+            try:
+                round_instance = Round.objects.get(tournament_name=data['tournament_name'])
+            except ObjectDoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Tournament not found'}, status=404)
         # Check if round_id is provided and is a valid integer
         if 'round_id' in data and data['round_id'].isdigit():
             round_instance = get_object_or_404(Round, id=int(data['round_id']))
