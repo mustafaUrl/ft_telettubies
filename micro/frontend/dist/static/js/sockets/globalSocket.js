@@ -1,5 +1,5 @@
 import { getCookie } from '../cookies/cookies.js';
-
+import  startGame  from '../pages/game/start.js';
 window.chatSocket = '';
 
 export default function openSocket() {
@@ -17,12 +17,11 @@ export default function openSocket() {
     }else if (data.type === 'tournaments') {
       const tournaments = data.tournaments;
       const tournamentList = document.getElementById('tournamentList');
-      if (!tournamentList) { 
+      if (!tournamentList) {
           return;
       }
       tournamentList.innerHTML = '';
   
-      // Collect host information
       const username = getCookie('username');
       console.log('Data:', data); // Debug data structure
   
@@ -33,16 +32,13 @@ export default function openSocket() {
           console.log('Current Time:', currentTime, 'Start Time:', startTimeUtc, 'Local Start Time:', localStartTime);
           const joinTime = startTimeUtc > currentTime;
   
-          // Check if the user is already a participant
           const userJoined = details.players.includes(username);
           const checkTime = startTimeUtc - currentTime;
           console.log('Check Time:', checkTime);
   
-          // If the difference is positive (start time is in the future)
           if (checkTime > 0) {
               setTimeout(() => {
                   console.log('Scheduled check time function executed!');
-                  // Call your function here
                   checkTimeFunction();
               }, checkTime);
           }
@@ -50,12 +46,10 @@ export default function openSocket() {
           const li = document.createElement('li');
           li.className = 'list-group-item';
   
-          // Create HTML structure for each tournament
           let playerListHtml = '';
           let roundsHtml = '';
   
           if (details.status === 'started') {
-              // Show rounds and hide player list
               if (Object.keys(details.rounds).length > 0) {
                   roundsHtml = `
                       <h5>Rounds:</h5>
@@ -64,22 +58,22 @@ export default function openSocket() {
                               <h6>${round}</h6>
                               <ul>
                                   ${matches.map(match => `
-                                      <li>${match.join(' vs ')}</li>
+                                      <li>${match.join(' vs ')} 
+                                          <button class="btn btn-primary btn-sm playButton" data-tournament="${tournament}" data-player1="${match[0]}" data-player2="${match[1]}">Play</button>
+                                      </li>
                                   `).join('')}
                               </ul>
                           </div>
                       `).join('')}
                       <h5>Waiting Players:</h5>
                       <ul>
-                      <ul>
                         ${details.waiting_player ? `<li>${details.waiting_player}</li>` : '<li>No waiting player</li>'}
-                    </ul>
+                      </ul>
                   `;
               } else {
                   roundsHtml = '<p>No rounds available.</p>';
               }
           } else {
-              // Show player list and other details
               playerListHtml = `
                   <ul id="participantList">
                       ${(details.players || []).map(name => `
@@ -99,7 +93,6 @@ export default function openSocket() {
               ${playerListHtml}
           `;
   
-          // Conditionally add Join and Leave buttons
           if (joinTime && !userJoined) {
               li.innerHTML += `<button class="btn btn-primary joinTournamentButton" data-tournament="${tournament}">Join Tournament</button>`;
           }
@@ -109,8 +102,7 @@ export default function openSocket() {
               li.innerHTML += '<h7>Join Time is Over</h7>';
           }
   
-          // Add Start button for the host after the join time is over
-          if (!joinTime && username === details.host) {
+          if (!joinTime && username === details.host && details.status !== 'started') {
               const startButton = document.createElement('button');
               startButton.className = 'btn btn-success startTournamentButton';
               startButton.dataset.tournament = tournament;
@@ -133,9 +125,18 @@ export default function openSocket() {
       // Reapply event listeners for join and leave buttons
       updateTournamentButtons();
       updateKickButtons();
-  }
   
-  
+      // Add event listeners for play buttons
+      const playButtons = document.querySelectorAll('.playButton');
+      playButtons.forEach(button => {
+          button.addEventListener('click', (event) => {
+              const player1 = event.target.dataset.player1;
+              const player2 = event.target.dataset.player2;
+              const gameMode = event.target.dataset.tournament;
+              startGame(player1, player2, gameMode);
+          });
+      });
+  }  
 else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');
