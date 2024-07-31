@@ -1,15 +1,10 @@
-
-from .models import Match, Round
+from .models import Match
 import json
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from django.http import JsonResponse
-from django.core.exceptions import ObjectDoesNotExist
-import logging
 from django.shortcuts import get_object_or_404
-
-logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -17,19 +12,11 @@ logger = logging.getLogger(__name__)
 def create_match(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+
+
         
-        if data['tournament_name'] == '':
-            round_instance = None
-        else:
-            try:
-                round_instance = Round.objects.get(tournament_name=data['tournament_name'])
-            except ObjectDoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Tournament not found'}, status=404)
-        # Check if round_id is provided and is a valid integer
-        if 'round_id' in data and data['round_id'].isdigit():
-            round_instance = get_object_or_404(Round, id=int(data['round_id']))
         match = Match.objects.create(
-            round=round_instance,
+            game_mode=data['game_mode'],
             player1_username=data['player1_username'],
             player2_username=data['player2_username'],
             player1_score=data['player1_score'],
@@ -38,6 +25,10 @@ def create_match(request):
             match_start_time=data['match_start_time'],
             match_finish_time=data['match_finish_time']
         )
+        if 'tournament_name' in data:
+            match.tournament_name = data['tournament_name']
+            match.round = data['round_id']
+        match.save()
         return JsonResponse({'id': match.id, 'status': 'success'})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)

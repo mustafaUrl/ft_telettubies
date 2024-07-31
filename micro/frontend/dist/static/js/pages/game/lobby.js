@@ -1,6 +1,6 @@
 import game from './game.js';
 import { getCookie } from '../../cookies/cookies.js';
-import startGame from './start.js';
+import {startGame} from './start.js';
 export default function lobby() {
   // Select the main-content div
   const gameContainer = document.getElementById('main-content');
@@ -177,44 +177,7 @@ export default function lobby() {
   });
 
 
-/* // Submit Tournament Button
-document.getElementById('submitTournament').addEventListener('click', () => {
-  const tournamentName = document.getElementById('tournamentName').value.trim(); // Get tournament name
-  const numPlayers = parseInt(document.getElementById('numPlayers').value);
-  if (numPlayers > 15 || numPlayers < 2) {
-    alert('The number of players must be between 2 and 15.');
-    return;
-  }
 
-  const playerNames = [];
-  const usedNames = new Set(); // To store used names
-
-  for (let i = 0; i < numPlayers; i++) {
-    const playerName = document.getElementById(`playerName${i}`).value.trim(); // Trim whitespace
-
-    // Check for empty names
-    if (playerName === '') {
-      alert('Player names cannot be empty.');
-      return;
-    }
-
-    // Check for duplicate names
-    if (usedNames.has(playerName)) {
-      alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
-      return;
-    }
-
-    playerNames.push(playerName);
-    usedNames.add(playerName); // Add name to set to track uniqueness
-  }
-
-  //createTournament(tournamentName, playerNames);
-
-  // Close the modal after creating the tournament
-  const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
-  tournamentModal.hide();
-});
- */
 
 
 // Submit Tournament Button
@@ -337,125 +300,6 @@ function rebuildPlayerNameFields(numPlayers) {
       playerNamesContainer.appendChild(playerNameDiv);
   }
 }
-
-
-// Tournament data storage
-const tournaments = {};
-
-
-// Adjusted createTournament function
-function createTournament(tournamentName, playerNames) {
-  console.log('Tournament created with players:', playerNames);
-  const tournamentList = document.getElementById('tournamentList');
-  tournamentList.innerHTML = '';
-
-  // Shuffle player names to randomize teams
-  const shuffledPlayers = shuffleArray(playerNames);
-
-  // If odd number of players, keep the last player in waiting
-  let waitingPlayer = null;
-  if (shuffledPlayers.length % 2 !== 0) {
-    waitingPlayer = shuffledPlayers.pop();
-  }
-
-  // Create teams
-  const teams = [];
-  for (let i = 0; i < shuffledPlayers.length; i += 2) {
-    const team = [shuffledPlayers[i], shuffledPlayers[i + 1]];
-    teams.push(team);
-  }
-
-
-
-  // Store tournament data
-  tournaments[tournamentName] = {
-    teams: teams,
-    waitingPlayer: waitingPlayer,
-    currentMatch: 0,
-    winners: []
-  };
-
-    // // Add waiting player if there is one
-    // if (waitingPlayer) {
-    //   tournaments.winners.push([waitingPlayer]);
-    // }
-
-  // Display tournament name and teams in tournament list (you may adjust this part based on your HTML structure)
-  const tournamentItem = document.createElement('li');
-  tournamentItem.className = 'list-group-item';
-  tournamentItem.innerHTML = `
-    <div>${tournamentName}</div>
-    <ul id="matches-${tournamentName}">
-      ${teams.map((team, index) => `<li id="match-${tournamentName}-${index}">Match ${index + 1}: ${team.join(' vs ')}</li>`).join('')}
-      ${waitingPlayer ? `<li id="waiting-${tournamentName}">Waiting: ${waitingPlayer}</li>` : ''}
-    </ul>
-    <button class="btn btn-primary" onclick="startTournament('${tournamentName}')">Start Tournament</button>
-  `;
-  tournamentList.appendChild(tournamentItem);
-}
-
-
-// Function to shuffle array (Fisher-Yates shuffle)
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function startNextMatch(tournamentName, tournamentData) {
-  // Check if there are still matches left in the current tournament
-  
-  
-  if (tournamentData.currentMatch < tournamentData.teams.length) {
-    const match = tournamentData.teams[tournamentData.currentMatch];
-    // const matchId = `match-${gameMode}-${tournamentData.currentMatch}`;
-
-    console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    startGame(match[0], match[1], "tournament",tournamentName); // Start the game for this match
-  } else {
-    // No more matches left, check if there are winners to proceed
-    if ( tournamentData.waitingPlayer) {
-      tournaments[tournamentName].winners.push( tournamentData.waitingPlayer); // Add winner to the array
-      tournamentData.waitingPlayer = null;
-    }
-    if (tournamentData.winners.length > 1) {
-      console.log(`Proceeding to next round with winners: ${tournamentData.winners}`);
-      tournamentData.teams = [];
-      
-      // Create teams for the next round
-      while (tournamentData.winners.length > 1) {
-        const team = [tournamentData.winners.shift(), tournamentData.winners.shift()];
-        tournamentData.teams.push(team);
-      }
-      
-      
-      
-      tournamentData.currentMatch = 0; // Reset current match for the next round
-      startNextMatch(tournamentName, tournamentData); // Start the next round
-    } else {
-      // Declare the winner of the tournament
-      console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
-      alert(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
-    }
-  }
-}
-
-
-// Ensure startTournament function is properly defined
-window.startTournament = function(tournamentName) {
-  console.log(`Starting tournament: ${tournamentName}`);
-  const tournamentData = tournaments[tournamentName];
-  if (!tournamentData) {
-    console.error(`Tournament ${tournamentName} not found.`);
-    return;
-  }
-  startNextMatch(tournamentName, tournamentData);
-};
-
-
-
 
   // Add event listener to Create Game button to open game creation modal
   document.getElementById('createGameButton').addEventListener('click', () => {

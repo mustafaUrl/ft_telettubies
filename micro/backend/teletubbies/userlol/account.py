@@ -6,7 +6,7 @@ from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import UserProfile
 from django.shortcuts import get_object_or_404
-
+from game.models import Match
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -76,3 +76,18 @@ def update_profile_pic(request):
         return JsonResponse({'new_profile_pic_url': uploaded_file_url}, status=200)
     else:
         return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def get_match_history(request):
+    user = request.user
+    # Filter matches where the user is either player1 or player2
+    matches = Match.objects.filter(
+        player1_username=user.username
+    ).union(
+        Match.objects.filter(player2_username=user.username)
+    ).values()
+
+    return JsonResponse(list(matches), safe=False)

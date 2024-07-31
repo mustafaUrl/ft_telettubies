@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 import random
 import math
-from game.models import Tournament, Round, Match
+from game.models import  Match
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -239,41 +239,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
  
            
 
-            round_1_matches = self.create_matches(teams)
 
-            if waiting_player:
-                round_1_matches.append({"waiting_player": waiting_player})
-
-            ChatConsumer.tournaments[tournament_name]["rounds"] = {"round_1": round_1_matches }
-
-            await self.create_objects(tournament_name, round_count, round_1_matches)
 
             await self.update_tournaments()
-            logging.info("Tournament %s started with rounds %s", tournament_name, ChatConsumer.tournaments[tournament_name]["rounds"])
         else:
             # Turnuva bulunamazsa yapılacak işlemler
             logging.error("Tournament %s not found", tournament_name)
 
-    @database_sync_to_async
-    def create_objects(self, tournament_name, round_count, round_1_matches):
-        # Turnuva nesnesi oluştur
-        tournament = Tournament.objects.create(
-            name=tournament_name,
-            start_time=datetime.now(),
-            round_count=round_count,
-            winner=""
-        )
-
-        # Tur nesneleri oluştur
-        for i in range(1, round_count + 1):
-            round = Round.objects.create(
-                tournament=tournament,
-                round_number=i,
-                matches={},
-                teams={} if i > 1 else round_1_matches,  
-            )
-
-        tournament.save()
       
 
     def create_matches(self, players):

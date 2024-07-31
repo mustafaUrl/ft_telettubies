@@ -1,3 +1,0 @@
-addfriendListener();
-listFriends();
-pendingFriendRequests();
