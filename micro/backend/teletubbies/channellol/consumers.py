@@ -216,6 +216,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif command == "start":
             if username == ChatConsumer.tournaments[room]["host"]:
                await self.start_tournament(room)
+        elif command == "update_notification":
+            await self.update_notification(self.user)
         else:
             message = text_data_json["message"]
             await self.channel_layer.group_send(
@@ -230,7 +232,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     ############################################################################################################
     ############################################################################################################
 
-
+    async def update_notification(self, user):
+        await self.channel_layer.group_send(
+            self.roomGroupName, {
+                'type': 'send_notifications',
+            }
+        )
     async def start_tournament(self, tournament_name):
         if tournament_name in ChatConsumer.tournaments:
             ChatConsumer.tournaments[tournament_name]["status"] = "started"
@@ -375,11 +382,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
 
-    @staticmethod
-    async def update_user_status(user, is_online):
-        # Implement your user status update logic here
-        pass
-
     async def sendMessage(self, event):
         message = event["message"]
         username = event["username"]
@@ -415,7 +417,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "online_players",
                 'players': online_players_list
             }))
-
+    async def send_notifications(self, event):
+        if not self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                "type": "invite_notification",
+            }))
 
     async def tournaments_send(self, event):
         tournaments_list = event["tournaments_list"]

@@ -8,10 +8,35 @@ import triggerContentLoad from './gatePage/gatePage.js';
 import profileTrigger from './pages/profile/profileTrigger.js';
 import ft_login from './pages/login/42login.js';
 // import changeContent from './uimodule/changeContent.js';
+import { get_notifications, get_notifications_count } from './uimodule/notifications.js';
 
 deleteCookie('contentData');
 
-      
+
+// Event listener for notification icon click
+document.getElementById('notificationIcon').addEventListener('click', async function() {
+  get_notifications();
+});
+
+// Fetch notifications count when the page loads
+window.onload = function() {
+  get_notifications_count();
+};
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.closest('.notification-icon')) {
+      const dropdowns = document.getElementsByClassName('dropdown-menu');
+      for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+              openDropdown.classList.remove('show');
+          }
+      }
+  }
+}
+
+
 checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {

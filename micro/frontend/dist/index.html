@@ -28,10 +28,14 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div id="notificationIcon" class="notification-icon">
-        🔔 <!-- Bildirim ikonu -->
-        <span id="notificationCount" class="notification-count">0</span> <!-- Sayaç -->
+        🔔 <!-- Notification icon -->
+        <span id="notificationCount" class="badge badge-pill badge-danger">0</span> <!-- Counter -->
+        <div id="notificationDropdown" class="dropdown-menu dropdown-menu-right">
+            <div id="notificationContent" class="notification-content">
+                <!-- Invite notifications will be appended here -->
+            </div>
+        </div>
       </div>
-      <button id="notification_button" style="display:none;">Bildirimler</button>
 
     
       <div id="navcol-2" class="collapse navbar-collapse">

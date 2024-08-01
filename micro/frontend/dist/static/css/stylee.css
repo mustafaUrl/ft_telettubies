@@ -307,3 +307,27 @@ body{
   background-position: center;
   
 }
+
+
+.notification-icon {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.notification-content {
+  max-height: 300px;
+  overflow-y: auto;
+  width: 300px; /* Adjust the width as needed */
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-invite {
+  color: red;
+  cursor: pointer;
+}

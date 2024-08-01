@@ -1,6 +1,11 @@
 import { getCookie } from '../cookies/cookies.js';
-import  {startGame, createTournament, startNextMatch}  from '../pages/game/start.js';
+import  {createTournament}  from '../pages/game/start.js';
+import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
+import { get_notifications_count } from '../uimodule/notifications.js';
 window.chatSocket = '';
+
+
+
 
 export default function openSocket() {
   if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
@@ -20,6 +25,10 @@ export default function openSocket() {
       updateTournamentButtons();
 
     }
+    else if (data.type === 'invite_notification') {
+      get_notifications_count();
+
+      }
     else {
       const chatMessages = document.getElementById('chat_messages1');
       const messageDiv = document.createElement('div');

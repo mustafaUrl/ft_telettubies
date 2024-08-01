@@ -121,3 +121,34 @@ def invite_user(request):
         'message': f'Invitation sent to {invited_user} with code {invite_code}.',
         'invite_code': invite_code
     }, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def invite_notifications(request):
+    invited_user = request.user.username  # get the current user's username
+    invites = Invite.objects.filter(invited_user=invited_user).values('invite_code', 'inviting')
+
+    if not invites:
+        return JsonResponse({'error': 'No invites found for the user.'}, status=status.HTTP_404_NOT_FOUND)
+
+    return JsonResponse({
+        'invites': list(invites)
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def delete_invite(request):
+    invite_code = request.data.get('invite_code')
+    
+    if not invite_code:
+        return JsonResponse({'success': False, 'error': 'No invite code provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        invite = Invite.objects.get(invite_code=invite_code)
+        invite.delete()
+        return JsonResponse({'success': True, 'message': 'Invite deleted successfully.'}, status=status.HTTP_200_OK)
+    except Invite.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Invite not found.'}, status=status.HTTP_404_NOT_FOUND)

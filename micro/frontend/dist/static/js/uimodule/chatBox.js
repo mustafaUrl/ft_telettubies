@@ -197,6 +197,12 @@ function inviteUser(username) {
   sendPostWithJwt('api/user/invite_user/', {username}, 'POST')
     .then(response => {
       console.log('Invitation sent:', response);
+      window.chatSocket.send(JSON.stringify({
+        'message': message,
+        'username': getCookie('username'),
+        'room': 'global',
+        'command': 'update_notification',
+      }));
       
     })
     .catch(error => {
