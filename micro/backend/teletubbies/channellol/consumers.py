@@ -21,22 +21,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
             # Arkadaş listesini çek
-        friend_usernames = await self.get_friend_usernames(self.user)
 
-        if not friend_usernames:
-            await self.close()
-            return
-
-        # Her arkadaş için oda oluştur
-        self.rooms = {}
-        for friend_username in friend_usernames:
-            room_name = self.generate_room_name(self.user.username, friend_username)
-            self.rooms[friend_username] = room_name
-            room_group_name = f'chat_{room_name}'
-            await self.channel_layer.group_add(
-                room_group_name,
-                self.channel_name
-            )
+        await self.update_room_name()
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -118,7 +104,29 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                         'username': self.user.username  # Oda adını da ekleyin
                     }
                 )
-
+    async def update_room_name(self):
+        friend_usernames = await self.get_friend_usernames(self.user)
+        
+        # Remove old rooms not in the updated friend list
+        for friend_username in list(self.rooms.keys()):
+            if friend_username not in friend_usernames:
+                room_name = self.rooms.pop(friend_username)
+                room_group_name = f'chat_{room_name}'
+                await self.channel_layer.group_discard(
+                    room_group_name,
+                    self.channel_name
+                )
+        
+        # Add new rooms from the updated friend list
+        for friend_username in friend_usernames:
+            if friend_username not in self.rooms:
+                room_name = self.generate_room_name(self.user.username, friend_username)
+                self.rooms[friend_username] = room_name
+                room_group_name = f'chat_{room_name}'
+                await self.channel_layer.group_add(
+                    room_group_name,
+                    self.channel_name
+                )
     async def chat_message(self, event):
         message = event['message']
         username = event['username']  # Oda adını event'ten alın
