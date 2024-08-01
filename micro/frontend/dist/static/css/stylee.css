@@ -112,7 +112,7 @@
 }
 
 #chat_send {
-  width: 35px; /* Reduced width */
+  width: 40px; /* Reduced width */
   padding: 6px; /* Reduced padding */
   border: none;
   border-radius: 8px;
@@ -121,6 +121,8 @@
   cursor: pointer;
   transition: background-color 0.3s;
   font-size: 12px; /* Smaller font size */
+  margin-left: 220px; /* Adjusted spacing */
+  margin-top: -30px; /* Adjusted spacing */
 }
 
 #chat_send:hover {
