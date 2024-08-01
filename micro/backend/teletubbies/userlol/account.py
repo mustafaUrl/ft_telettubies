@@ -10,12 +10,14 @@ from game.models import Match, Invite
 import random
 import string
 from rest_framework import status
+from django.utils.translation import gettext as _
+import logging
 
+logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def update_user(request):
-    print(request.user)
     # POST request'ini kontrol et
     if request.method == 'POST':
         # JSON verisini yükle
@@ -152,3 +154,31 @@ def delete_invite(request):
         return JsonResponse({'success': True, 'message': 'Invite deleted successfully.'}, status=status.HTTP_200_OK)
     except Invite.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Invite not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+@api_view(['POST'])  # Use POST instead of DELETE for validation
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def validate_invite_code(request):
+    invite_code = request.data.get('invite_code')
+    logger.info("Validating invite code: %s", invite_code)
+    if not invite_code:
+        return JsonResponse({'success': False, 'error': _('No invite code provided.')}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        invite = Invite.objects.get(invite_code=invite_code)
+        logger.info("Invite found: %s", invite)
+        # Check if the requesting user is the one who created the invite
+        if invite.inviting != request.user.username:
+            return JsonResponse({'success': False, 'error': _('You are not authorized to use this invite code.')}, status=status.HTTP_403_FORBIDDEN)
+        logger.info("Invite code validated successfully.")
+        return JsonResponse({'success': True, 'inviting_user': invite.invited_user}, status=status.HTTP_200_OK)
+    
+    except Invite.DoesNotExist:
+        return JsonResponse({'success': False, 'error': _('Invite code not found.')}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as e:
+        # Log the exception details for debugging
+        logger.exception("An unexpected error occurred. %s", str(e))
+        return JsonResponse({'success': False, 'error': _('An unexpected error occurred.')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

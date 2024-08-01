@@ -1,6 +1,28 @@
 import game from './game.js';
 import { getCookie } from '../../cookies/cookies.js';
 import {startGame} from './start.js';
+import  sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
+
+async function validateInviteCode(inviteCode) {
+  try {
+    const response = await sendPostWithJwt('api/user/validate_invite_code/', { invite_code: inviteCode }, 'POST');
+
+    if (response.success) {
+      const invitingUser = response.inviting_user;
+      console.log('Invite code is valid. Inviting user:', invitingUser);
+      return invitingUser;
+    } else {
+      alert('Invalid invite code.');
+      return null;
+    }
+  } catch (error) {
+    console.error('An error occurred while validating the invite code:', error);
+    alert('An error occurred while validating the invite code. Please try again later.');
+    return null;
+  }
+}
+
+
 export default function lobby() {
   // Select the main-content div
   const gameContainer = document.getElementById('main-content');
@@ -134,7 +156,6 @@ export default function lobby() {
           </div>
           <div class="mb-3" id="player2NameContainer">
             <label for="player2Name" class="form-label">Player 2 Name</label>
-            <!-- Player 2 name input based on game mode selection -->
             <input type="text" class="form-control" id="player2Name" required>
           </div>
           <!-- Invite Code input for invited game mode -->
@@ -307,37 +328,55 @@ function rebuildPlayerNameFields(numPlayers) {
       gameModal.show();
   });
 
- // Add event listener to submit game form
-document.getElementById('submitGame').addEventListener('click', () => {
-  const player2Name = document.getElementById('player2Name').value;
-  const gameMode = document.getElementById('gameMode').value;
-  let inviteCode = null;
 
-  if (gameMode === 'invited') {
-    inviteCode = document.getElementById('inviteCode').value;
-    // Check if invite code is valid (for example, check if it's 42)
-    if (inviteCode !== '42') {
-      alert('Invalid invite code.');
+ 
+  document.getElementById('gameMode').addEventListener('change', function() {
+    const gameMode = this.value;
+    const inviteCodeContainer = document.getElementById('inviteCodeContainer');
+    const player2NameContainer = document.getElementById('player2NameContainer');
+    
+    if (gameMode === 'invited') {
+      inviteCodeContainer.style.display = 'block';
+      player2NameContainer.style.display = 'none'; // Hide player2Name input
+    } else {
+      inviteCodeContainer.style.display = 'none';
+      player2NameContainer.style.display = 'block'; // Show player2Name input
+    }
+  });
+  
+  document.getElementById('submitGame').addEventListener('click', async () => {
+    const gameMode = document.getElementById('gameMode').value;
+    let player2Name = document.getElementById('player2Name').value;
+    let inviteCode = null;
+  
+    if (gameMode === 'invited') {
+      inviteCode = document.getElementById('inviteCode').value;
+      const invited = await validateInviteCode(inviteCode); // Await the promise
+  
+      if (!invited) {
+        alert('Invalid invite code');
+        return;
+      }
+      player2Name = invited;
+    }
+  
+    if (player1Name === player2Name) {
+      alert('Player names cannot be the same.');
       return;
     }
-  }
-
+    if (!player1Name || !player2Name) {
+      alert('Both player names are required.');
+      return;
+    }
   
-  if (player1Name === player2Name) {
-    alert('Player names cannot be the same.');
-    return;
-  }
-  if (!player1Name || !player2Name) {
-    alert('Both player names are required.');
-    return;
-  }
-
-  startGame(player1Name, player2Name, gameMode);
-
-  // Close the modal after creating the game
-  const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
-  gameModal.hide();
-});
+    startGame(player1Name, player2Name, gameMode);
+  
+    // Close the modal after creating the game
+    const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
+    gameModal.hide();
+  });
+  
+  
 
 
 
@@ -345,16 +384,8 @@ document.getElementById('submitGame').addEventListener('click', () => {
 document.getElementById('resetButton').addEventListener('click', () => {
   const player2Name = document.getElementById('player2Name').value;
   const gameMode = document.getElementById('gameMode').value;
-  let inviteCode = null;
 
-  if (gameMode === 'invited') {
-    inviteCode = document.getElementById('inviteCode').value;
-    // Check if invite code is valid (for example, check if it's 42)
-    if (inviteCode !== '42') {
-      alert('Invalid invite code.');
-      return;
-    }
-  }
+  
 
   
   if (player1Name === player2Name) {
