@@ -1,6 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 import requests
 import os
@@ -75,7 +74,6 @@ def ft_auth(request):
     email = user_info.get('email')
     image = user_info.get('image')
     imageUrl = image["link"]
-    print(imageUrl)
     if User.objects.filter(username=username).exists():
         user = authenticate(username_or_email=username, password=password)
 
@@ -103,7 +101,7 @@ def ft_auth(request):
         user = User.objects.create_user(
             username=username, 
             email= user_info.get('email'), 
-            password=make_password(password), #hashli şifre için <3 
+            password=password, #hashli şifre için <3 
             first_name=user_info.get('first_name'), 
             last_name= user_info.get('last_name'),
             is_active=True
@@ -140,12 +138,10 @@ def ft_auth(request):
                 uploaded_file_url = uploaded_file_url[len(settings.MEDIA_URL):]
             
             # UserProfile modeline kaydedilen dosya yolunu ilişkilendirme
-            print(f"The image was successfully saved: {uploaded_file_url}")
             UserProfile.objects.create(
             user=user,
             profile_picture= uploaded_file_url  # Varsayılan resmin yolu
             )
-            print(f"The image was successfully saved: {uploaded_file_url}")
             
         else:
             UserProfile.objects.create(
