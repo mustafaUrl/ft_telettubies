@@ -50,14 +50,14 @@ function shuffleArray(array) {
   }
   return array;
 }
-
 function startNextMatch(tournamentName) {
   const tournamentData = tournaments[tournamentName];
 
   if (tournamentData.currentMatch < tournamentData.teams.length) {
     const match = tournamentData.teams[tournamentData.currentMatch];
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    startGame(match[0], match[1], "tournament", tournamentName,  tournamentData.currentMatch);
+    const round = (tournamentData.currentMatch + 1 === tournamentData.teams.length && tournamentData.winners.length === 1) ? 'final' : `${tournamentData.currentMatch + 1}`;
+    startGame(match[0], match[1], "tournament", tournamentName, round);
   } else {
     if (tournamentData.waitingPlayer) {
       tournamentData.winners.push(tournamentData.waitingPlayer);
@@ -142,7 +142,7 @@ function startGame(player1Name, player2Name, gameMode, tournamentName = null, ro
       matchResult.player1_username = player1Name;
       matchResult.player2_username = player2Name;
       matchResult.tournament_name = tournamentName;
-      matchResult.round_id = roundId + 1;
+      matchResult.round_id = roundId;
       console.log("roundddd: ", roundId);
     }
 

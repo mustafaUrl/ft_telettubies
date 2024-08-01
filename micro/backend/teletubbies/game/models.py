@@ -1,9 +1,9 @@
 from django.db import models
 
 class Match(models.Model):
-    game_mode = models.CharField(max_length=100, default='normal')  # Set a default value here
+    game_mode = models.CharField(max_length=100, default='normal')
     tournament_name = models.CharField(max_length=100, blank=True, null=True)
-    round = models.PositiveIntegerField(blank=True, null=True)  # Correct the typo from rouund to round
+    round = models.CharField(max_length=50, blank=True, null=True)  # Changed to CharField
     player1_username = models.CharField(max_length=100)
     player2_username = models.CharField(max_length=100)
     player1_score = models.PositiveIntegerField()
