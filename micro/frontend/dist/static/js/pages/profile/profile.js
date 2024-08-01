@@ -22,6 +22,10 @@ export default function profile() {
   const method = 'GET'; // Use GET method as defined in the Django view
 
   sendPostWithJwt(url, bodyData, method).then(matchHistory => {
+    const contentProfile = document.getElementById('content-profile2');
+    if (!contentProfile) {
+      return;
+    }
     console.log(matchHistory);
 
     let wins = 0;
@@ -35,17 +39,47 @@ export default function profile() {
       }
     });
 
-    const winLoseStats = `
+    contentProfile.innerHTML += `
       <div>
         <h3>Win-Lose Stats</h3>
-        <p>Wins: ${wins}</p>
-        <p>Losses: ${losses}</p>
+        <canvas id="winLoseChart" width="800" height="600"></canvas>
       </div>
     `;
 
-    const contentProfile = document.getElementById('content-profile2');
-    contentProfile.innerHTML += winLoseStats;
+    drawWinLoseChart(wins, losses);
   }).catch(error => {
     console.error('An error occurred while fetching match history:', error);
+  });
+}
+
+function drawWinLoseChart(wins, losses) {
+  const canvas = document.getElementById('winLoseChart');
+  const ctx = canvas.getContext('2d');
+
+  const data = [wins, losses];
+  const labels = ['Wins', 'Losses'];
+  const colors = ['#B6FFFA', '#FFF67E'];
+
+  const barWidth = 300;
+  const barSpacing = 100;
+  const chartHeight = canvas.height - 20;
+  const maxDataValue = Math.max(...data);
+  const scale = chartHeight / maxDataValue;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = '20px Arial';
+
+  data.forEach((value, index) => {
+    const barHeight = value * scale;
+    const x = index * (barWidth + barSpacing) + barSpacing;
+    const y = canvas.height - barHeight;
+
+    ctx.fillStyle = colors[index];
+    ctx.fillRect(x, y, barWidth, barHeight);
+
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[index], x + barWidth / 2, canvas.height - 5);
+    ctx.fillText(value, x + barWidth / 2, y - 5);
   });
 }
