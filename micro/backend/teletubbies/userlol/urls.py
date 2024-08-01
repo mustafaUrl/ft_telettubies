@@ -8,4 +8,5 @@ urlpatterns = [
     path('get_info/', account.get_info),
     path('update_profile_pic/', account.update_profile_pic),
     path('get_match_history/', account.get_match_history),
+    path('invite_user/', account.invite_user),
 ] 

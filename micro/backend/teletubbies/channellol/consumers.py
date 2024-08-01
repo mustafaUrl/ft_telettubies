@@ -10,9 +10,7 @@ import logging
 from datetime import datetime, timezone
 import random
 import math
-import uuid
-
-from game.models import  Match, Invite
+from game.models import  Match
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -218,12 +216,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif command == "start":
             if username == ChatConsumer.tournaments[room]["host"]:
                await self.start_tournament(room)
-        elif command == "invite_game":
-            target = text_data_json["target"]
-            logging.info("bbbb %s to a lolllll", target)
-            self.invite_game(target)
-            logging.info("aaa %s to a gamaaaaaaae", target)
-
         else:
             message = text_data_json["message"]
             await self.channel_layer.group_send(
@@ -233,34 +225,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "username": username,
                 }
             )
-    @database_sync_to_async
-    def invite_game(self, target):
-        try:
-            logging.info("Inviting %s to a game", target)
 
-            # Generate a unique invite code
-            invite_code = self.generate_unique_invite_code()
-            logging.info("Generated invite code: %s", invite_code)
-
-            # Create the Invite object
-            invite = Invite.objects.create(
-                invited_user=target,
-                invite_code=invite_code,
-                inviting=self.scope["user"].username  # Assuming you have the username in the scope
-            )
-            invite.save()
-            logging.info("Invite code %s created for %s", invite_code, target)
-
-        except Exception as e:
-            logging.error("Error in invite_game: %s", e)
-
-    def generate_unique_invite_code(self):
-        while True:
-            invite_code = uuid.uuid4().hex[:10]  # Generate a random 10-character code
-            if not Invite.objects.filter(invite_code=invite_code).exists():
-                break
-        return invite_code
-    
     ############################################################################################################
     ############################################################################################################
     ############################################################################################################

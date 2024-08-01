@@ -1,7 +1,7 @@
 import sendPostUserRequest from '../postwithjwt/userRequest.js';
 import { getCookie } from '../cookies/cookies.js';
 import { sendMessage } from '../utils/SocketHelper.js';
-
+import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
 let activeTab = 'tab1';
 function selectTab(selectedTabId) {
     // Reset tab styles
@@ -193,19 +193,15 @@ function viewProfile(username) {
 function inviteUser(username) {
   const message = `I wanna play with you ${username}`;
   console.log(`Inviting ${username} with message: ${message}`);
-  const sender = getCookie('username');
   
-  // Send the message through the WebSocket
-  if (window.chatSocket) {
-    console.log('Sending invite message');
-    window.chatSocket.send(JSON.stringify({
-      'message': message,
-      'username': sender,
-      'target' : username,
-      'room': 'global',
-      'command': 'invite_game'
-    }));
-  }
+  sendPostWithJwt('api/user/invite_user/', {username}, 'POST')
+    .then(response => {
+      console.log('Invitation sent:', response);
+      
+    })
+    .catch(error => {
+      console.error('An error occurred while sending invitation:', error);
+    });
 
 }
 

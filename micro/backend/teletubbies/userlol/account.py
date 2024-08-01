@@ -6,7 +6,10 @@ from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import UserProfile
 from django.shortcuts import get_object_or_404
-from game.models import Match
+from game.models import Match, Invite
+import random
+import string
+from rest_framework import status
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -91,3 +94,30 @@ def get_match_history(request):
     ).values()
 
     return JsonResponse(list(matches), safe=False)
+
+def generate_invite_code(length=6):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def invite_user(request):
+    invited_user = request.data.get('username')
+    inviting = request.user.username  # assuming you get the inviting user's username from the token
+    invite_code = generate_invite_code()
+    
+    if not invited_user:
+        return JsonResponse({'error': 'No invited user provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    invite = Invite.objects.create(
+        invited_user=invited_user,
+        invite_code=invite_code,
+        inviting=inviting
+    )
+    invite.save()
+    
+    return JsonResponse({
+        'message': f'Invitation sent to {invited_user} with code {invite_code}.',
+        'invite_code': invite_code
+    }, status=status.HTTP_201_CREATED)
