@@ -11,3 +11,6 @@ all:
 	
 env:
 	echo "export PATH=\"$PATH:/System/Volumes/Data/Applications/Docker.app/Contents/Resources/bin/:/System/Volumes/Data/Applications/Docker.app/Contents/Resources/bin/docker-compose-v1/\"" >> ~/.zshrc
+
+hakan:
+	mkdir /Users/$(USER)/library/containers/com.docker.docker/Data
