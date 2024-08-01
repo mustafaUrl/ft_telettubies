@@ -16,26 +16,28 @@ from django.core.files.storage import FileSystemStorage
 User = get_user_model()
 from rest_framework_simplejwt.tokens import RefreshToken
 from dotenv import load_dotenv
-
+import logging
 load_dotenv()
 
 from django.conf import settings
+logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def ft_auth(request):
     client_id = os.getenv('CLIENT_ID')
     client_secret = os.getenv('CLIENT_SECRET')
-
+    redirect_uri = os.getenv('REDIRECT_URI')
+    logger.info('redirect_uri: %s + client_id: %s + client_secret: %s ', redirect_uri, client_id, client_secret)
     if request.method == 'POST':
         code = request.data.get('code')
 
     if not code:
         return JsonResponse({
             'code': 400,
-            'message': 'Bad request'
+            'message': 'Bad request 1'
         }, status=400)
-
+    logger.info('code: %s', code)
     try:
         url = "https://api.intra.42.fr/oauth/token"
         payload = {
@@ -43,7 +45,7 @@ def ft_auth(request):
             'client_id': client_id,
             'client_secret': client_secret,
             'code': code,
-            'redirect_uri': 'https://localhost'
+            'redirect_uri': redirect_uri
         }
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -54,14 +56,14 @@ def ft_auth(request):
         if not ft_access_token:
             return JsonResponse({
                 'code': 400,
-                'message': 'Bad request'
+                'message': 'Bad request 2'
             }, status=400)
     except Exception as e:
         return JsonResponse({
             'code': 400,
-            'message': 'Bad request'
+            'message': 'Bad request 3'
         }, status=400)
-
+    logger.info('patlamadı:', ft_access_token)
     user_info_response = requests.get('https://api.intra.42.fr/v2/me', headers={
         'Authorization': f'Bearer {ft_access_token}'
     })

@@ -100,7 +100,7 @@ export default function ft_login(authCode) {
       })
       .catch(error => {
         // Hata durumunda işlem yapın
-        console.error('error:', error);
+        console.error('error:',  error.message);
       });
    
 
