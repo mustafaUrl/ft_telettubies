@@ -13,9 +13,11 @@ export default function profileTrigger(contentId) {
         pendingFriendRequests();
     }
     if (contentId === 'account') {
+        console.log('account');
         accountListener();
     }
     if(contentId === 'matchHistory') {
+        console.log('match history');
        historylistener();
     }
     
