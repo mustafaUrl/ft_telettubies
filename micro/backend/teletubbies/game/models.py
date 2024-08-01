@@ -14,3 +14,12 @@ class Match(models.Model):
 
     def __str__(self):
         return f"Match {self.id}"
+
+
+class Invite(models.Model):
+    invited_user = models.CharField(max_length=100)
+    invite_code = models.CharField(max_length=100)
+    inviting = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return f"Invite {self.id}"

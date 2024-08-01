@@ -197,22 +197,16 @@ function inviteUser(username) {
   
   // Send the message through the WebSocket
   if (window.chatSocket) {
+    console.log('Sending invite message');
     window.chatSocket.send(JSON.stringify({
       'message': message,
       'username': sender,
+      'target' : username,
       'room': 'global',
-      'command': 'message'
+      'command': 'invite_game'
     }));
   }
 
-  // Update the chat box in the DOM
-  const chatBox = document.getElementById('chat-box'); // Adjust the ID to match your chat box element
-  if (chatBox) {
-    const messageElement = document.createElement('div');
-    messageElement.className = 'chat-message'; // Adjust the class to match your chat message styling
-    messageElement.innerText = `${sender}: ${message}`;
-    chatBox.appendChild(messageElement);
-  }
 }
 
 
