@@ -27,15 +27,15 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.12.5.2", "25.33.108.97"]
 
-DOMAIN = "localhost"
-IP = "127.0.0.1"
 
-URL_DOMAIN = f"https://{DOMAIN}:8000"
-URL_IP = f"https://{IP}:8000"
+URL_IP =config('IP')
 
+URL_DOMAIN = f"http://{URL_IP}:8000"
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", URL_DOMAIN,f"https://{URL_IP}:8000", f"https://{URL_IP}:8000", URL_IP,]
 # Application definition
+
+
 
 INSTALLED_APPS = [
     'daphne',
@@ -178,10 +178,11 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
     URL_DOMAIN,
-    URL_IP,
-    "https://10.12.5.2",
-    "https://25.33.108.97",
-]
+    f"http://{URL_IP}:8000",
+    f"https://{URL_IP}:8000",
+    f"http://{URL_IP}",
+    f"https://{URL_IP}",
+    ]
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
     'content-type',

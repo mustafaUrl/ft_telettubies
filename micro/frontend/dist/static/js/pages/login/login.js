@@ -12,7 +12,7 @@ export default function login() {
   document.getElementById('42intra').addEventListener('click', function(e) {
     e.preventDefault();
   
-    window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-20c553f5c26f223de188e7408a5a34057742d4a7e23ee717e94adf8660fbd915&redirect_uri=https%3A%2F%2Flocalhost&response_type=code";
+    window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-20c553f5c26f223de188e7408a5a34057742d4a7e23ee717e94adf8660fbd915&redirect_uri=https%3A%2F%2F10.12.1.8&response_type=code";
   });
 
 document.getElementById('login-form').addEventListener('submit', function(e) {
