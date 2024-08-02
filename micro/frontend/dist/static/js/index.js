@@ -18,10 +18,6 @@ document.getElementById('notificationIcon').addEventListener('click', async func
   get_notifications();
 });
 
-// Fetch notifications count when the page loads
-window.onload = function() {
-  get_notifications_count();
-};
 
 window.onclick = function(event) {
   // Check if the click is outside the notification dropdown
@@ -40,6 +36,7 @@ checkAuthStatus();
     if (getCookie('accessToken')) {
       openSocketPrivate();
       openSocket();
+      get_notifications_count();
     }
     selectTab('tab1');
 

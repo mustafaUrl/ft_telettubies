@@ -1,7 +1,10 @@
-import { getCookie } from '../cookies/cookies.js';
+import { getCookie, setCookie } from '../cookies/cookies.js';
 import  {createTournament}  from '../pages/game/start.js';
 import { get_notifications_count } from '../uimodule/notifications.js';
 import { inviteUser } from '../uimodule/chatBox.js';
+import viewProfile from '../utils/view-profile.js ';
+import {listFriends} from '../pages/profile/profile_utils.js';
+
 
 window.chatSocket = '';
 
@@ -30,20 +33,76 @@ export default function openSocket() {
       get_notifications_count();
 
       }
-    else {
-      const chatMessages = document.getElementById('chat_messages1');
-      const messageDiv = document.createElement('div');
-      messageDiv.textContent = data.username + ': ' + data.message;
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-  };
+      else {
+        const chatMessages = document.getElementById('chat_messages1');
+        const messageDiv = document.createElement('div');
+        
+        // Create a dropdown button
+        const dropdownButton = document.createElement('button');
+        dropdownButton.textContent = '⋮'; // More options icon
+        dropdownButton.className = 'dropdown-button';
+    
+        // Create dropdown menu
+        const dropdownMenu = document.createElement('div');
+        dropdownMenu.className = 'chat-dropdown-menu';
+        dropdownMenu.innerHTML = `
+          <li><a class="dropdown-item view-profile-btn" href="#" data-username="${data.username}">View Profile</a></li>
+          <li><a class="dropdown-item invite-player-btn" href="#" data-username="${data.username}">Invite Player</a></li>
+        `;
+    
+        // Append dropdown menu to the button
+        dropdownButton.appendChild(dropdownMenu);
+    
+        // Toggle dropdown menu on button click
+        dropdownButton.addEventListener('click', function(event) {
+          event.stopPropagation(); // Prevent the click from propagating to the document
+          dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+        });
+    
+        // Handle view profile click
+        dropdownMenu.querySelector('.view-profile-btn').addEventListener('click', function(event) {
+          event.preventDefault();
+          viewProfile(data.username);
+        });
+    
+        // Handle invite player click
+        dropdownMenu.querySelector('.invite-player-btn').addEventListener('click', function(event) {
+          event.preventDefault();
+          inviteUser(data.username);
+        });
+    
+        // Add username, message text, and dropdown button to the message div
+        const usernameSpan = document.createElement('span');
+        usernameSpan.textContent = data.username;
+        usernameSpan.className = 'username-text';
+    
+        const messageText = document.createTextNode(`: ${data.message} `);
+    
+        messageDiv.appendChild(dropdownButton);
+        messageDiv.appendChild(usernameSpan);
+        messageDiv.appendChild(messageText);
+    
+        // Append message to chat
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    };
+  
+    // Close dropdown menu when clicking outside
+  document.addEventListener('click', function(event) {
+    const dropdowns = document.querySelectorAll('.chat-dropdown-menu');
+    dropdowns.forEach(dropdown => {
+      dropdown.style.display = 'none';
+    });
+  });
 
   window.chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
   };
 
   function updateOnlinePlayers(players) {
+    setCookie('onlinePlayers', JSON.stringify(players));
+    listFriends();
     const playerList = document.getElementById('playerList');
     if (!playerList) {
         return;
@@ -73,8 +132,8 @@ listItem.appendChild(inviteButton);
     });
 }
   
-}
 
+}
 function updateTournamentButtons() {
   document.querySelectorAll('.joinTournamentButton').forEach(button => {
     button.addEventListener('click', (event) => {
@@ -225,3 +284,6 @@ function updateLobbyTournaments(tournaments) {
       tournamentList.appendChild(li);
   }
 }
+
+
+

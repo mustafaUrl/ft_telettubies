@@ -3,7 +3,6 @@ import changeContent from '../../uimodule/changeContent.js';
 import openSocket from '../../sockets/globalSocket.js';
 import openSocketPrivate from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
-import {openPongSocket} from '../pong/pongSocket.js'
 
 
 
@@ -12,8 +11,23 @@ export default function login() {
   document.getElementById('42intra').addEventListener('click', function(e) {
     e.preventDefault();
   
-    window.location.href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-20c553f5c26f223de188e7408a5a34057742d4a7e23ee717e94adf8660fbd915&redirect_uri=https%3A%2F%2F10.12.1.8&response_type=code";
+    fetch('api/auth/env/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const apiUrl = data.api_url;
+      window.location.href = apiUrl;
+    })
+    .catch(error => {
+      console.error('An error occurred during the login process:', error);
+    });
+    
   });
+    
 
 document.getElementById('login-form').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -51,7 +65,6 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
             selectTab('tab1');
             openSocket();
             openSocketPrivate();
-            openPongSocket();
             // setInterval(refreshAccessToken, 4 * 60 * 1000); 
             // Login başarılı, ana sayfaya yönlendir
             // window.location.href = '/user_profile'; // Örnek bir yönlendirme
@@ -69,7 +82,6 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
       selectTab('tab1');
       openSocket();
       openSocketPrivate();
-      openPongSocket();
       // setInterval(refreshAccessToken, 4 * 60 * 1000); 
       // Login başarılı, ana sayfaya yönlendir
       // window.location.href = '/user_profile'; // Örnek bir yönlendirme

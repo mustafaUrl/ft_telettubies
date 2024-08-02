@@ -1,5 +1,6 @@
 import  sendPostUserRequest from '../../postwithjwt/userRequest.js';
 import { selectTab } from '../../uimodule/chatBox.js';
+import { getCookie } from '../../cookies/cookies.js';
 
 function addfriendListener() {
     document.getElementById('add_friend').addEventListener('click', function(e) {
@@ -47,34 +48,42 @@ function addfriendListener() {
  }
  
 
-function updateFriendList(friendsData) {
-    const tbody = document.querySelector('#dataTable tbody');
-    tbody.innerHTML = '';
-    friendsData.forEach(friend => {
+ function updateFriendList(friendsData) {
+  const tbody = document.querySelector('#dataTable tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+
+  // Retrieve and parse online players from the cookie
+  const onlinePlayers = getCookie('onlinePlayers') || [];
+  
+  friendsData.forEach(friend => {
+      // Determine if the friend is online
+      const isOnline = onlinePlayers.includes(friend.username);
       const tr = document.createElement('tr');
-      const profilePictureUrl = friend.profile_picture || 'default-profile-picture-url'; // Varsayılan resim URL'si
+      const profilePictureUrl = friend.profile_picture || 'default-profile-picture-url'; // Default profile picture URL
+      
       tr.innerHTML = `
-        <td><img class="rounded-circle me-2" width="30" height="30" src="${profilePictureUrl}" alt="Profile Picture"/>${friend.username}</td>
-        <td><button class="btn ${friend.online ? 'btn-success' : 'btn-secondary'}" type="button">${friend.online ? 'online' : 'offline'}</button></td>
-        <td><button class="btn btn-warning" type="button">message</button></td>
-        <td><button class="btn btn-info" type="button">invite</button></td>
-        <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
-        <td>
-          <div class="btn-group">
-            <button class="btn btn-primary" type="button">other</button>
-            <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="#">show profile</a>
-              <a class="dropdown-item" href="#">remove friend</a>
-              <a class="dropdown-item" href="#">block</a>
-            </div>
-          </div>
-        </td>
+          <td><img class="rounded-circle me-2" width="30" height="30" src="${profilePictureUrl}" alt="Profile Picture"/>${friend.username}</td>
+          <td><button class="btn ${isOnline ? 'btn-success' : 'btn-secondary'}" type="button">${isOnline ? 'online' : 'offline'}</button></td>
+          <td><button class="btn btn-warning" type="button">message</button></td>
+          <td><button class="btn btn-info" type="button">invite</button></td>
+          <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
+          <td>
+              <div class="btn-group">
+                  <button class="btn btn-primary" type="button">other</button>
+                  <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
+                  <div class="dropdown-menu">
+                      <a class="dropdown-item" href="#">show profile</a>
+                      <a class="dropdown-item" href="#">remove friend</a>
+                      <a class="dropdown-item" href="#">block</a>
+                  </div>
+              </div>
+          </td>
       `;
       tbody.appendChild(tr);
-    });
-  }
-
+  });
+}
 function listFriends() {
     sendPostUserRequest('list_friends')
       .then(data => {

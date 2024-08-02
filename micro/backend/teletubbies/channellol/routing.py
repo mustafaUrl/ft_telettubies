@@ -1,8 +1,7 @@
 
 from django.urls import path 
 from .consumers import PrivateChatConsumer , ChatConsumer
-# from .pong import PongConsumer
-from .middleware import JWTAuthMiddleware  # Özelleştirilmiş middleware'inizi burada import edin
+from .middleware import JWTAuthMiddleware
 from django.urls import re_path
 
 websocket_urlpatterns = [

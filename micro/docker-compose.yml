@@ -4,7 +4,7 @@ services:
     image: postgres
     restart: always
     env_file:
-      - .env
+      - env_files/.env_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     networks:
@@ -13,7 +13,7 @@ services:
   backend:
     container_name: backend
     env_file:
-      - .env
+      - env_files/.env_backend
     build:
       context: ./backend
     networks:
@@ -30,6 +30,8 @@ services:
   frontend:
     container_name: frontend
     build: ./frontend
+    env_file:
+      - env_files/.env_frontend
     networks:
       - frontend_network
     volumes:
@@ -44,9 +46,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    env_file:
+      - env_files/.env_pgadmin
     ports:
       - "5050:80"
     depends_on:

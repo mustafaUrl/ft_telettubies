@@ -111,6 +111,8 @@ def generate_invite_code(length=6):
 @authentication_classes([JWTAuthentication])
 def invite_user(request):
     invited_user = request.data.get('username')
+    if invited_user == request.user.username:
+        return JsonResponse({'error': 'You cannot invite yourself.'}, status=status.HTTP_400_BAD_REQUEST)
     inviting = request.user.username  # assuming you get the inviting user's username from the token
     invite_code = generate_invite_code()
     

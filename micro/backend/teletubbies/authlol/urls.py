@@ -15,6 +15,7 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('verify-2fa/', views.verify_2fa, name='verify'),
     path('ft-auth/', ft_views.ft_auth, name='ft_auth'),
+    path('env/', ft_views.env, name='env'),
     # path('get_username/', views.get_username, name='get_username'),
 
 ]

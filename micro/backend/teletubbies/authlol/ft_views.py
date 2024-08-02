@@ -17,10 +17,21 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from dotenv import load_dotenv
 import logging
 load_dotenv()
+from decouple import config
 
 from django.conf import settings
 logger = logging.getLogger(__name__)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def env(request):
+    CLIENT_ID = config('CLIENT_ID')
+    REDIRECT_URI = config('REDIRECT_URI')
+    api_url = f"https://api.intra.42.fr/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code"
+    return JsonResponse({'api_url': api_url})
+
+    
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def ft_auth(request):
