@@ -99,7 +99,7 @@ def list_friends(request):
             'username': friend.username,
             'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
             'online':  online_status.is_online if online_status else False,  # Bu metodu User modelinize eklemeniz gerekecek.
-            'muted': friend in friend_list.muted.all()
+            'block': friend in friend_list.block.all()
         })
     return JsonResponse({'friends': friend_data})
 # def list_friends(request):
@@ -136,40 +136,12 @@ def list_friends(request):
 #     except FriendList.DoesNotExist:
 #         return JsonResponse({'error': 'Arkadaş listesi bulunamadı.'}, status=404)
 
-# Kullanıcıyı banlama
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
-def ban_user(request):
-    user = request.user
-    target_user_id = request.POST.get('friend_id')
 
-    try:
-        target_user = User.objects.get(id=target_user_id)
-    except User.DoesNotExist:
-        return JsonResponse({'error': 'User not found.'}, status=404)
-
-    friend_list = FriendList.objects.get(user=user)
-    if target_user in friend_list.banned.all():
-        return JsonResponse({'error': 'The user has already been banned.'}, status=400)
-
-    friend_list.banned.add(target_user)
-    return JsonResponse({'success': 'User successfully banned.'})
-
-# Kullanıcıyı banlamayı kaldırma
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
-def unban_user(request):
-    user = request.user
-    target_user_id = request.POST.get('friend_id')
-
-    friend_list = FriendList.objects.get(user=user)
-    friend_list.banned.remove(target_user_id)
-    return JsonResponse({'success': 'The user has been successfully unbanned.'})
 
 # Kullanıcıyı sessize alma
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-def mute(request):
+def block(request):
     user = request.user
     friend_username = request.data.get('friend_username')
     print(friend_username)
@@ -179,18 +151,18 @@ def mute(request):
         return JsonResponse({'error': 'User not found.'}, status=404)
 
     friend_list = FriendList.objects.get(user=user)
-    if friend in friend_list.muted.all():
-        return JsonResponse({'error': 'The user is already muted.'}, status=400)
+    if friend in friend_list.block.all():
+        return JsonResponse({'error': 'The user is already block.'}, status=400)
 
-    friend_list.muted.add(friend)
-    return JsonResponse({'success': 'User successfully muted.'})
+    friend_list.block.add(friend)
+    return JsonResponse({'success': 'User successfully block.'})
 
 
 
 # Kullanıcının sessizliğini kaldırma
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-def unmute(request):
+def remove_block(request):
     user = request.user
     friend_username = request.data.get('friend_username')
 
@@ -200,11 +172,11 @@ def unmute(request):
         return JsonResponse({'error': 'User not found.'}, status=404)
 
     friend_list = FriendList.objects.get(user=user)
-    if friend not in friend_list.muted.all():
-        return JsonResponse({'error': 'The user is not muted.'}, status=400)
+    if friend not in friend_list.block.all():
+        return JsonResponse({'error': 'The user is not block.'}, status=400)
 
-    friend_list.muted.remove(friend)
-    return JsonResponse({'success': 'The user unmuted successfully.'})
+    friend_list.block.remove(friend)
+    return JsonResponse({'success': 'The user remove block successfully.'})
 
 
 # Belirli bir arkadaşı getirme
@@ -268,10 +240,8 @@ actions_list = {
     'add_friend': send_friend_request,
     'remove friend': remove_friend,
     'list_friends': list_friends,
-    'block': ban_user,
-    'remove block': unban_user,
-    'mute': mute,
-    'unmute': unmute,
+    'block': block,
+    'remove_block': remove_block,
     'get_friend': get_friend,
     'get_banned': get_banned,
     'accept_friend_request': accept_friend_request,

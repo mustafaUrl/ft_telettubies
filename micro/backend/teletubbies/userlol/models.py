@@ -54,7 +54,7 @@ class FriendList(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='friend_list')
     friends = models.ManyToManyField(User, related_name='friends', blank=True)
     banned = models.ManyToManyField(User, related_name='banned_users', blank=True)
-    muted = models.ManyToManyField(User, related_name='muted_users', blank=True)
+    block = models.ManyToManyField(User, related_name='block_users', blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s friend list"

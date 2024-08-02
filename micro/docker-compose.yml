@@ -30,8 +30,6 @@ services:
   frontend:
     container_name: frontend
     build: ./frontend
-    env_file:
-      - env_files/.env_frontend
     networks:
       - frontend_network
     volumes:

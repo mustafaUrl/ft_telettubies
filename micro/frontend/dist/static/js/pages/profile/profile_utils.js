@@ -18,9 +18,12 @@ function addfriendListener() {
    const tbody = document.querySelector('#dataTable tbody');
    tbody.addEventListener('click', function(e) {
      const friendUsername = e.target.closest('tr').querySelector('td:first-child').textContent.trim();
-     const action = e.target.textContent;
-     if (action === 'mute' || action === 'unmute'
-       || action === 'message' || action === 'invite' || action === 'show profile' || action === 'remove friend' || action === 'block'){
+     let action = e.target.textContent;
+     if (action === 'remove block') {
+       action = 'remove_block';
+     }
+     if (action === 'block' || action === 'remove_block'
+       || action === 'message' || action === 'invite' || action === 'show profile' || action === 'remove friend'){
        
          if (action === 'message') {
            if (window.otherUser !== friendUsername) {
@@ -36,7 +39,7 @@ function addfriendListener() {
        
        sendPostUserRequest(action, friendUsername)
        .then(data => {
-       if (action === 'mute' || action === 'unmute') {
+       if (action === 'block' || action === 'remove_block') {
        listFriends();
        }
        })
@@ -68,7 +71,7 @@ function addfriendListener() {
           <td><button class="btn ${isOnline ? 'btn-success' : 'btn-secondary'}" type="button">${isOnline ? 'online' : 'offline'}</button></td>
           <td><button class="btn btn-warning" type="button">message</button></td>
           <td><button class="btn btn-info" type="button">invite</button></td>
-          <td><button class="btn ${friend.muted ? 'btn-danger' : 'btn-success'}" type="button">${friend.muted ? 'unmute' : 'mute'}</button></td>
+          <td><button class="btn ${friend.block ? 'btn-danger' : 'btn-success'}" type="button">${friend.block ? 'remove block' : 'block'}</button></td>
           <td>
               <div class="btn-group">
                   <button class="btn btn-primary" type="button">other</button>
@@ -76,7 +79,6 @@ function addfriendListener() {
                   <div class="dropdown-menu">
                       <a class="dropdown-item" href="#">show profile</a>
                       <a class="dropdown-item" href="#">remove friend</a>
-                      <a class="dropdown-item" href="#">block</a>
                   </div>
               </div>
           </td>
