@@ -131,9 +131,7 @@ def invite_notifications(request):
     invited_user = request.user.username  # get the current user's username
     invites = Invite.objects.filter(invited_user=invited_user).values('invite_code', 'inviting')
 
-    if not invites:
-        return JsonResponse({'error': 'No invites found for the user.'}, status=status.HTTP_404_NOT_FOUND)
-
+   
     return JsonResponse({
         'invites': list(invites)
     }, status=status.HTTP_200_OK)
