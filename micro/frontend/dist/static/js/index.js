@@ -23,18 +23,16 @@ window.onload = function() {
   get_notifications_count();
 };
 
-// Close the dropdown if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.closest('.notification-icon')) {
-      const dropdowns = document.getElementsByClassName('dropdown-menu');
-      for (let i = 0; i < dropdowns.length; i++) {
-          const openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-              openDropdown.classList.remove('show');
-          }
-      }
+  // Check if the click is outside the notification dropdown
+  if (!event.target.closest('#notificationIcon')) {
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    if (notificationDropdown.classList.contains('show')) {
+      notificationDropdown.classList.remove('show');
+    }
   }
-}
+};
+
 
 
 checkAuthStatus();

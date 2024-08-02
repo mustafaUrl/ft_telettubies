@@ -2,50 +2,47 @@ import sendPostUserRequest from '../postwithjwt/userRequest.js';
 import { getCookie } from '../cookies/cookies.js';
 import { sendMessage } from '../utils/SocketHelper.js';
 import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
+
 let activeTab = 'tab1';
+
 function selectTab(selectedTabId) {
-    // Reset tab styles
-    const tabs = document.querySelectorAll('#tabs > div');
-    tabs.forEach(function(tab) {
-      tab.style.backgroundColor = '';
-      tab.style.color = '';
-    });
-  
-    // Set selected tab style
-    const selectedTab = document.getElementById(selectedTabId);
-    selectedTab.style.backgroundColor = '#0d61d7';
-    selectedTab.style.color = 'black';
-  
-    // Adjust visibility of message boxes
-    document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
-    document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
-    activeTab = selectedTabId;
+  const tabs = document.querySelectorAll('#tabs > div');
+  tabs.forEach(function(tab) {
+    tab.style.backgroundColor = '';
+    tab.style.color = '';
+  });
+
+  const selectedTab = document.getElementById(selectedTabId);
+  selectedTab.style.backgroundColor = '#0d61d7';
+  selectedTab.style.color = 'black';
+
+  document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
+  document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
+  activeTab = selectedTabId;
 }
 
 function showTab2WithUsername(username) {
   const tab2 = document.getElementById('tab2');
-  tab2.textContent = username; // Update tab 2 text
-  tab2.style.display = 'block'; // Show tab 2
-  selectTab('tab2'); // Select tab 2
+  tab2.textContent = username;
+  tab2.style.display = 'block';
+  selectTab('tab2');
 }
 
-// Update notification button function
 function updateNotificationButton(username) {
   const notificationButton = document.getElementById('notification_button');
   notificationButton.textContent = `New messages (${username})`;
-  notificationButton.style.display = 'block'; // Show notification button
+  notificationButton.style.display = 'block';
 }
 
 document.getElementById('chat_send').onclick = function() {
   const messageInput = document.getElementById('chat_input');
   const message = messageInput.value;
-  const username = getCookie('username'); // Get sender's username
+  const username = getCookie('username');
 
   if (chatSocketPrivate && activeTab === 'tab2') {
     sendMessage(message);
     showTab2WithUsername(window.otherUser);
   } else {
-    // Send message via WebSocket
     if (window.chatSocket) {
       window.chatSocket.send(JSON.stringify({
         'message': message,
@@ -58,28 +55,24 @@ document.getElementById('chat_send').onclick = function() {
   messageInput.value = '';
 };
 
-// Listen to icon click event and show friend list
 document.getElementById('chat_icon').addEventListener('click', function() {
-  toggleFriendList(); // This function should be defined earlier
-  // fetchAndDisplayFriends();
+  toggleFriendList();
 });
 
 document.getElementById('chat_bar').addEventListener('click', function() {
   var chatContainer = document.getElementById('chat_container');
   var isClosed = chatContainer.style.height === '0px' || chatContainer.style.height === '';
 
-  // Update chat window height and gray bar bottom position
   chatContainer.style.height = isClosed ? '285px' : '0px';
-  this.style.bottom = isClosed ? '310px' : '10px'; // Update chatBar with 'this'
+  this.style.bottom = isClosed ? '310px' : '10px';
 });
 
 document.getElementById('chat_input').onkeypress = function(e) {
-  if (e.keyCode === 13) {  // Enter key
+  if (e.keyCode === 13) {
     document.getElementById('chat_send').click();
   }
 };
 
-// Toggle chat box function
 function toggleFriendList() {
   var friendList = document.getElementById('friend-list');
   var chatContainer = document.getElementById('chat_container');
@@ -88,26 +81,20 @@ function toggleFriendList() {
 
   var isFriendListVisible = friendList.style.display === 'block';
 
-  // Toggle friend list visibility
   friendList.style.display = isFriendListVisible ? 'none' : 'block';
 
-  // Shift chat_container if friend list is visible
   chatContainer.style.right = isFriendListVisible ? '10px' : '250px';
   chatBar.style.right = isFriendListVisible ? '10px' : '250px';
   chatIcon.style.right = isFriendListVisible ? '330px' : '600px';
   if (!isFriendListVisible) {
-    fetchAndDisplayFriends(); // Clear friend list
+    fetchAndDisplayFriends();
   }
 }
 
-// Handle data from get_user_info function
-// Fetch and display friends
 function fetchAndDisplayFriends() {
   sendPostUserRequest('list_friends')
     .then(data => {
-      // Get friend list
       const friends = data.friends;
-      // Display friend list
       displayFriends(friends);
     })
     .catch(error => {
@@ -120,40 +107,48 @@ function updateNotificationCount(username, count) {
   let notificationSpan = userLink.querySelector('.notification-count');
   
   if (!notificationSpan) {
-    // Create a new notification span if not exists
     notificationSpan = document.createElement('span');
     notificationSpan.classList.add('notification-count');
     userLink.appendChild(notificationSpan);
   }
   
   if (count > 0) {
-    notificationSpan.textContent = count; // Update notification count
-    notificationSpan.style.display = 'block'; // Show notification span
+    notificationSpan.textContent = count;
+    notificationSpan.style.display = 'block';
   } else {
-    notificationSpan.style.display = 'none'; // Hide notification span
+    notificationSpan.style.display = 'none';
   }
 }
 
 function displayFriends(friends) {
   const friendListContainer = document.getElementById('friend-list');
-  friendListContainer.innerHTML = ''; // Clear existing list
+  friendListContainer.innerHTML = '';
 
   friends.forEach(friend => {
     const friendElement = document.createElement('div');
     friendElement.classList.add('friend-item');
+  
     friendElement.innerHTML = `
       <p>
         <img src="${friend.profile_picture}" alt="${friend.username}" class="profile-picture">
-        <button class="username-btn" data-username="${friend.username}">
-          ${friend.username}
-        </button>
-        <button class="view-profile-btn custom-btn" data-username="${friend.username}">View Profile</button>
-        <button class="invite-btn custom-btn" data-username="${friend.username}">Invite</button>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-${friend.username}" data-bs-toggle="dropdown" aria-expanded="false">
+            ${friend.username}
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${friend.username}">
+            <li><a class="dropdown-item view-profile-btn" href="#" data-username="${friend.username}">View Profile</a></li>
+            <li><a class="dropdown-item invite-btn" href="#" data-username="${friend.username}">Invite</a></li>
+          </ul>
+        </div>
       </p>`;
+  
     friendListContainer.appendChild(friendElement);
   });
 
-  // "View Profile" button click event
+  document.querySelectorAll('.dropdown-toggle').forEach(dropdownToggleEl => {
+    new bootstrap.Dropdown(dropdownToggleEl);
+  });
+
   document.querySelectorAll('.view-profile-btn').forEach(button => {
     button.addEventListener('click', function(event) {
       const username = this.getAttribute('data-username');
@@ -161,7 +156,6 @@ function displayFriends(friends) {
     });
   });
 
-  // "Invite" button click event
   document.querySelectorAll('.invite-btn').forEach(button => {
     button.addEventListener('click', function(event) {
       const username = this.getAttribute('data-username');
@@ -182,10 +176,8 @@ function displayFriends(friends) {
       chatBar.style.bottom = '310px';
     });
   });
-
 }
 
-// Profile viewing function
 function viewProfile(username) {
   console.log(`Viewing profile of ${username}`);
 }
@@ -203,13 +195,10 @@ function inviteUser(username) {
         'room': 'global',
         'command': 'update_notification',
       }));
-      
     })
     .catch(error => {
       console.error('An error occurred while sending invitation:', error);
     });
-
 }
-
 
 export { updateNotificationButton, showTab2WithUsername, selectTab };
