@@ -1,16 +1,15 @@
-import  sendPostWithJwt  from '../postwithjwt/sendPostWithJwt.js';
-
+import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
 
 async function get_notifications() {
     const dropdown = document.getElementById('notificationDropdown');
     dropdown.classList.toggle('show');
-  
+
     if (dropdown.classList.contains('show')) {
         try {
             const response = await sendPostWithJwt('api/user/invite_notifications/', {}, 'POST');
             const notificationContent = document.getElementById('notificationContent');
             notificationContent.innerHTML = ''; // Clear existing notifications
-  
+
             if (response.invites && response.invites.length > 0) {
                 response.invites.forEach(invite => {
                     const inviteElement = document.createElement('div');
@@ -22,6 +21,15 @@ async function get_notifications() {
                         </span>
                         <span class="delete-invite">&times;</span>
                     `;
+
+                    // Add hover event listener to decrement notification count
+                    inviteElement.addEventListener('mouseover', function() {
+                        const notificationCount = document.getElementById('notificationCount');
+                        const newCount = Math.max(parseInt(notificationCount.textContent) - 1, 0);
+                        notificationCount.textContent = newCount;
+                        inviteElement.removeEventListener('mouseover', arguments.callee); // Remove the event listener after it has been triggered
+                    });
+
                     inviteElement.querySelector('.delete-invite').addEventListener('click', async function() {
                         try {
                             const deleteResponse = await sendPostWithJwt('api/user/delete_invite/', { invite_code: invite.invite_code }, 'DELETE');
@@ -47,10 +55,10 @@ async function get_notifications() {
             console.error('An error occurred while retrieving invitation notifications:', error);
         }
     }
-  }
-  
-  // Fetch notifications count
-  async function get_notifications_count() {
+}
+
+// Fetch notifications count
+async function get_notifications_count() {
     try {
         const response = await sendPostWithJwt('api/user/invite_notifications/', {}, 'POST');
         const notificationCount = document.getElementById('notificationCount');
@@ -62,6 +70,6 @@ async function get_notifications() {
     } catch (error) {
         console.error('An error occurred while retrieving notifications count:', error);
     }
-  }
-  
+}
+
 export { get_notifications, get_notifications_count };
