@@ -24,10 +24,12 @@ async function get_notifications() {
 
                     // Add hover event listener to decrement notification count
                     inviteElement.addEventListener('mouseover', function() {
-                        const notificationCount = document.getElementById('notificationCount');
-                        const newCount = Math.max(parseInt(notificationCount.textContent) - 1, 0);
-                        notificationCount.textContent = newCount;
-                        inviteElement.removeEventListener('mouseover', arguments.callee); // Remove the event listener after it has been triggered
+                        if (!inviteElement.dataset.decremented) {
+                            const notificationCount = document.getElementById('notificationCount');
+                            const newCount = Math.max(parseInt(notificationCount.textContent) - 1, 0);
+                            notificationCount.textContent = newCount;
+                            inviteElement.dataset.decremented = true; // Mark as decremented
+                        }
                     });
 
                     inviteElement.querySelector('.delete-invite').addEventListener('click', async function() {
