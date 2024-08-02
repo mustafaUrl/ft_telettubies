@@ -3,9 +3,14 @@ import { getCookie } from '../cookies/cookies.js';
 import { sendMessage } from '../utils/SocketHelper.js';
 import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
 
-let activeTab = 'tab1';
+window.activeTab = 'tab1';
 
 function selectTab(selectedTabId) {
+  window.unreadCount = 0;
+  const unreadCountElement = document.getElementById('unread_count');
+  unreadCountElement.textContent = '';
+  unreadCountElement.style.display = 'none'; // Hide count
+
   const tabs = document.querySelectorAll('#tabs > div');
   tabs.forEach(function(tab) {
     tab.style.backgroundColor = '';
@@ -18,7 +23,7 @@ function selectTab(selectedTabId) {
 
   document.getElementById('chat_messages1').style.display = selectedTabId === 'tab1' ? 'block' : 'none';
   document.getElementById('chat_messages2').style.display = selectedTabId === 'tab2' ? 'block' : 'none';
-  activeTab = selectedTabId;
+  window.activeTab = selectedTabId;
 }
 
 function showTab2WithUsername(username) {
@@ -39,7 +44,7 @@ document.getElementById('chat_send').onclick = function() {
   const message = messageInput.value;
   const username = getCookie('username');
 
-  if (chatSocketPrivate && activeTab === 'tab2') {
+  if (chatSocketPrivate && window.activeTab === 'tab2') {
     sendMessage(message);
     showTab2WithUsername(window.otherUser);
   } else {
@@ -119,7 +124,6 @@ function updateNotificationCount(username, count) {
     notificationSpan.style.display = 'none';
   }
 }
-
 function displayFriends(friends) {
   const friendListContainer = document.getElementById('friend-list');
   friendListContainer.innerHTML = '';
@@ -131,9 +135,10 @@ function displayFriends(friends) {
     friendElement.innerHTML = `
       <p>
         <img src="${friend.profile_picture}" alt="${friend.username}" class="profile-picture">
+        <span class="username-btn" data-username="${friend.username}">${friend.username}</span>
         <div class="dropdown">
           <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-${friend.username}" data-bs-toggle="dropdown" aria-expanded="false">
-            ${friend.username}
+            <span class="dropdown-arrow">▼</span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${friend.username}">
             <li><a class="dropdown-item view-profile-btn" href="#" data-username="${friend.username}">View Profile</a></li>

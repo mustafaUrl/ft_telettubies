@@ -43,7 +43,6 @@
 }
 
 #chat_bar::before {
-  content: 'Chat';
   font-size: 14px; /* Adjust the font size as needed */
   color: #333; /* Dark text color */
 }
@@ -330,4 +329,12 @@ body{
 .delete-invite {
   color: red;
   cursor: pointer;
+}
+
+
+.unread-count {
+  color: red; /* Color for the unread count */
+  font-size: 14px; /* Adjust the font size as needed */
+  margin-left: 5px; /* Space between label and count */
+  display: none; /* Hidden by default */
 }

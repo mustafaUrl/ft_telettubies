@@ -21,23 +21,26 @@ export default function openSocketPrivate() {
     console.error('WebSocket error:', e);
   };
 
-  window.chatSocketPrivate.onmessage = function(e) {
-    // Gelen mesajları işle
-    const data = JSON.parse(e.data);
-    // Mesajları cookie'de sakla
+  window.unreadCount = 0; // Counter for unread messages
 
-    // Mesajın hangi odaya ait olduğunu kontrol et
+  window.chatSocketPrivate.onmessage = function(e) {
+    // Handle incoming messages
+    const data = JSON.parse(e.data);
+    
+    // Create a new div for the message
     const chatMessages = document.getElementById('chat_messages2');
     const messageDiv = document.createElement('div');
     messageDiv.textContent = data.username + ': ' + data.message;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    // if (data.username !== getCookie('username')) {
-    //   showTab2WithUsername(data.username); // Sekme 2'yi göster ve kullanıcı adını güncelle
-    // }
+    
+    // Increase unread count and update the chat label
+    if (window.activeTab !== 'tab2') {
+      window.unreadCount++;
+      const unreadCountElement = document.getElementById('unread_count');
+      unreadCountElement.textContent = `(${unreadCount})`;
+      unreadCountElement.style.display = 'inline'; // Show count
+    }
   };
-
-  window.chatSocketPrivate.onclose = function(e) {
-    console.error('WebSocket connection closed:', e);
-  };
+  
 }
