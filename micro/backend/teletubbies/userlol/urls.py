@@ -12,4 +12,5 @@ urlpatterns = [
     path('invite_notifications/', account.invite_notifications),
     path('delete_invite/', account.delete_invite),
     path('validate_invite_code/', account.validate_invite_code),
+    path('view_profile/', account.view_profile),
 ] 

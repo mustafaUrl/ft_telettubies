@@ -83,18 +83,23 @@ def update_profile_pic(request):
         return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def get_match_history(request):
-    user = request.user
+    data = json.loads(request.body)
+    username = data.get('username')
+    
+    if not username:
+        return JsonResponse({'error': 'Username is required'}, status=400)
+    
     # Filter matches where the user is either player1 or player2
     matches = Match.objects.filter(
-        player1_username=user.username
+        player1_username=username
     ).union(
-        Match.objects.filter(player2_username=user.username)
+        Match.objects.filter(player2_username=username)
     ).values()
-
+    
     return JsonResponse(list(matches), safe=False)
 
 def generate_invite_code(length=6):
@@ -180,3 +185,23 @@ def validate_invite_code(request):
         # Log the exception details for debugging
         logger.exception("An unexpected error occurred. %s", str(e))
         return JsonResponse({'success': False, 'error': _('An unexpected error occurred.')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def view_profile(request):
+    username = request.data.get('username')
+    if not username:
+        return JsonResponse({'error': 'No username provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = get_object_or_404(User, username=username)
+    profile = get_object_or_404(UserProfile, user=user)
+    
+    return JsonResponse({
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+    }, status=status.HTTP_200_OK)

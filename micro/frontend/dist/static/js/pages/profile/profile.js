@@ -2,7 +2,7 @@ import changeContent from '../../uimodule/changeContent.js';
 import profileTrigger from './profileTrigger.js';
 import sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
 import { getCookie } from '../../cookies/cookies.js';
-
+import drawWinLoseChart from '../../utils/drawChart.js';
 export default function profile() {
   console.log('profile javascript');
 
@@ -17,9 +17,9 @@ export default function profile() {
   });
 
   // Fetch match history and calculate win-lose stats
-  const url = 'api/user/get_match_history';
-  const bodyData = {}; // Any required data for the POST request, if needed
-  const method = 'GET'; // Use GET method as defined in the Django view
+  const url = 'api/user/get_match_history/';
+  const bodyData = { username: getCookie('username') }; // Include username in the body
+  const method = 'POST'; // Use GET method as defined in the Django view
 
   sendPostWithJwt(url, bodyData, method).then(matchHistory => {
     const contentProfile = document.getElementById('content-profile2');
@@ -52,34 +52,3 @@ export default function profile() {
   });
 }
 
-function drawWinLoseChart(wins, losses) {
-  const canvas = document.getElementById('winLoseChart');
-  const ctx = canvas.getContext('2d');
-
-  const data = [wins, losses];
-  const labels = ['Wins', 'Losses'];
-  const colors = ['#B6FFFA', '#FFF67E'];
-
-  const barWidth = 300;
-  const barSpacing = 100;
-  const chartHeight = canvas.height - 20;
-  const maxDataValue = Math.max(...data);
-  const scale = chartHeight / maxDataValue;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.font = '20px Arial';
-
-  data.forEach((value, index) => {
-    const barHeight = value * scale;
-    const x = index * (barWidth + barSpacing) + barSpacing;
-    const y = canvas.height - barHeight;
-
-    ctx.fillStyle = colors[index];
-    ctx.fillRect(x, y, barWidth, barHeight);
-
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.fillText(labels[index], x + barWidth / 2, canvas.height - 5);
-    ctx.fillText(value, x + barWidth / 2, y - 5);
-  });
-}

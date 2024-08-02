@@ -3,7 +3,6 @@ import  logout  from '../pages/logout/logout.js';
 import  register  from '../pages/register/register.js';
 import  profile  from '../pages/profile/profile.js';
 import  menu from '../pages/game/menu.js';
-
 export default function triggerContentLoad(contentId) {
    
     switch (contentId) {
