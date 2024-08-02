@@ -1,7 +1,8 @@
 import { getCookie } from '../cookies/cookies.js';
 import  {createTournament}  from '../pages/game/start.js';
-import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
 import { get_notifications_count } from '../uimodule/notifications.js';
+import { inviteUser } from '../uimodule/chatBox.js';
+
 window.chatSocket = '';
 
 
@@ -45,17 +46,33 @@ export default function openSocket() {
   function updateOnlinePlayers(players) {
     const playerList = document.getElementById('playerList');
     if (!playerList) {
-      return;
+        return;
     }
     playerList.innerHTML = ''; // Clear existing player list
 
     players.forEach(player => {
-      const listItem = document.createElement('li');
-      listItem.textContent = player;
-      listItem.className = 'list-group-item';
-      playerList.appendChild(listItem);
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+
+        // Create player name text node
+        const playerText = document.createTextNode(player);
+        listItem.appendChild(playerText);
+
+        if (player !== getCookie('username')) {
+// Create invite button
+const inviteButton = document.createElement('button');
+inviteButton.textContent = 'Invite';
+inviteButton.className = 'btn btn-primary btn-sm';
+inviteButton.addEventListener('click', () => inviteUser(player));
+
+// Append button to the list item
+listItem.appendChild(inviteButton);
+        }
+        // Append list item to the player list
+        playerList.appendChild(listItem);
     });
-  }
+}
+  
 }
 
 function updateTournamentButtons() {

@@ -2,6 +2,7 @@ import sendPostUserRequest from '../postwithjwt/userRequest.js';
 import { getCookie } from '../cookies/cookies.js';
 import { sendMessage } from '../utils/SocketHelper.js';
 import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
+import changeContent from './changeContent.js';
 
 window.activeTab = 'tab1';
 
@@ -156,6 +157,7 @@ function displayFriends(friends) {
 
   document.querySelectorAll('.view-profile-btn').forEach(button => {
     button.addEventListener('click', function(event) {
+      changeContent('view_profile');
       const username = this.getAttribute('data-username');
       viewProfile(username);
     });
@@ -185,6 +187,13 @@ function displayFriends(friends) {
 
 function viewProfile(username) {
   console.log(`Viewing profile of ${username}`);
+ /*  sendPostWithJwt('api/user/view_profile/', {username}, 'GET')
+    .then(response => {
+      console.log('Profile viewed:', response);
+    })
+    .catch(error => {
+      console.error('An error occurred while viewing profile:', error);
+    }); */
 }
 
 function inviteUser(username) {
@@ -206,4 +215,4 @@ function inviteUser(username) {
     });
 }
 
-export { updateNotificationButton, showTab2WithUsername, selectTab };
+export { updateNotificationButton, showTab2WithUsername, selectTab, inviteUser };
