@@ -1,3 +1,5 @@
+import { sendPostUserRequest } from './RequestHelper.js';
+
 function joinRoom(friendUsername) {
     if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
@@ -44,4 +46,19 @@ function joinRoom(friendUsername) {
     }
   }
 
-  export { closeSocket, sendMessage, joinRoom, leaveRoom };
+  function checkBlocked(friendUsername) {
+
+    /* return new Promise((resolve, reject) => {
+      sendPostUserRequest('check_blocked', friendUsername)
+        .then(data => {
+          resolve(data);
+        })
+        .catch(error => {
+          console.error('Processing error:', error);
+          reject(error);
+        });
+    }
+    ); */
+  }
+
+  export { closeSocket, sendMessage, joinRoom, leaveRoom, checkBlocked };

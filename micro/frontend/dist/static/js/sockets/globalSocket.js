@@ -3,8 +3,8 @@ import  {createTournament}  from '../pages/game/start.js';
 import { get_notifications_count } from '../uimodule/notifications.js';
 import { inviteUser } from '../uimodule/chatBox.js';
 import viewProfile from '../utils/view-profile.js ';
-import {listFriends} from '../pages/profile/profile_utils.js';
-
+import {listFriends,} from '../pages/profile/profile_utils.js';
+import {checkBlocked} from '../utils/SocketHelper.js';
 
 window.chatSocket = '';
 
@@ -21,6 +21,9 @@ export default function openSocket() {
   window.chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('type:', data.type, 'data:', data);
+    if (data.type !== "online_players" && data.type !== "tournaments") {
+      checkBlocked(data.username);
+    }
     if (data.type === "online_players") {
       updateOnlinePlayers(data.players);
     }else if (data.type === 'tournaments') {
