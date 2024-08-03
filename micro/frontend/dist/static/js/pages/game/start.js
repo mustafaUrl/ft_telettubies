@@ -56,11 +56,8 @@ function startNextMatch(tournamentName) {
   } else {
     // Handling the case where there is a waiting player
     if (tournamentData.waitingPlayer) {
-      // Only push waitingPlayer to winners if it's not the final round
-      if (tournamentData.teams.length > 1) {
-        tournamentData.winners.push(tournamentData.waitingPlayer);
-        tournamentData.waitingPlayer = null;
-      }
+      tournamentData.winners.push(tournamentData.waitingPlayer);
+      tournamentData.waitingPlayer = null;
     }
 
     if (tournamentData.winners.length > 1) {
@@ -87,6 +84,7 @@ function startNextMatch(tournamentName) {
     }
   }
 }
+
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
