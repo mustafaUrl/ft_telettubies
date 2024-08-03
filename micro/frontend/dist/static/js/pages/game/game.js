@@ -36,78 +36,7 @@ export default function game() {
     camera.position.set(800, 21, 800); // Kamerayı daha uzak bir noktaya konumlandır
     camera.lookAt(0, 0, 0);
 
-    // // Oyun alanını boyamak için bir plane oluşturun
-    // const playAreaGeometry = new THREE.PlaneGeometry(canvasWidth, canvasHeight / 2 + 100);
-    // const playAreaMaterial = new THREE.MeshBasicMaterial({ color: 0xf4a460, side: THREE.DoubleSide });
-    // const playArea = new THREE.Mesh(playAreaGeometry, playAreaMaterial);
-    // playArea.rotation.x = -Math.PI / 2; // X ekseni etrafında 90 derece döndür, böylece yatay olur
-    // playArea.position.y = canvasHeight / 2 + 5; // Oyun alanını biraz aşağıya koy, böylece paddle'lar üstünde durur
-    // playArea.position.z = 200; // Oyun alanının ortasında
-    // scene.add(playArea);
-
-    // // Sol kenara zemin eklemek için bir plane oluşturun
-    // const leftWallGeometry = new THREE.PlaneGeometry(canvasHeight / 2 + 100, canvasHeight);
-    // const leftWallMaterial = new THREE.MeshBasicMaterial({ color: 0x1a1a1a, side: THREE.DoubleSide });
-    // const leftWall = new THREE.Mesh(leftWallGeometry, leftWallMaterial);
-    // leftWall.rotation.y = Math.PI / 2; // Y ekseni etrafında 90 derece döndür, böylece dikey olur
-    // leftWall.position.x = -canvasWidth / 2; // Oyun alanının sol tarafında
-    // leftWall.position.y = 1; // Y ekseni boyunca merkezde
-    // leftWall.position.z = 200; // Oyun alanının ortasında
-    // scene.add(leftWall);
-
-    // // Sağ kenara zemin eklemek için bir plane oluşturun
-    // const rightWallGeometry = new THREE.PlaneGeometry(canvasHeight / 2 + 100, canvasHeight);
-    // const rightWallMaterial = new THREE.MeshBasicMaterial({ color: 0x1a1a1a, side: THREE.DoubleSide });
-    // const rightWall = new THREE.Mesh(rightWallGeometry, rightWallMaterial);
-    // rightWall.rotation.y = -Math.PI / 2; // Y ekseni etrafında -90 derece döndür, böylece dikey olur
-    // rightWall.position.x = canvasWidth / 2; // Oyun alanının sağ tarafında
-    // rightWall.position.y = 1; // Y ekseni boyunca merkezde
-    // rightWall.position.z = 200; // Oyun alanının ortasında
-    // scene.add(rightWall);
-
-    // // Ortada bir zemin oluşturun
-    // const centerGroundGeometry = new THREE.PlaneGeometry(canvasWidth, canvasHeight);
-    // const centerGroundMaterial = new THREE.MeshBasicMaterial({ color: 0xfffacd, side: THREE.DoubleSide });
-    // const centerGround = new THREE.Mesh(centerGroundGeometry, centerGroundMaterial);
-    // centerGround.position.y = 1; // Y ekseni boyunca merkezde
-    // centerGround.position.z = -30; // Oyun alanının ortasında
-    // centerGround.position.x = 1; // Oyun alanının ortasında
-    // scene.add(centerGround);
-
-    // // Paddle'ların geometri ve malzemelerini ayarla
-    // const paddleWidth = 30; // Canvas genişliğine göre paddle genişliğini ayarla
-    // const paddleHeight = 150; // Paddle yüksekliği
-
-    // const paddleDepth = 40; // Paddle derinliği
-    // const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    // const paddleMaterial = new THREE.MeshBasicMaterial({ color: 0xf0e6ff });
-
-    // const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xff1500 });
-    // // Paddle'ları oluştur ve pozisyonlarını ayarla
-    // const paddle1 = new THREE.Mesh(paddleGeometry, paddleMaterial);
-    // const paddle2 = new THREE.Mesh(paddleGeometry, paddleMaterial);
-
-    // const edges1 = new THREE.EdgesGeometry(paddleGeometry);
-    // const line1 = new THREE.LineSegments(edges1, edgeMaterial);
-    // paddle1.add(line1);
-
-    // const edges2 = new THREE.EdgesGeometry(paddleGeometry);
-    // const line2 = new THREE.LineSegments(edges2, edgeMaterial);
-    // paddle2.add(line2);
-
-    // paddle1.position.set(-canvasWidth / 2 + paddleWidth / 2, 0, 0); // Sol paddle
-    // paddle2.position.set(canvasWidth / 2 - paddleWidth / 2, 0, 0); // Sağ paddle
-    // scene.add(paddle1);
-    // scene.add(paddle2);
-
-    // // Topun geometri ve malzemesini ayarla
-    // const ballRadius = 20;
-    // const ballGeometry = new THREE.SphereGeometry(ballRadius, 32, 32);
-    // const ballMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    // const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-    // ball.position.set(0, 0, 0); // Topun başlangıç pozisyonu
-    // scene.add(ball);
-   // Malzemeler
+ 
    const transparentMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, transparent: true });
    const neonEdgeMaterial = new THREE.LineBasicMaterial({ color: 0xff00ff });
 
@@ -449,33 +378,7 @@ export default function game() {
         }
     });
 
-    // document.getElementById('resetButton').addEventListener('click', () => {
-    //     // Reset scores
-    //     scoreP1 = 0;
-    //     scoreP2 = 0;
-    //     updateScoreDisplay();
-        
-    //     // Reset the ball
-    //     resetBall();
-        
-    //     // Restart the game
-    //     gameRunning = true;
-    //     gameLoop(); // Restart the game loop
-    //     animate(); // Restart the animation loop
-    // });
-
-    // function showWinner(winner) {
-    //     const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
-    //     document.getElementById('winnerMessage').textContent = `${winner} wins!`;
-    //     winnerPopup.show();
-        
-    //     setTimeout(() => {
-    //         winnerPopup.hide();
-    //     }, 3000); // 3 saniye sonra pop-up'ı gizle
-       
-    // }
     
-    // Start with the game paused
     gameRunning = false;
 
 });

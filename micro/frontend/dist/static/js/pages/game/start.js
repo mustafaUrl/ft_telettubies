@@ -1,5 +1,6 @@
 import game from './game.js';
 import { getCookie } from '../../cookies/cookies.js';
+import changeContent from '../../uimodule/changeContent.js';
 
 window.tournaments = {};
 
@@ -84,9 +85,6 @@ function startNextMatch(tournamentName) {
       tournamentData.currentMatch= 0;
       tournamentData.roundNumber++;
       startNextMatch(tournamentName);
-    } else if (tournamentData.winners.length === 1) {
-      console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);  
-      alert(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
     }
   }
 }
@@ -99,16 +97,65 @@ function shuffleArray(array) {
   return array;
 }
 
+function clearDisplay(tournamentName) {
+  // Puanları sıfırla
+  const scorePlayer1 = document.getElementById('scorePlayer1');
+  const scorePlayer2 = document.getElementById('scorePlayer2');
+  if (scorePlayer1) scorePlayer1.textContent = '';
+  if (scorePlayer2) scorePlayer2.textContent = '';
+
+  // Oyun modunu temizle
+  const gameModeDisplay = document.getElementById('gameModeDisplay');
+  if (gameModeDisplay) gameModeDisplay.textContent = '';
+
+  // Skor tablosunu temizle
+  const scoreBoardDiv = document.querySelector('#scoreBoard div');
+  if (scoreBoardDiv) scoreBoardDiv.innerHTML = '';
+
+  // Kontrol ve skor tablosunu gizle
+  const gameControls = document.getElementById('gameControls');
+  const scoreBoard = document.getElementById('scoreBoard');
+  if (gameControls) gameControls.style.display = 'none';
+  if (scoreBoard) scoreBoard.style.display = 'none';
+  if (window.chatSocket) {
+    window.chatSocket.send(JSON.stringify({
+      'username': getCookie('username'),
+      'room': tournamentName,
+      'command': 'leave',
+    }));
+  }
+  changeContent('game');
+  
+}
+
+
+
+
 
 function startGame(player1Name, player2Name, gameMode, tournamentName = null, roundId = null, players = null) {
   function showWinner(winner) {
     const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
-    document.getElementById('winnerMessage').textContent = `${winner} wins!`;
+    const message = roundId === "Final" ? `Winner of the Tournament ${tournamentName}: ${winner}` : "Winner";
+    document.getElementById('winnerMessage').textContent = `${message}!`;
     winnerPopup.show();
+  
+    // Pop-up kapanma olayına dinleyici ekleyin
+    winnerPopup._element.addEventListener('hidden.bs.modal', function () {
+      // Kapanma animasyonu tamamlandığında çalıştırılacak kod
+      if (gameMode === "tournament") {
+        if (roundId === "Final") {
+          clearDisplay(tournamentName);
+          
+        }
+      }
+    });
+  
+    // Pop-up'ı belirli bir süre sonra kapat
     setTimeout(() => {
       winnerPopup.hide();
     }, 3000);
   }
+  
 
   console.log(gameMode, 'Game started with players:', player1Name, player2Name);
   document.getElementById('scorePlayer1').textContent = '0';
