@@ -203,11 +203,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         command = text_data_json["command"]
         room = text_data_json["room"]
         
-       
-        recipient_user = self.user.username
-        is_blocked = await self.is_user_blocked(recipient_user, username)
-        if is_blocked:
-            return  # Do not send the message if the sender is blocked
+    
 
         if command == "online_players":
             await self.list_online_players()
@@ -242,15 +238,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    @database_sync_to_async
-    def is_user_blocked(self, recipient_username, sender_username):
-        try:
-            recipient_user = User.objects.get(username=recipient_username)
-            sender_user = User.objects.get(username=sender_username)
-            recipient_friends_list, _ = FriendList.objects.get_or_create(user=recipient_user)
-            return recipient_friends_list.is_blocked(sender_user)
-        except User.DoesNotExist:
-            return False
+   
         
     async def update_notification(self, user):
         await self.channel_layer.group_send(

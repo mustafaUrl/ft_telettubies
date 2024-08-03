@@ -202,10 +202,14 @@ def get_friend(request):
 @authentication_classes([JWTAuthentication])
 def get_banned(request):
     user = request.user
-    friend_list = FriendList.objects.get(user=user)
-    banned_users = friend_list.banned.all()
-    banned_data = [{'id': user.id, 'username': user.username} for user in banned_users]
-    return JsonResponse({'banned_users': banned_data})
+    try:
+        friend_list = FriendList.objects.get(user=user)
+    except FriendList.DoesNotExist:
+        return JsonResponse({'error': 'Friend list does not exist'}, status=404)
+
+    blocked_users = friend_list.block.all()
+    blocked_data = [{'username': blocked_user.username} for blocked_user in blocked_users]
+    return JsonResponse({'blocked_users': blocked_data})
 
 # Arkadaşlık isteğini iptal etme
 @permission_classes([IsAuthenticated])

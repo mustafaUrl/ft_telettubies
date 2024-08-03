@@ -5,8 +5,33 @@ import { inviteUser } from '../uimodule/chatBox.js';
 import viewProfile from '../utils/view-profile.js ';
 import {listFriends,} from '../pages/profile/profile_utils.js';
 import {checkBlocked} from '../utils/SocketHelper.js';
-
+import sendPostUserRequest from '../postwithjwt/userRequest.js';
 window.chatSocket = '';
+
+async function get_banned_user(username) {
+  try {
+    const response = await sendPostUserRequest('get_banned');
+    console.log('Response:', response); // Log the entire response
+
+    // Ensure response is in the expected format
+    if (!response || !Array.isArray(response.blocked_users)) {
+      throw new Error('Invalid response structure');
+    }
+
+    const bannedUsers = response.blocked_users;
+    console.log('Banned users:', bannedUsers);
+
+    // Check if the specified username is in the list of banned users
+    const isBanned = bannedUsers.some(user => user.username === username);
+    console.log('Is user banned:', isBanned, typeof isBanned);
+
+    return isBanned; // Return the result
+
+  } catch (error) {
+    console.error('Processing error:', error);
+    return false; // Ensure a boolean value is returned
+  }
+}
 
 
 function isTournamentStarted(tournament) {
@@ -14,14 +39,14 @@ function isTournamentStarted(tournament) {
 }
 
 
-export default function openSocket() {
+export default  function openSocket() {
   if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
     return;
   }
 
   window.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?token=` + getCookie('accessToken'));
 
-  window.chatSocket.onmessage = function(e) {
+  window.chatSocket.onmessage = async function(e) {
     const data = JSON.parse(e.data);
     console.log('type:', data.type, 'data:', data);
     if (data.type !== "online_players" && data.type !== "tournaments") {
@@ -35,7 +60,7 @@ export default function openSocket() {
       updateTournamentButtons();
 
     }
-    else if (data.type === 'invite_notification') {
+    else if (!data.type === 'invite_notification') {
       get_notifications_count();
     }
     else if (data.type === 'tournament_message') {
@@ -48,58 +73,63 @@ export default function openSocket() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
       else {
-        const chatMessages = document.getElementById('chat_messages1');
-        const messageDiv = document.createElement('div');
+        const deger = await get_banned_user(data.username);
+        console.log('deger:', deger, 'type:', typeof deger);
+        if (!deger) {
+          const chatMessages = document.getElementById('chat_messages1');
+          const messageDiv = document.createElement('div');
+          
+          // Create a dropdown button
+          const dropdownButton = document.createElement('button');
+          dropdownButton.textContent = '⋮'; // More options icon
+          dropdownButton.className = 'dropdown-button';
+      
+          // Create dropdown menu
+          const dropdownMenu = document.createElement('div');
+          dropdownMenu.className = 'chat-dropdown-menu';
+          dropdownMenu.innerHTML = `
+            <li><a class="dropdown-item view-profile-btn" href="#" data-username="${data.username}">View Profile</a></li>
+            <li><a class="dropdown-item invite-player-btn" href="#" data-username="${data.username}">Invite Player</a></li>
+          `;
+      
+          // Append dropdown menu to the button
+          dropdownButton.appendChild(dropdownMenu);
+      
+          // Toggle dropdown menu on button click
+          dropdownButton.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent the click from propagating to the document
+            dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+          });
+      
+          // Handle view profile click
+          dropdownMenu.querySelector('.view-profile-btn').addEventListener('click', function(event) {
+            event.preventDefault();
+            viewProfile(data.username);
+          });
+      
+          // Handle invite player click
+          dropdownMenu.querySelector('.invite-player-btn').addEventListener('click', function(event) {
+            event.preventDefault();
+            inviteUser(data.username);
+          });
+      
+          // Add username, message text, and dropdown button to the message div
+          const usernameSpan = document.createElement('span');
+          usernameSpan.textContent = data.username;
+          usernameSpan.className = 'username-text';
+      
+          const messageText = document.createTextNode(`: ${data.message} `);
+      
+          messageDiv.appendChild(dropdownButton);
+          messageDiv.appendChild(usernameSpan);
+          messageDiv.appendChild(messageText);
+      
+          // Append message to chat
+          chatMessages.appendChild(messageDiv);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        }
         
-        // Create a dropdown button
-        const dropdownButton = document.createElement('button');
-        dropdownButton.textContent = '⋮'; // More options icon
-        dropdownButton.className = 'dropdown-button';
-    
-        // Create dropdown menu
-        const dropdownMenu = document.createElement('div');
-        dropdownMenu.className = 'chat-dropdown-menu';
-        dropdownMenu.innerHTML = `
-          <li><a class="dropdown-item view-profile-btn" href="#" data-username="${data.username}">View Profile</a></li>
-          <li><a class="dropdown-item invite-player-btn" href="#" data-username="${data.username}">Invite Player</a></li>
-        `;
-    
-        // Append dropdown menu to the button
-        dropdownButton.appendChild(dropdownMenu);
-    
-        // Toggle dropdown menu on button click
-        dropdownButton.addEventListener('click', function(event) {
-          event.stopPropagation(); // Prevent the click from propagating to the document
-          dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
-        });
-    
-        // Handle view profile click
-        dropdownMenu.querySelector('.view-profile-btn').addEventListener('click', function(event) {
-          event.preventDefault();
-          viewProfile(data.username);
-        });
-    
-        // Handle invite player click
-        dropdownMenu.querySelector('.invite-player-btn').addEventListener('click', function(event) {
-          event.preventDefault();
-          inviteUser(data.username);
-        });
-    
-        // Add username, message text, and dropdown button to the message div
-        const usernameSpan = document.createElement('span');
-        usernameSpan.textContent = data.username;
-        usernameSpan.className = 'username-text';
-    
-        const messageText = document.createTextNode(`: ${data.message} `);
-    
-        messageDiv.appendChild(dropdownButton);
-        messageDiv.appendChild(usernameSpan);
-        messageDiv.appendChild(messageText);
-    
-        // Append message to chat
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
     };
   
     // Close dropdown menu when clicking outside

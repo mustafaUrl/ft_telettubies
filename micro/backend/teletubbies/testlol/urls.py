@@ -10,7 +10,6 @@ urlpatterns = [
     path('api/auth/', include('authlol.urls')),
    # path('', include('applol.urls')),
     path('api/',include('uimodule.urls')),
-    path('api/chat/', include('channellol.urls')),
     path('api/user/', include('userlol.urls')),
     path('api/2fa/', include('twofa.urls')),
     path('api/game/', include('game.urls')),
