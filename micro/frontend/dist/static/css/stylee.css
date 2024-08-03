@@ -299,7 +299,7 @@
 }
 
 body{
-  /*background-image: url("../img/telewtf.png");*/
+  background-image: url("../img/telewtf.png");
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -341,13 +341,14 @@ body{
 
 /* Style for the dropdown button */
 .dropdown-button {
-  background: transparent;
-  border: none;
+  background: aqua;
+  border: black;
+  border-radius: 50%;
   font-size: 20px;
   cursor: pointer;
   position: relative;
-  padding: 0;
-  margin-left: 10px;
+  padding: 3px;
+  margin-left: -15px;
 }
 
 /* Style for the dropdown menu */
@@ -383,4 +384,18 @@ body{
 /* Additional styling */
 .chat-dropdown-menu .dropdown-item:hover {
   background-color: #ddd;
+}
+
+.welcome-text {
+  text-align: center;
+  color: aqua;
+  font-size: xx-large;
+}
+
+gameModeDisplay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  color: aqua;
 }

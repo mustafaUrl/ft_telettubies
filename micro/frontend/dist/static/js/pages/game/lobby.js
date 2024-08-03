@@ -78,7 +78,7 @@ export default function lobby() {
   </div>
 
   <!-- Scoreboard -->
-  <div id="scoreBoard" style="text-align: center; font-size: 24px; margin-bottom: 10px; display: none;">
+  <div id="scoreBoard" style="text-align: center; color: aqua; font-size: 24px; margin-bottom: 10px; display: none;">
     <div>Player 1: <span id="scorePlayer1">0</span> | Player 2: <span id="scorePlayer2">0</span></div>
     <div>Game Mode: <span id="gameModeDisplay"></span></div>
   </div>

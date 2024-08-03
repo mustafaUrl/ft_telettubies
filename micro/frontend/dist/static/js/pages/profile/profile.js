@@ -41,7 +41,7 @@ export default function profile() {
 
     contentProfile.innerHTML += `
       <div>
-        <h3>Win-Lose Stats</h3>
+        <h3 style="color: aqua;">Win-Lose Stats</h3>
         <canvas id="winLoseChart" width="800" height="600"></canvas>
       </div>
     `;

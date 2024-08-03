@@ -72,7 +72,7 @@ export default function accountListener() {
           // Popup penceresini oluşturun ve kullanıcıya gösterin
           let popupWindow = window.open('', '2FA Popup', 'width=400,height=400');
           popupWindow.document.write('<html><head><title>2FA QR Code</title></head><body>');
-          popupWindow.document.write('<h1>Two-factor Authentication</h1>');
+          popupWindow.document.write('<h1 style="color: aqua;">Two-factor Authentication</h1>');
           popupWindow.document.write('<p>' + data.message + '</p>');
     
           // QR kodu oluşturmak için qrcode.js kütüphanesini kullanın
