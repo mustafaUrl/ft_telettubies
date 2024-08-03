@@ -9,6 +9,9 @@ import {checkBlocked} from '../utils/SocketHelper.js';
 window.chatSocket = '';
 
 
+function isTournamentStarted(tournament) {
+  return window.tournaments[tournament] && window.tournaments[tournament].status_start === 'started';
+}
 
 
 export default function openSocket() {
@@ -34,8 +37,16 @@ export default function openSocket() {
     }
     else if (data.type === 'invite_notification') {
       get_notifications_count();
-
-      }
+    }
+    else if (data.type === 'tournament_message') {
+      
+        const chatMessages = document.getElementById('chat_messages1');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'my-message';
+        messageDiv.textContent = data.message;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
       else {
         const chatMessages = document.getElementById('chat_messages1');
         const messageDiv = document.createElement('div');
@@ -237,7 +248,12 @@ function updateLobbyTournaments(tournaments) {
 
       if (details.status === 'started') {
         console.log('aynennnn:',  details.players);
-        createTournament(tournament, details.players);
+        if (details.host === getCookie('username')) {
+          if ( !isTournamentStarted(tournament)) {
+            window.tournaments[tournament] = { status_start: 'started'};          
+            createTournament(tournament, details.players);
+        }}
+       
       } else {
           playerListHtml = `
               <ul id="participantList">

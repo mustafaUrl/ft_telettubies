@@ -1,7 +1,7 @@
 import game from './game.js';
 import { getCookie } from '../../cookies/cookies.js';
 
-const tournaments = {};
+window.tournaments = {};
 
 function createTournament(tournamentName, playerNames) {
   console.log('Tournament created with players:', playerNames);
@@ -22,11 +22,13 @@ function createTournament(tournamentName, playerNames) {
     teams.push(team);
   }
 
-  tournaments[tournamentName] = {
+  window.tournaments[tournamentName] = {
     teams: teams,
     waitingPlayer: waitingPlayer,
     currentMatch: 0,
-    winners: []
+    winners: [],
+    roundNumber: 1,
+    status_start: ""
   };
 
   const tournamentItem = document.createElement('li');
@@ -43,25 +45,22 @@ function createTournament(tournamentName, playerNames) {
   startNextMatch(tournamentName);
 }
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
 function startNextMatch(tournamentName) {
-  const tournamentData = tournaments[tournamentName];
+  const tournamentData = window.tournaments[tournamentName];
 
   if (tournamentData.currentMatch < tournamentData.teams.length) {
     const match = tournamentData.teams[tournamentData.currentMatch];
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    const round = (tournamentData.currentMatch + 1 === tournamentData.teams.length && tournamentData.winners.length === 1) ? 'final' : `${tournamentData.currentMatch + 1}`;
-    startGame(match[0], match[1], "tournament", tournamentName, round);
+    const round = `Round ${tournamentData.roundNumber}`;
+    startGame(match[0], match[1], "tournament", tournamentName, tournamentData.roundNumber);
   } else {
+    // Handling the case where there is a waiting player
     if (tournamentData.waitingPlayer) {
-      tournamentData.winners.push(tournamentData.waitingPlayer);
-      tournamentData.waitingPlayer = null;
+      // Only push waitingPlayer to winners if it's not the final round
+      if (tournamentData.teams.length > 1) {
+        tournamentData.winners.push(tournamentData.waitingPlayer);
+        tournamentData.waitingPlayer = null;
+      }
     }
 
     if (tournamentData.winners.length > 1) {
@@ -80,6 +79,7 @@ function startNextMatch(tournamentName) {
       }
 
       tournamentData.currentMatch = 0;
+      tournamentData.roundNumber++;
       startNextMatch(tournamentName);
     } else if (tournamentData.winners.length === 1) {
       console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
@@ -87,6 +87,14 @@ function startNextMatch(tournamentName) {
     }
   }
 }
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 
 function startGame(player1Name, player2Name, gameMode, tournamentName = null, roundId = null, players = null) {
   function showWinner(winner) {
@@ -167,8 +175,8 @@ function startGame(player1Name, player2Name, gameMode, tournamentName = null, ro
     }).then((data) => {
       console.log('Match created successfully:', data);
       if (gameMode == "tournament") {
-        tournaments[tournamentName].winners.push(winner);
-        tournaments[tournamentName].currentMatch++;
+        window.tournaments[tournamentName].winners.push(winner);
+        window.tournaments[tournamentName].currentMatch++;
         startNextMatch(tournamentName);
       }
     }).catch((error) => {

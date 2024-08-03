@@ -252,9 +252,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 waiting_player = None
  
            
-
-
-
+            message = f"Turnuva başladı!"
+            await self.send_tournament_message(tournament_name, message)
+            
             await self.update_tournaments()
         else:
             # Turnuva bulunamazsa yapılacak işlemler
@@ -312,9 +312,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "start_time": start_time.isoformat(),  # UTC olarak kaydediyoruz
                 "status": "waiting",
                 "rounds": {},
-                "waiting_player ": ""
+                "waiting_player ": "",
+                "channels": set()  # Initialize channels set
             }
             logging.info("Tournament %s created by %s start time %s ", tournament_name, host_name, start_time)
+            tournament_group_name = f"tournament_{tournament_name}"
+            await self.channel_layer.group_add(
+                tournament_group_name,
+                self.channel_name
+            )
             await self.update_tournaments()
         else:
             # Handle tournament already exists
@@ -340,14 +346,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
     async def leave_tournament(self, tournament_name, player_name):
         if tournament_name in ChatConsumer.tournaments:
+            tournament_group_name = f"tournament_{tournament_name}"  # Define tournament_group_name early
+
             if ChatConsumer.tournaments[tournament_name]["host"] == player_name:
+                # The host is leaving, remove the tournament and discard all associated channels
+                channels = ChatConsumer.tournaments[tournament_name].get("channels", set())
+                for channel in channels:
+                    await self.channel_layer.group_discard(
+                        tournament_group_name,
+                        channel
+                    )
                 del ChatConsumer.tournaments[tournament_name]
             else:
+                # A regular player is leaving
                 ChatConsumer.tournaments[tournament_name]["players"].discard(player_name)
+                channels = ChatConsumer.tournaments[tournament_name].get("channels", set())
+                channels.discard(self.channel_name)
+                ChatConsumer.tournaments[tournament_name]["channels"] = channels
+                await self.channel_layer.group_discard(
+                    tournament_group_name,
+                    self.channel_name
+                )
+            
             await self.update_tournaments()
         else:
             # Handle tournament not found
-            pass
+            logging.warning("Tournament %s not found", tournament_name)
+
 
 
 
@@ -362,16 +387,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Convert milliseconds to seconds and then to a datetime object in UTC
             current_time = datetime.fromtimestamp(current_time / 1000.0, tz=timezone.utc)
-            logging.info("şimdiki zaman: %s  %s", current_time, tournament_start_time_str)
-            # Debug logging
-            logging.info("Tournament Start Time: %s", tournament_start_time)
-            logging.info("Current Time: %s", current_time)
-            logging.info("Current Time Timestamp: %d", int(current_time.timestamp() * 1000))
-            logging.info("Tournament Start Time Timestamp: %d", int(tournament_start_time.timestamp() * 1000))
+            
 
             # Compare the times in milliseconds
             if int(tournament_start_time.timestamp() * 1000) > int(current_time.timestamp() * 1000):
                 ChatConsumer.tournaments[tournament_name]["players"].add(player_name)
+                tournament_group_name = f"tournament_{tournament_name}"
+                
+                await self.channel_layer.group_add(
+                    tournament_group_name,
+                    self.channel_name
+                )
+
+                ChatConsumer.tournaments[tournament_name]["channels"].add(self.channel_name)
                 await self.update_tournaments()
             else:
                 # Handle join attempt after start time
@@ -423,6 +451,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "invite_notification",
             }))
 
+    async def send_tournament_message(self, tournament_name, message):
+        tournament_group_name = f"tournament_{tournament_name}"
+        await self.channel_layer.group_send(
+            tournament_group_name, {
+                'type': 'chat_message',
+                'message': message,
+            }
+        )
+    async def chat_message(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({
+            'type': 'tournament_message',
+            'message': message
+        }))
     async def tournaments_send(self, event):
         tournaments_list = event["tournaments_list"]
         if not self.scope['user'].is_anonymous:

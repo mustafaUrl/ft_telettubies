@@ -38,7 +38,6 @@ def ft_auth(request):
     client_id = os.getenv('CLIENT_ID')
     client_secret = os.getenv('CLIENT_SECRET')
     redirect_uri = os.getenv('REDIRECT_URI')
-    logger.info('redirect_uri: %s + client_id: %s + client_secret: %s ', redirect_uri, client_id, client_secret)
     if request.method == 'POST':
         code = request.data.get('code')
 
@@ -47,7 +46,6 @@ def ft_auth(request):
             'code': 400,
             'message': 'Bad request 1'
         }, status=400)
-    logger.info('code: %s', code)
     try:
         url = "https://api.intra.42.fr/oauth/token"
         payload = {
@@ -73,7 +71,6 @@ def ft_auth(request):
             'code': 400,
             'message': 'Bad request 3'
         }, status=400)
-    logger.info('patlamadı:', ft_access_token)
     user_info_response = requests.get('https://api.intra.42.fr/v2/me', headers={
         'Authorization': f'Bearer {ft_access_token}'
     })
@@ -118,12 +115,7 @@ def ft_auth(request):
             is_active=True
         )
 
-    #     UserProfile.objects.create(
-    #     user=user,
-    #     profile_picture='profile_pictures/pp.jpeg'  # Varsayılan resmin yolu
-    
-    
-    # Resmin URL'si
+   
     
 
     # Resmi URL'den çekme

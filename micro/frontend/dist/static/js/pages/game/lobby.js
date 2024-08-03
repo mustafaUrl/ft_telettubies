@@ -1,4 +1,3 @@
-import game from './game.js';
 import { getCookie } from '../../cookies/cookies.js';
 import {startGame} from './start.js';
 import  sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
@@ -234,20 +233,20 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   const usedNames = new Set(); // To store used names
 
   for (let i = 0; i < numPlayers; i++) {
-    const playerName = document.getElementById(`playerName${i}`).value.trim(); // Trim whitespace
+    const playerName = document.getElementById(`playerName${i}`).value.trim() + ' (anonim)'; ; // Trim whitespace
 
     // Check for empty names
     if (playerName === '') {
       alert('Player names cannot be empty.');
       return;
     }
-
+ 
     // Check for duplicate names
     if (usedNames.has(playerName)) {
       alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
       return;
     }
-
+    
     playerNames.push(playerName);
     usedNames.add(playerName); // Add name to set to track uniqueness
   }
