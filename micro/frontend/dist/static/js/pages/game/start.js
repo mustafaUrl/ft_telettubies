@@ -47,18 +47,18 @@ function createTournament(tournamentName, playerNames) {
 
 function startNextMatch(tournamentName) {
   const tournamentData = window.tournaments[tournamentName];
-
+  if (tournamentData.waitingPlayer) {
+    tournamentData.winners.push(tournamentData.waitingPlayer);
+    tournamentData.waitingPlayer = null;
+  }
   if (tournamentData.currentMatch < tournamentData.teams.length) {
     const match = tournamentData.teams[tournamentData.currentMatch];
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
-    const round = `Round ${tournamentData.roundNumber}`;
+    
     startGame(match[0], match[1], "tournament", tournamentName, tournamentData.roundNumber);
   } else {
     // Handling the case where there is a waiting player
-    if (tournamentData.waitingPlayer) {
-      tournamentData.winners.push(tournamentData.waitingPlayer);
-      tournamentData.waitingPlayer = null;
-    }
+   
 
     if (tournamentData.winners.length > 1) {
       console.log(`Proceeding to next round with winners: ${tournamentData.winners}`);
@@ -75,7 +75,7 @@ function startNextMatch(tournamentName) {
         tournamentData.waitingPlayer = winners.shift();
       }
 
-      tournamentData.currentMatch = 0;
+      tournamentData.currentMatch= 0;
       tournamentData.roundNumber++;
       startNextMatch(tournamentName);
     } else if (tournamentData.winners.length === 1) {
