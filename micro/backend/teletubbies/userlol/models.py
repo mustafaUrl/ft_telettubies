@@ -1,12 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-from channellol.models import OnlineUserStatus
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-    
-
 
 class FriendList(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='friend_list')
@@ -17,6 +14,9 @@ class FriendList(models.Model):
     def __str__(self):
         return f"{self.user.username}'s friend list"
 
+    def is_blocked(self, user):
+        return self.block.filter(id=user.id).exists()
+        
 class FriendRequest(models.Model):
     from_user = models.ForeignKey(User, related_name='sent_requests', on_delete=models.CASCADE)
     to_user = models.ForeignKey(User, related_name='received_requests', on_delete=models.CASCADE)
@@ -26,17 +26,19 @@ class FriendRequest(models.Model):
         return f"{self.from_user.username} -> {self.to_user.username}"
 
     def accept(self):
-        # İsteği kabul eden kullanıcının arkadaş listesine istek gönderen kullanıcıyı ekleyin
-        friend_list, created = FriendList.objects.get_or_create(user=self.to_user)
-        friend_list.friends.add(self.from_user)
-        # İsteği gönderen kullanıcının arkadaş listesine isteği kabul eden kullanıcıyı ekleyin
-        friend_list_from_user, created = FriendList.objects.get_or_create(user=self.from_user)
-        friend_list_from_user.friends.add(self.to_user)
-        # İsteği pasif hale getirin
+        to_user_friends_list, _ = FriendList.objects.get_or_create(user=self.to_user)
+        from_user_friends_list, _ = FriendList.objects.get_or_create(user=self.from_user)
+
+        # If the user is not blocked, add them to the friends list
+        if not to_user_friends_list.is_blocked(self.from_user):
+            to_user_friends_list.friends.add(self.from_user)
+        
+        if not from_user_friends_list.is_blocked(self.to_user):
+            from_user_friends_list.friends.add(self.to_user)
+
         self.is_active = False
         self.save()
 
     def reject(self):
-        # İsteği pasif hale getirin
         self.is_active = False
         self.save()
