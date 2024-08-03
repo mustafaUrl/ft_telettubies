@@ -1,4 +1,4 @@
-import { sendPostUserRequest } from './RequestHelper.js';
+//import { sendPostUserRequest } from './RequestHelper.js';
 
 function joinRoom(friendUsername) {
     if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
