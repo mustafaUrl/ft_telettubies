@@ -51,13 +51,19 @@ function startNextMatch(tournamentName) {
     tournamentData.winners.push(tournamentData.waitingPlayer);
     tournamentData.waitingPlayer = null;
   }
-  if (tournamentData.currentMatch < tournamentData.teams.length) {
+
+  if ( tournamentData.teams.length === 1 && tournamentData.winners.length === 0) {
+    const match = tournamentData.teams[tournamentData.currentMatch];
+    console.log(`Starting Final Match: ${match[0]} vs ${match[1]}`);
+    
+    startGame(match[0], match[1], "tournament", tournamentName, "Final");
+  }
+  else if (tournamentData.currentMatch < tournamentData.teams.length) {
     const match = tournamentData.teams[tournamentData.currentMatch];
     console.log(`Starting Match: ${match[0]} vs ${match[1]}`);
     
     startGame(match[0], match[1], "tournament", tournamentName, tournamentData.roundNumber);
   } else {
-    // Handling the case where there is a waiting player
    
 
     if (tournamentData.winners.length > 1) {
@@ -79,7 +85,7 @@ function startNextMatch(tournamentName) {
       tournamentData.roundNumber++;
       startNextMatch(tournamentName);
     } else if (tournamentData.winners.length === 1) {
-      console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
+      console.log(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);  
       alert(`Winner of the Tournament ${tournamentName}: ${tournamentData.winners[0]}`);
     }
   }
