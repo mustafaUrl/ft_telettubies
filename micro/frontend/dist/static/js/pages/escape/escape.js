@@ -1,4 +1,4 @@
-function escapeHtml(str) {
+export default function escapeHtml(str) {
     const map = {
       '&': '&amp;',
       '<': '&lt;',
