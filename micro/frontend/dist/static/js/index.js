@@ -31,7 +31,7 @@ window.onclick = function(event) {
 
 
 
-checkAuthStatus();
+    checkAuthStatus();
     hrefListener();
     if (getCookie('accessToken')) {
       openSocketPrivate();

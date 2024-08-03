@@ -23,7 +23,7 @@ function addfriendListener() {
        action = 'remove_block';
      }
      if (action === 'block' || action === 'remove_block'
-       || action === 'message' || action === 'invite' || action === 'show profile' || action === 'remove friend'){
+       || action === 'message'  || action === 'show profile' || action === 'remove friend'){
        
          if (action === 'message') {
            if (window.otherUser !== friendUsername) {
@@ -70,14 +70,12 @@ function addfriendListener() {
           <td><img class="rounded-circle me-2" width="30" height="30" src="${profilePictureUrl}" alt="Profile Picture"/>${friend.username}</td>
           <td><button class="btn ${isOnline ? 'btn-success' : 'btn-secondary'}" type="button">${isOnline ? 'online' : 'offline'}</button></td>
           <td><button class="btn btn-warning" type="button">message</button></td>
-          <td><button class="btn btn-info" type="button">invite</button></td>
           <td><button class="btn ${friend.block ? 'btn-danger' : 'btn-success'}" type="button">${friend.block ? 'remove block' : 'block'}</button></td>
           <td>
               <div class="btn-group">
                   <button class="btn btn-primary" type="button">other</button>
                   <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" type="button"></button>
                   <div class="dropdown-menu">
-                      <a class="dropdown-item" href="#">show profile</a>
                       <a class="dropdown-item" href="#">remove friend</a>
                   </div>
               </div>
