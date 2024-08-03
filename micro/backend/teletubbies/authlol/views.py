@@ -160,14 +160,3 @@ def register_view(request):
     )
     user.save()
     return Response({'success': 'User created successfully.'})
-
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# @authentication_classes([JWTAuthentication])
-# def get_username(request):
-#     return JsonResponse({'username': request.user.username})
-
-
-
-
