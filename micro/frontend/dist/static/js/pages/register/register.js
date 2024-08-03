@@ -1,4 +1,11 @@
+import escapeHtml from '../escape/escape.js';
 import changeContent from '../../uimodule/changeContent.js';
+
+// Function to check for special characters
+function containsSpecialChars(str) {
+    const specialChars = /[&<>"'/]/;
+    return specialChars.test(str);
+}
 
 // Güçlü parola oluşturma fonksiyonu
 function isStrongPassword(password) {
@@ -30,6 +37,12 @@ export default function register() {
         const password = document.querySelector('[name="password"]').value;
         const password_repeat = document.querySelector('[name="password_repeat"]').value;
 
+        // Check for special characters
+        if (containsSpecialChars(username) || containsSpecialChars(first_name) || containsSpecialChars(last_name) || containsSpecialChars(email)) {
+            alert('Special characters are not allowed.');
+            return;
+        }
+
         // Şifrelerin eşleşip eşleşmediğini kontrol et
         if (password !== password_repeat) {
             alert('Passwords do not match.');
@@ -46,7 +59,7 @@ export default function register() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, first_name, last_name, email, password })
+            body: JSON.stringify({ username: escapeHtml(username), first_name: escapeHtml(first_name), last_name: escapeHtml(last_name), email: escapeHtml(email), password: escapeHtml(password) })
         })
         .then(response => response.json())
         .then(data => {
