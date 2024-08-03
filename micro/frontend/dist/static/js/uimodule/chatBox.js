@@ -165,7 +165,7 @@ function displayFriends(friends) {
   });
 
   document.querySelectorAll('.invite-btn').forEach(button => {
-    
+      console.log('invite-btn');
     button.addEventListener('click', function(event) {
       event.preventDefault();
 

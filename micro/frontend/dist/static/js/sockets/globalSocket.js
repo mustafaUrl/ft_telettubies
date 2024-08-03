@@ -36,7 +36,7 @@ export default  function openSocket() {
       updateTournamentButtons();
 
     }
-    else if (!data.type === 'invite_notification') {
+    else if (data.type === 'invite_notification') {
       get_notifications_count();
     }
     else if (data.type === 'tournament_message') {
