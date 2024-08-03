@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async, async_to_sync
 from .models import OnlineUserStatus, Notification, OnlineUserStatusPrivate
-from userlol.models import PrivateChatMessage, FriendList
+from userlol.models import FriendList
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
@@ -262,43 +262,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
       
 
-    def create_matches(self, players):
-        if len(players) < 2:
-            return "Oyuncu sayısı en az 2 olmalıdır."
-        
-        random.shuffle(players)  # Oyuncuları rastgele karıştır
-        matches = []
-        
-        # Oyuncuları eşleştir
-        for i in range(0, len(players) - 1, 2):
-            matches.append((players[i], players[i + 1]))
-        
-        # Tek sayıda oyuncu varsa, son oyuncuyu son maça ekleyin
-        if len(players) % 2 == 1:
-            matches[-1] = matches[-1] + (players[-1],)
-        
-        return matches
 
-    async def next_round(self, winners):
-        if len(winners) < 2:
-            return "Kazanan sayısı en az 2 olmalıdır."
-        
-        random.shuffle(winners)  # Kazananları rastgele karıştır
-        next_matches = []
-        
-        # Kazananları eşleştir
-        for i in range(0, len(winners) - 1, 2):
-            next_matches.append((winners[i], winners[i + 1]))
-        
-        # Tek sayıda kazanan varsa, son kazananı son maça ekleyin
-        if len(winners) % 2 == 1:
-            next_matches[-1] = next_matches[-1] + (winners[-1],)
-        
-        return next_matches
-
-    ############################################################################################################
-    ############################################################################################################
-    ############################################################################################################
 
 
     async def create_tournament(self, tournament_name, player_names, host_name, start_time):
@@ -324,7 +288,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.update_tournaments()
         else:
             # Handle tournament already exists
-            pass
+            logging.warning("Tournament %s already exists", tournament_name)
+             
 
     async def update_tournaments(self):
         tournaments_list = {t: {"players": list(p.get("players", [])), "host": p.get("host", ""), "start_time": p.get("start_time", ""), "status": p.get("status", ""), "rounds": p.get("rounds", {}), "waiting_player": p.get("waiting_player", None )} for t, p in ChatConsumer.tournaments.items()}      

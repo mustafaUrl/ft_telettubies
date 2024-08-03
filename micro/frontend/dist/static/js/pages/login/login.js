@@ -3,7 +3,7 @@ import changeContent from '../../uimodule/changeContent.js';
 import openSocket from '../../sockets/globalSocket.js';
 import openSocketPrivate from '../../sockets/privateSocket.js';
 import { selectTab } from '../../uimodule/chatBox.js';
-
+import escapeHtml from '../escape/escape.js';
 
 
 export default function login() {
