@@ -49,9 +49,8 @@ export default  function openSocket() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
       else {
-        const deger = await get_banned_user(data.username);
-        console.log('deger:', deger, 'type:', typeof deger);
-        if (!deger) {
+        const banned = await get_banned_user(data.username);
+        if (!banned) {
           const chatMessages = document.getElementById('chat_messages1');
           const messageDiv = document.createElement('div');
           
