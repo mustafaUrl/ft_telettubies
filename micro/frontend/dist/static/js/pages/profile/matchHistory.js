@@ -1,14 +1,12 @@
 import sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
 import { getCookie } from '../../cookies/cookies.js';
 export default function historylistener() {
-    console.log('match history javascript');
     try {
         const url = 'api/user/get_match_history/';
         const bodyData = {username: getCookie('username')}; // Any required data for the POST request, if needed
         const method = 'POST'; // Use GET method as defined in the Django view
 
         sendPostWithJwt(url, bodyData, method).then(matchHistory => {
-            console.log(matchHistory);
             const contentProfile = document.getElementById('content-profile');
             let tableHTML = `
                 <table class="table table-striped">

@@ -13,8 +13,8 @@ export default function accountListener() {
         const formData = new FormData();
         formData.append('profile_pic', file);
         try {
-          const data = await sendPostWithJwt('api/user/update_profile_pic/', formData);
-          console.log('success:', data);
+        await sendPostWithJwt('api/user/update_profile_pic/', formData);
+         
         } catch (error) {
           console.error('error:', error);
         }

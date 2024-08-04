@@ -8,7 +8,6 @@ async function validateInviteCode(inviteCode) {
 
     if (response.success) {
       const invitingUser = response.inviting_user;
-      console.log('Invite code is valid. Inviting user:', invitingUser);
       return invitingUser;
     } else {
       alert('Invalid invite code.');
@@ -96,6 +95,19 @@ export default function lobby() {
         </div>
         <div class="modal-body">
           <p id="winnerMessage"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="PlayerPopup" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Winner</h5>
+        </div>
+        <div class="modal-body">
+          <p id="PlayerMessage"></p>
         </div>
       </div>
     </div>
@@ -252,7 +264,6 @@ document.getElementById('submitTournament').addEventListener('click', () => {
 
   const localDateTime = new Date(startTimeInput);
   const utcDateTime = localDateTime.toISOString(); // UTC'ye dönüştür
-  console.log("utccccc" ,utcDateTime);
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({

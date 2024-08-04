@@ -151,7 +151,6 @@ function displayFriends(friends) {
   });
 
   document.querySelectorAll('.invite-btn').forEach(button => {
-      console.log('invite-btn');
     button.addEventListener('click', function(event) {
       event.preventDefault();
 
@@ -184,11 +183,9 @@ function displayFriends(friends) {
 
 function inviteUser(username) {
   const message = `I wanna play with you ${username}`;
-  console.log(`Inviting ${username} with message: ${message}`);
   
   sendPostWithJwt('api/user/invite_user/', {username}, 'POST')
     .then(response => {
-      console.log('Invitation sent:', response);
       window.chatSocket.send(JSON.stringify({
         'message': message,
         'username': getCookie('username'),

@@ -4,7 +4,6 @@ import sendPostWithJwt from '../../postwithjwt/sendPostWithJwt.js';
 import { getCookie } from '../../cookies/cookies.js';
 import drawWinLoseChart from '../../utils/drawChart.js';
 export default function profile() {
-  console.log('profile javascript');
 
   const dynamicLinks = document.querySelectorAll('.dynamic-profile');
   dynamicLinks.forEach(link => {
@@ -26,7 +25,6 @@ export default function profile() {
     if (!contentProfile) {
       return;
     }
-    console.log(matchHistory);
 
     let wins = 0;
     let losses = 0;

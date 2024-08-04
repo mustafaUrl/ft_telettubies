@@ -3,6 +3,17 @@ import { getCookie } from '../../cookies/cookies.js';
 import changeContent from '../../uimodule/changeContent.js';
 
 window.tournaments = {};
+function showPlayer(player1Name, player2Name) {
+  const winnerPopup = new bootstrap.Modal(document.getElementById('PlayerPopup'));
+  const message = `${player1Name} VS ${player2Name}`; 
+  document.getElementById('PlayerMessage').textContent = `${message}!`;
+  winnerPopup.show();
+
+  // Pop-up'ı belirli bir süre sonra kapat
+  setTimeout(() => {
+    winnerPopup.hide();
+  }, 3000);
+}
 
 function createTournament(tournamentName, playerNames) {
   console.log('Tournament created with players:', playerNames);
@@ -56,7 +67,6 @@ function startNextMatch(tournamentName) {
   if ( tournamentData.teams.length === 1 && tournamentData.winners.length === 0) {
     const match = tournamentData.teams[tournamentData.currentMatch];
     console.log(`Starting Final Match: ${match[0]} vs ${match[1]}`);
-    
     startGame(match[0], match[1], "tournament", tournamentName, "Final");
   }
   else if (tournamentData.currentMatch < tournamentData.teams.length) {
@@ -155,7 +165,8 @@ function startGame(player1Name, player2Name, gameMode, tournamentName = null, ro
       winnerPopup.hide();
     }, 3000);
   }
-  
+  showPlayer(player1Name, player2Name);
+
 
   console.log(gameMode, 'Game started with players:', player1Name, player2Name);
   document.getElementById('scorePlayer1').textContent = '0';

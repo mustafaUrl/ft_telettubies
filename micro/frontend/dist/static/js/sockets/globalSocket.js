@@ -24,7 +24,6 @@ export default  function openSocket() {
 
   window.chatSocket.onmessage = async function(e) {
     const data = JSON.parse(e.data);
-    console.log('type:', data.type, 'data:', data);
     if (data.type !== "online_players" && data.type !== "tournaments") {
       checkBlocked(data.username);
     }
@@ -157,7 +156,6 @@ function updateTournamentButtons() {
   document.querySelectorAll('.joinTournamentButton').forEach(button => {
     button.addEventListener('click', (event) => {
         const tournamentName = event.target.getAttribute('data-tournament');
-        console.log('Join Tournament button clicked for:', tournamentName, "time: ", new Date().getTime());
 
         if (window.chatSocket) {
             window.chatSocket.send(JSON.stringify({
@@ -174,7 +172,6 @@ function updateTournamentButtons() {
   document.querySelectorAll('.leaveTournamentButton').forEach(button => {
     button.addEventListener('click', (event) => {
       const tournamentName = event.target.getAttribute('data-tournament');
-      console.log('Leave Tournament button clicked for:', tournamentName);
 
       if (window.chatSocket) {
         window.chatSocket.send(JSON.stringify({
@@ -192,7 +189,6 @@ function updateKickButtons() {
     button.addEventListener('click', (event) => {
       const tournamentName = event.target.getAttribute('data-tournament');
       const playerName = event.target.getAttribute('data-player');
-      console.log('Kick Player button clicked for:', playerName, 'in tournament:', tournamentName);
 
       if (window.chatSocket) {
         window.chatSocket.send(JSON.stringify({
@@ -227,20 +223,16 @@ function updateLobbyTournaments(tournaments) {
   const username = getCookie('username');
 
   for (const [tournament, details] of Object.entries(tournaments)) {
-      console.log('Tournament:', tournament, 'Details:', details);
       const startTimeUtc = new Date(details.start_time);
       const localStartTime = startTimeUtc.toLocaleString();
       const currentTime = new Date();
-      console.log('Current Time:', currentTime, 'Start Time:', startTimeUtc, 'Local Start Time:', localStartTime);
       const joinTime = startTimeUtc > currentTime;
 
       const userJoined = details.players.includes(username);
       const checkTime = startTimeUtc - currentTime;
-      console.log('Check Time:', checkTime);
 
       if (checkTime > 0) {
           setTimeout(() => {
-              console.log('Scheduled check time function executed!');
               checkTimeFunction();
           }, checkTime);
       }
@@ -252,7 +244,6 @@ function updateLobbyTournaments(tournaments) {
       let roundsHtml = '';
 
       if (details.status === 'started') {
-        console.log('aynennnn:',  details.players);
         if (details.host === getCookie('username')) {
           if ( !isTournamentStarted(tournament)) {
             window.tournaments[tournament] = { status_start: 'started'};          

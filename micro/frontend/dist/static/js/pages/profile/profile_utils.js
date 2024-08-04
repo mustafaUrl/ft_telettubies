@@ -89,7 +89,6 @@ function listFriends() {
     sendPostUserRequest('list_friends')
       .then(data => {
         if (data.friends) {
-          console.log('Arkadaş listesi:', data.friends);
           updateFriendList(data.friends);
         } else {
           console.error('Error:', data.error);
@@ -102,8 +101,7 @@ function listFriends() {
     sendPostUserRequest('accept_friend_request', friendUsername)
       .then(data => {
         if (data.success) {
-          console.log('Friend request accepted:', data);
-          listFriends(); // Refresh the friend list to sync the view
+          listFriends(); 
         } else {
           console.error('Error', data.error);
         }
@@ -115,7 +113,6 @@ function listFriends() {
     sendPostUserRequest('reject_friend_request', friendUsername)
       .then(data => {
         if (data.success) {
-          console.log('Friend request rejected:', data);
           listFriends();
         } else {
           console.error('Error:', data.error);
@@ -129,7 +126,6 @@ function listFriends() {
     sendPostUserRequest('list_pending_friend_requests')
     .then(data => {
       if (!data.pending_requests || data.pending_requests.length === 0 || data.pending_requests === 'nonerequests') {
-        console.log('There are no pending friend requests');
         return; 
       }
       const list = document.getElementById('pendingFriendRequests');

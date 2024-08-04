@@ -3,10 +3,8 @@ import drawWinLoseChart from './drawChart.js';
 import changeContent from '../uimodule/changeContent.js';
 export default function viewProfile(username) {
     changeContent('view_profile');
-    console.log(`Viewing profile of ${username}`);
     sendPostWithJwt('api/user/view_profile/', { username }, 'POST')
       .then(response => {
-        console.log('Profile viewed:', response);
   
         const profileContainer = document.getElementById('view-container');
         if (!profileContainer) {

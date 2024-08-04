@@ -25,7 +25,6 @@ export default function triggerContentLoad(contentId) {
         profile();
         break;
       default:
-        console.log('Content not found ss');
         break;
     }
     

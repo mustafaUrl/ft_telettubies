@@ -43,7 +43,6 @@ window.onclick = function(event) {
     window.addEventListener('load', function() {
       const urlParams = new URLSearchParams(window.location.search);
       const authCode = urlParams.get('code');
-      // console.log(authCode);
       if (authCode) {
 
         ft_login(authCode);
@@ -77,22 +76,3 @@ window.onclick = function(event) {
     }
   });
 
-
-//   // Gözlemlemek istediğiniz elementi tanımlayın
-// var elementToObserve = document.getElementById('myElement');
-
-// // Yeni bir 'MutationObserver' örneği oluşturun ve bir callback fonksiyonu geçirin
-// var observer = new MutationObserver(function(mutationsList, observer) {
-//   // Burada her bir mutasyon için yapılacak işlemleri tanımlayabilirsiniz
-//   mutationsList.forEach(function(mutation) {
-//     console.log(mutation);
-//   });
-// });
-
-// // Gözlemciye gözlemlemek istediğiniz elementi ve seçenekleri nesnesini geçirin
-// observer.observe(elementToObserve, {
-//   childList: true, // Elementin çocuklarında yapılan değişiklikleri dinler
-//   attributes: true, // Elementin attribute'larında yapılan değişiklikleri dinler
-//   characterData: true, // Elementin veri karakterlerinde yapılan değişiklikleri dinler
-//   subtree: true // Elementin alt ağacındaki tüm değişiklikleri dinler
-// });

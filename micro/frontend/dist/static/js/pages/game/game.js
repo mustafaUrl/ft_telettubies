@@ -202,12 +202,6 @@ export default function game() {
                 paddle2.position.y -= paddleMoveStep;
             }
         }
-        ball.position.add(ballDirection.clone().multiplyScalar(ballSpeed));
-
-        // Calculate rotation based on movement
-        const rotationAngle = (ballSpeed+10) / ballRadius;
-        ball.rotation.x += rotationAngle * ballDirection.y;
-        ball.rotation.y += rotationAngle * ballDirection.x;
         // Call the game loop again on the next frame
         requestAnimationFrame(gameLoop);
     }
@@ -246,8 +240,8 @@ export default function game() {
     // Reset the ball to the starting position with a random direction and speed
     function resetBall() {
         ball.position.set(0, 0, 0);
-        // Select a random 360 degree new angle for the ball
-        let randomAngle = Math.random() * Math.PI * 2;
+        // Select a random direction
+        let randomAngle = Math.random() * Math.PI - Math.PI / 2; // Random angle between -π/2 and π/2
         ballDirection.set(Math.cos(randomAngle), Math.sin(randomAngle), 0).normalize();
         ballSpeed = 4; // Reset ball speed
     }
@@ -281,7 +275,7 @@ export default function game() {
         // Call the game loop again on the next frame
         gameLoopId = requestAnimationFrame(gameLoop);
     }
-    let winScore = 3;
+    let winScore = 1;
     // Animasyon döngüsü
     function animate() {
         if (!gameRunning) return;
@@ -384,11 +378,6 @@ export default function game() {
         }
     });
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'k') {
-            resetBall();
-        }
-    });
     
     gameRunning = false;
 
