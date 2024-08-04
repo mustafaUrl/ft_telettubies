@@ -74,7 +74,6 @@ export default function lobby() {
   <div id="gameControls" style="text-align: center; margin-bottom: 10px; display: none;">
     <button id="startButton" class="btn btn-success">Start</button>
     <button id="stopButton" class="btn btn-danger">Stop</button>
-    <button id="resetButton" class="btn btn-warning">Reset</button>
   </div>
 
   <!-- Scoreboard -->
@@ -375,33 +374,6 @@ function rebuildPlayerNameFields(numPlayers) {
     gameModal.hide();
   });
   
-  
-
-
-
-
-document.getElementById('resetButton').addEventListener('click', () => {
-  const player2Name = document.getElementById('player2Name').value;
-  const gameMode = document.getElementById('gameMode').value;
-
-  
-
-  
-  if (player1Name === player2Name) {
-    alert('Player names cannot be the same.');
-    return;
-  }
-  if (!player1Name || !player2Name) {
-    alert('Both player names are required.');
-    return;
-  }
-
-  startGame(player1Name, player2Name, gameMode);
-
-  // Close the modal after creating the game
-  const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
-  gameModal.hide();
-});
 
 
 
