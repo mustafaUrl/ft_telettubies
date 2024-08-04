@@ -226,14 +226,19 @@ document.getElementById('submitTournament').addEventListener('click', () => {
     alert('Tournament name cannot be empty.');
     return;
   }
+  
+  if (!/^[\x00-\x7F]*$/.test(tournamentName)) {
+    alert('Tournament name must contain only ASCII characters.');
+    return;
+  }
   // Check if the start time is at least 2 minutes in the future
   const now = new Date();
   const minStartTime = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
   
-   if (startTime < minStartTime) {
+  if (startTime < minStartTime) {
     alert('Start time must be at least 2 minutes from now.');
     return;
-  }  
+  }
 
   if (numPlayers > 15 || numPlayers < 2) {
     alert('The number of players must be between 2 and 15.');
@@ -244,14 +249,22 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   const usedNames = new Set(); // To store used names
 
   for (let i = 0; i < numPlayers; i++) {
-    const playerName = document.getElementById(`playerName${i}`).value.trim() + ' (anonim)'; ; // Trim whitespace
+    const playerName = document.getElementById(`playerName${i}`).value.trim() + ' (anonim)'; // Trim whitespace
 
     // Check for empty names
     if (playerName === '') {
       alert('Player names cannot be empty.');
       return;
     }
+
+    // Check for ASCII only
+    if (!/^[\x00-\x7F]*$/.test(playerName)) {
+      alert('Player names must contain only ASCII characters.');
+      return;
+    }
+
  
+
     // Check for duplicate names
     if (usedNames.has(playerName)) {
       alert(`Duplicate player name found: ${playerName}. Player names must be unique.`);
@@ -267,7 +280,7 @@ document.getElementById('submitTournament').addEventListener('click', () => {
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({
-      'playerNames': playerNames.join(', ') +', ' +player1Name, // Send player names to backend
+      'playerNames': playerNames.join(', ') + ', ' + player1Name, // Send player names to backend
       'username': player1Name, // Ensure you have the username defined
       'room': tournamentName, // Define the room name
       'command': 'create',
@@ -279,6 +292,7 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   const tournamentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentModal'));
   tournamentModal.hide();
 });
+
 
 
 

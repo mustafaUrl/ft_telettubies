@@ -232,7 +232,7 @@ export default function game() {
         // Select a random direction
         let randomAngle = Math.random() * Math.PI - Math.PI / 2; // Random angle between -π/2 and π/2
         ballDirection.set(Math.cos(randomAngle), Math.sin(randomAngle), 0).normalize();
-        ballSpeed = 4; // Reset ball speed
+        ballSpeed = 10; // Reset ball speed
     }
 
     // Define the game loop
