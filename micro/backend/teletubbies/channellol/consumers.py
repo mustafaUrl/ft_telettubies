@@ -88,6 +88,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     'message': f'{self.user.username} has left the room {room_name}.',
                     'room_name': room_name
                 }))
+        elif command == 'update':
+            await self.update_room_name()
         elif command == 'send':
             # 'send' komutu işlemleri burada yer alacak...
             friend_username = text_data_json['friend']
@@ -104,18 +106,25 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                         'username': self.user.username  # Oda adını da ekleyin
                     }
                 )
+            else :
+                self.rooms={}
+                await self.update_room_name()
+                if friend_username in self.rooms:
+                    room_name = self.rooms[friend_username]
+                    room_group_name = f'chat_{room_name}'
+                    await self.channel_layer.group_send(
+                        room_group_name,
+                        {
+                            'type': 'chat_message',
+                            'message': message,
+                            'username': self.user.username  # Oda adını da ekleyin
+                        }
+                    )
+
     async def update_room_name(self):
         friend_usernames = await self.get_friend_usernames(self.user)
         
-        # Remove old rooms not in the updated friend list
-        for friend_username in list(self.rooms.keys()):
-            if friend_username not in friend_usernames:
-                room_name = self.rooms.pop(friend_username)
-                room_group_name = f'chat_{room_name}'
-                await self.channel_layer.group_discard(
-                    room_group_name,
-                    self.channel_name
-                )
+        self.rooms = {}
         
         # Add new rooms from the updated friend list
         for friend_username in friend_usernames:

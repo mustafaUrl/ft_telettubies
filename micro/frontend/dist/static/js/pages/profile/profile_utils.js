@@ -1,7 +1,8 @@
 import  sendPostUserRequest from '../../postwithjwt/userRequest.js';
 import { selectTab } from '../../uimodule/chatBox.js';
 import { getCookie } from '../../cookies/cookies.js';
-
+import  openSocketPrivate  from '../../sockets/privateSocket.js';
+import changeContent from '../../uimodule/changeContent.js';
 function addfriendListener() {
     document.getElementById('add_friend').addEventListener('click', function(e) {
        e.preventDefault();
@@ -143,7 +144,19 @@ function listFriends() {
         const acceptBtn = document.createElement('button');
         acceptBtn.className = 'btn btn-success btn-sm';
         acceptBtn.textContent = 'Accept';
-        acceptBtn.onclick = function() { acceptFriendRequest(request.from_user); };
+        acceptBtn.onclick = function() { acceptFriendRequest(request.from_user);
+         if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
+          const message = {
+            command: 'update'
+          };
+          window.chatSocketPrivate.send(JSON.stringify(message));
+         }
+         else{
+            openSocketPrivate();
+         }
+         
+         changeContent('friends');
+         };
   
         const rejectBtn = document.createElement('button');
         rejectBtn.className = 'btn btn-danger btn-sm';

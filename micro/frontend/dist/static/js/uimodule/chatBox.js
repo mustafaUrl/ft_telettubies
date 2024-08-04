@@ -38,6 +38,7 @@ function updateNotificationButton(username) {
   const notificationButton = document.getElementById('notification_button');
   notificationButton.textContent = `New messages (${username})`;
   notificationButton.style.display = 'block';
+ 
 }
 
 document.getElementById('chat_send').onclick = function() {
@@ -59,9 +60,7 @@ document.getElementById('chat_send').onclick = function() {
     }
   }
   messageInput.value = '';
-  window.chatSocketPrivate.close();
-  window.chatSocketPrivate = null;
-  openSocketPrivate();
+
 };
 
 document.getElementById('chat_icon').addEventListener('click', function() {
