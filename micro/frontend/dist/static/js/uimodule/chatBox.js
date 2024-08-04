@@ -2,7 +2,7 @@ import sendPostUserRequest from '../postwithjwt/userRequest.js';
 import { getCookie } from '../cookies/cookies.js';
 import { sendMessage } from '../utils/SocketHelper.js';
 import sendPostWithJwt from '../postwithjwt/sendPostWithJwt.js';
-import changeContent from './changeContent.js';
+import openSocketPrivate from '../sockets/privateSocket.js';
 import viewProfile from '../utils/view-profile.js'; 
 window.activeTab = 'tab1';
 
@@ -59,6 +59,9 @@ document.getElementById('chat_send').onclick = function() {
     }
   }
   messageInput.value = '';
+  window.chatSocketPrivate.close();
+  window.chatSocketPrivate = null;
+  openSocketPrivate();
 };
 
 document.getElementById('chat_icon').addEventListener('click', function() {
@@ -108,23 +111,7 @@ function fetchAndDisplayFriends() {
     });
 }
 
-function updateNotificationCount(username, count) {
-  const userLink = document.querySelector(`[data-username="${username}"]`);
-  let notificationSpan = userLink.querySelector('.notification-count');
-  
-  if (!notificationSpan) {
-    notificationSpan = document.createElement('span');
-    notificationSpan.classList.add('notification-count');
-    userLink.appendChild(notificationSpan);
-  }
-  
-  if (count > 0) {
-    notificationSpan.textContent = count;
-    notificationSpan.style.display = 'block';
-  } else {
-    notificationSpan.style.display = 'none';
-  }
-}
+
 function displayFriends(friends) {
   const friendListContainer = document.getElementById('friend-list');
   friendListContainer.innerHTML = '';

@@ -33,7 +33,6 @@ URL_IP =config('IP')
 
 URL_DOMAIN = f"http://{URL_IP}:8000"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", URL_DOMAIN,f"https://{URL_IP}:8000", f"https://{URL_IP}:8000", URL_IP,]
-# Application definition
 
 
 
@@ -173,7 +172,7 @@ SECURE_HSTS_PRELOAD = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
