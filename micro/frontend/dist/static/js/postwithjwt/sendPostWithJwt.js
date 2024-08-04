@@ -10,7 +10,6 @@ export default async function sendPostWithJwt(url, bodyData, method = 'POST') {
         'Content-Type': 'application/json'
       });
       var methodData;
-      // Multipart/form-data için Content-Type başlığını kaldır
       if (url === 'api/user/update_profile_pic/') {
         headers.delete('Content-Type');
         methodData = bodyData;
@@ -21,9 +20,7 @@ export default async function sendPostWithJwt(url, bodyData, method = 'POST') {
       else {
         methodData = JSON.stringify(bodyData);
       }
-      // if (method === 'POST' && bodyData instanceof FormData) {
-      //   headers.delete('Content-Type');
-      // }
+     
   
       let response = await fetch(url, {
         method: method,
@@ -31,7 +28,6 @@ export default async function sendPostWithJwt(url, bodyData, method = 'POST') {
         body: methodData,
       });
   
-      // Eğer yanıt 401 ise, token yenileme fonksiyonunu çağır
       if (response.status === 401) {
         const newAccessToken = await refreshAccessToken();
         headers.set('Authorization', 'Bearer ' + newAccessToken);
@@ -42,13 +38,12 @@ export default async function sendPostWithJwt(url, bodyData, method = 'POST') {
         });
       }
   
-      // İkinci isteğin sonucunu al
       const data = await response.json();
-      return data; // İşlem başarılıysa veriyi dön
+      return data; 
     } catch (error) {
-      // Hata oluşursa burada ele al
+     
       console.error('An error occurred during the request:', error);
-      throw error; // Hata bilgisini dışarı fırlat
+      throw error; 
     }
   }
   

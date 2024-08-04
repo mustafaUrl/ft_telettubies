@@ -19,15 +19,7 @@ class OnlineUserStatusPrivate(models.Model):
     def __str__(self):
         return f"{self.user.username} is {'online' if self.is_online else 'offline'}"
 
-# class OnlineUserStatus(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='online_status')
-#     is_online = models.BooleanField(default=False)
-#     last_seen = models.DateTimeField(default=timezone.now)
 
-#     def update_status(self, online=True):
-#         self.is_online = online
-#         self.last_seen = timezone.now()
-#         self.save()
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -38,7 +30,6 @@ from userlol.models import FriendRequest, UserProfile
 User = get_user_model()
 
 class Notification(models.Model):
-    # Bildirim türleri
     FRIEND_REQUEST = 'friend_request'
     GAME_INVITE = 'game_invite'
     UNREAD_MESSAGE = 'unread_message'
@@ -49,7 +40,6 @@ class Notification(models.Model):
         (UNREAD_MESSAGE, 'Unread Message'),
     ]
 
-    # Bildirim alanları
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
@@ -63,5 +53,3 @@ class Notification(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
-
-#game

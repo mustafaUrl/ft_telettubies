@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 import random
 import math
 from game.models import  Match
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
@@ -20,13 +19,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         if self.user.is_anonymous:
             await self.close()
             return
-            # Arkadaş listesini çek
         self.rooms = {}
         await self.update_room_name()
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Kullanıcının tüm odalarından ayrıl
         if self.user.is_anonymous:
             await self.close()
             return
@@ -52,38 +49,32 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         command = text_data_json.get('command')
 
         if command == 'join':
-            # Kullanıcıyı belirli bir sohbet odasına katıl
             friend_username = text_data_json['friend']
             room_name = self.generate_room_name(self.user.username, friend_username)
             room_group_name = f'chat_{room_name}'
             self.rooms[friend_username] = room_name
 
-            # Oda grubuna katıl
             await self.channel_layer.group_add(
                 room_group_name,
                 self.channel_name
             )
 
-            # Kullanıcıya başarılı katılım mesajı gönder
             await self.send(text_data=json.dumps({
                 'message': f'{self.user.username} has joined the room {room_name}.',
                 'room_name': room_name
             }))
 
         elif command == 'leave':
-            # Kullanıcıyı belirli bir sohbet odasından çıkar
             friend_username = text_data_json['friend']
             room_name = self.rooms.pop(friend_username, None)
             if room_name:
                 room_group_name = f'chat_{room_name}'
 
-                # Oda grubundan ayrıl
                 await self.channel_layer.group_discard(
                     room_group_name,
                     self.channel_name
                 )
 
-                # Kullanıcıya başarılı ayrılma mesajı gönder
                 await self.send(text_data=json.dumps({
                     'message': f'{self.user.username} has left the room {room_name}.',
                     'room_name': room_name
@@ -91,7 +82,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         elif command == 'update':
             await self.update_room_name()
         elif command == 'send':
-            # 'send' komutu işlemleri burada yer alacak...
             friend_username = text_data_json['friend']
             message = text_data_json['message']
 
@@ -103,7 +93,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     {
                         'type': 'chat_message',
                         'message': message,
-                        'username': self.user.username  # Oda adını da ekleyin
+                        'username': self.user.username  
                     }
                 )
             else :
@@ -117,7 +107,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                         {
                             'type': 'chat_message',
                             'message': message,
-                            'username': self.user.username  # Oda adını da ekleyin
+                            'username': self.user.username  
                         }
                     )
 
@@ -126,7 +116,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         self.rooms = {}
         
-        # Add new rooms from the updated friend list
         for friend_username in friend_usernames:
             if friend_username not in self.rooms:
                 room_name = self.generate_room_name(self.user.username, friend_username)
@@ -138,32 +127,27 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                 )
     async def chat_message(self, event):
         message = event['message']
-        username = event['username']  # Oda adını event'ten alın
-
-        # Mesajı ve oda adını WebSocket üzerinden gönder
+        username = event['username']  
         await self.send(text_data=json.dumps({
             'message': message,
-            'username': username  # Oda adını da gönderin
+            'username': username  
         }))
 
     @database_sync_to_async
     def get_friend_usernames(self, user):
         try:
-            # Arkadaş listesini çek ve kullanıcı adlarını al
             friend_list = FriendList.objects.get(user=user).friends.all()
             friend_usernames = [friend.username for friend in friend_list]
             return friend_usernames
         except FriendList.DoesNotExist:
-            # Eğer FriendList bulunamazsa boş liste döndür
             return []
 
     def generate_room_name(self, username1, username2):
-            # Kullanıcı adlarını sıralayarak oda adı oluştur
         return '_'.join(sorted([username1, username2]))
     
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    online_users = set()  # Tüm bağlı kullanıcıları tutacak set
+    online_users = set()
     tournaments = {}
     async def connect(self):
         self.user = self.scope["user"]
@@ -201,11 +185,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-         # sender_user = self.scope["user"]
-         # recipient_username = self.room_name.replace(sender_user.username, "").replace("_", "")
-         # recipient_user = await sync_to_async(User.objects.get)(username=recipient_username)
-
-        # Check if the sender is blocked by the recipient
+       
         
         text_data_json = json.loads(text_data)
         username = text_data_json["username"]
@@ -260,22 +240,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if tournament_name in ChatConsumer.tournaments:
             ChatConsumer.tournaments[tournament_name]["status"] = "started"
             teams = list(ChatConsumer.tournaments[tournament_name]["players"])
-            round_count = math.ceil(math.log2(len(teams)))  # Takım sayısını log2 ile hesaplayarak tur sayısını bul
+            round_count = math.ceil(math.log2(len(teams))) 
 
-            # İlk tur eşleşmelerini oluştur
             if len(teams) % 2 == 1:
-                waiting_player = teams.pop()  # Eğer tek sayıda takım varsa, bir takımı beklemeye al
+                waiting_player = teams.pop()  
                 ChatConsumer.tournaments[tournament_name]["waiting_player"] = waiting_player 
             else:
                 waiting_player = None
  
            
-            message = f"Turnuva başladı!"
+            message = f"Tournament started!"
             await self.send_tournament_message(tournament_name, message)
             
             await self.update_tournaments()
         else:
-            # Turnuva bulunamazsa yapılacak işlemler
             logging.error("Tournament %s not found", tournament_name)
 
       
@@ -285,17 +263,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def create_tournament(self, tournament_name, player_names, host_name, start_time):
         if tournament_name not in ChatConsumer.tournaments:
-            # Veriyi UTC olarak alıyoruz
             logging.info("start time: %s", start_time)
             start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
             ChatConsumer.tournaments[tournament_name] = {
                 "players": set(player_names.split(', ')),
                 "host": host_name,
-                "start_time": start_time.isoformat(),  # UTC olarak kaydediyoruz
+                "start_time": start_time.isoformat(), 
                 "status": "waiting",
                 "rounds": {},
                 "waiting_player ": "",
-                "channels": set()  # Initialize channels set
+                "channels": set() 
             }
             logging.info("Tournament %s created by %s start time %s ", tournament_name, host_name, start_time)
             tournament_group_name = f"tournament_{tournament_name}"
@@ -305,7 +282,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             await self.update_tournaments()
         else:
-            # Handle tournament already exists
             logging.warning("Tournament %s already exists", tournament_name)
              
 

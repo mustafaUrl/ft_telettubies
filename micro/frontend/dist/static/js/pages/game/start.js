@@ -4,12 +4,32 @@ import changeContent from '../../uimodule/changeContent.js';
 
 window.tournaments = {};
 function showPlayer(player1Name, player2Name) {
-  const winnerPopup = new bootstrap.Modal(document.getElementById('PlayerPopup'));
-  const message = `${player1Name} VS ${player2Name}`; 
+  const playerPopup = new bootstrap.Modal(document.getElementById('PlayerPopup'));
+  const message = `${player1Name} VS ${player2Name}`;
   document.getElementById('PlayerMessage').textContent = `${message}!`;
+  playerPopup.show();
+
+  setTimeout(() => {
+    playerPopup.hide();
+  }, 3000);
+
+  return new Promise((resolve) => {
+    setTimeout(resolve, 1000); 
+  });
+}
+
+function showWinner(winner, gameMode, roundId, tournamentName) {
+  const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
+  const message = roundId === "Final" ? `Winner of the Tournament ${tournamentName}: ${winner}` : `Winner: ${winner}`;
+  document.getElementById('winnerMessage').textContent = `${message}!`;
   winnerPopup.show();
 
-  // Pop-up'ı belirli bir süre sonra kapat
+  winnerPopup._element.addEventListener('hidden.bs.modal', function () {
+    if (gameMode === "tournament" && roundId === "Final") {
+      clearDisplay(tournamentName);
+    }
+  });
+
   setTimeout(() => {
     winnerPopup.hide();
   }, 3000);
@@ -108,21 +128,17 @@ function shuffleArray(array) {
 }
 
 function clearDisplay(tournamentName) {
-  // Puanları sıfırla
   const scorePlayer1 = document.getElementById('scorePlayer1');
   const scorePlayer2 = document.getElementById('scorePlayer2');
   if (scorePlayer1) scorePlayer1.textContent = '';
   if (scorePlayer2) scorePlayer2.textContent = '';
 
-  // Oyun modunu temizle
   const gameModeDisplay = document.getElementById('gameModeDisplay');
   if (gameModeDisplay) gameModeDisplay.textContent = '';
 
-  // Skor tablosunu temizle
   const scoreBoardDiv = document.querySelector('#scoreBoard div');
   if (scoreBoardDiv) scoreBoardDiv.innerHTML = '';
 
-  // Kontrol ve skor tablosunu gizle
   const gameControls = document.getElementById('gameControls');
   const scoreBoard = document.getElementById('scoreBoard');
   if (gameControls) gameControls.style.display = 'none';
@@ -141,32 +157,8 @@ function clearDisplay(tournamentName) {
 
 
 
-
-function startGame(player1Name, player2Name, gameMode, tournamentName = null, roundId = null, players = null) {
-  function showWinner(winner) {
-    const winnerPopup = new bootstrap.Modal(document.getElementById('winnerPopup'));
-    const message = roundId === "Final" ? `Winner of the Tournament ${tournamentName}: ${winner}` : "Winner";
-    document.getElementById('winnerMessage').textContent = `${message}!`;
-    winnerPopup.show();
-  
-    // Pop-up kapanma olayına dinleyici ekleyin
-    winnerPopup._element.addEventListener('hidden.bs.modal', function () {
-      // Kapanma animasyonu tamamlandığında çalıştırılacak kod
-      if (gameMode === "tournament") {
-        if (roundId === "Final") {
-          clearDisplay(tournamentName);
-          
-        }
-      }
-    });
-  
-    // Pop-up'ı belirli bir süre sonra kapat
-    setTimeout(() => {
-      winnerPopup.hide();
-    }, 3000);
-  }
-  showPlayer(player1Name, player2Name);
-
+async function startGame(player1Name, player2Name, gameMode, tournamentName = null, roundId = null, players = null) {
+  await showPlayer(player1Name, player2Name);
 
   console.log(gameMode, 'Game started with players:', player1Name, player2Name);
   document.getElementById('scorePlayer1').textContent = '0';
@@ -189,23 +181,21 @@ function startGame(player1Name, player2Name, gameMode, tournamentName = null, ro
     game_mode: gameMode,
   };
 
-  game().then((winner) => {
+  try {
+    const winner = await game();
     console.log('Game finished');
-    if (winner === "Player 1") {
-      showWinner(player1Name);
-      winner = player1Name;
-    } else {
-      showWinner(player2Name);
-      winner = player2Name;
-    }
-    matchResult.winner_username = winner;
+    const winnerName = winner === "Player 1" ? player1Name : player2Name;
+    showWinner(winnerName, gameMode, roundId, tournamentName);
+
+    matchResult.winner_username = winnerName;
     matchResult.player1_score = document.getElementById('scorePlayer1').textContent;
     matchResult.player2_score = document.getElementById('scorePlayer2').textContent;
     matchResult.match_finish_time = new Date().toISOString();
-    if (gameMode == "normal") {
+    
+    if (gameMode === "normal") {
       matchResult.player1_username = player1Name;
-      matchResult.player2_username = player2Name + "(anonim)";
-    } else if (gameMode == "invited") {
+      matchResult.player2_username = `${player2Name}(anonim)`;
+    } else if (gameMode === "invited") {
       matchResult.player1_username = player1Name;
       matchResult.player2_username = player2Name;
     } else {
@@ -213,43 +203,39 @@ function startGame(player1Name, player2Name, gameMode, tournamentName = null, ro
       matchResult.player2_username = player2Name;
       matchResult.tournament_name = tournamentName;
       matchResult.round_id = roundId;
-      console.log("roundddd: ", roundId);
     }
 
     const accessToken = getCookie('accessToken');
-    fetch('api/game/create/', {
+    const response = await fetch('api/game/create/', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + accessToken,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(matchResult)
-    }).then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        return response.json().then((errorData) => {
-          const error = new Error('Error creating match');
-          error.data = errorData;
-          throw error;
-        });
-      }
-    }).then((data) => {
-      console.log('Match created successfully:', data);
-      if (gameMode == "tournament") {
-        window.tournaments[tournamentName].winners.push(winner);
-        window.tournaments[tournamentName].currentMatch++;
-        startNextMatch(tournamentName);
-      }
-    }).catch((error) => {
-      console.error('Error creating match:', error.message);
-      if (error.data) {
-        console.error('Error details:', error.data.detail);
-      }
     });
-  }).catch((error) => {
-    console.error('Error during the game:', error);
-  });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const error = new Error('Error creating match');
+      error.data = errorData;
+      throw error;
+    }
+
+    const data = await response.json();
+    console.log('Match created successfully:', data);
+
+    if (gameMode === "tournament") {
+      window.tournaments[tournamentName].winners.push(winnerName);
+      window.tournaments[tournamentName].currentMatch++;
+      startNextMatch(tournamentName);
+    }
+  } catch (error) {
+    console.error('Error creating match:', error.message);
+    if (error.data) {
+      console.error('Error details:', error.data.detail);
+    }
+  }
 }
 
 export { startGame, createTournament, startNextMatch };

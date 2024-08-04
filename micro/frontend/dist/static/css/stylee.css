@@ -156,8 +156,8 @@
   border-left: 1px solid #9a878775;
   height: 50vh;
   top: 50vh;
-  border-radius: 10px; /* Yumuşak köşeler */
-  box-shadow: -2px 0px 4px rgba(0, 0, 0, 0.2); /* Sağa doğru hafif gölge */
+  border-radius: 10px; 
+  box-shadow: -2px 0px 4px rgba(0, 0, 0, 0.2);
 }
 
 .friend-item {
@@ -171,7 +171,7 @@
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
 .notification-icon {
@@ -189,7 +189,7 @@
   background-color: red;
   color: white;
   font-size: 14px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4); /* Hafif gölge */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
 }
 .profile-container {
   position: relative;
@@ -225,14 +225,14 @@
 
 .canvas-container {
   text-align: center;
-  background-color: black; /* Arka planı siyah yap */
-  padding: 20px; /* İçerik etrafında biraz boşluk bırak */
+  background-color: black; 
+  padding: 20px; 
 }
 
 #myCanvas {
-  display: inline-block; /* Canvas'ı blok olarak değil, satır içi olarak hizalama */
-  background-color: black; /* Canvas arka planını siyah yap */
-  border: 1px solid white; /* Canvas etrafında beyaz bir çerçeve oluştur */
+  display: inline-block; 
+  background-color: black; 
+  border: 1px solid white; 
 }
 
 .tournament {
@@ -288,10 +288,10 @@
   background-color: #0d61d7;
   color: white;
   border: none;
-  padding: 3px 8px; /* Küçük bir padding ayarı */
+  padding: 3px 8px; 
   border-radius: 3px;
   cursor: pointer;
-  font-size: 12px; /* Yazı boyutunu ayarla */
+  font-size: 12px; 
 }
 
 .custom-btn:hover {

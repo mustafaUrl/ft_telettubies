@@ -162,7 +162,7 @@ function updateTournamentButtons() {
                 'username': getCookie('username'),
                 'room': tournamentName,
                 'command': 'join',
-                'currentTime': new Date().getTime()  // Milisaniye cinsinden UTC zamanı
+                'currentTime': new Date().getTime()
             }));
         }
     });

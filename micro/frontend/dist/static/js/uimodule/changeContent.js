@@ -14,7 +14,7 @@ export default async function changeContent(contentId) {
         localStorage.setItem('contentData', JSON.stringify(contentData));
       } catch (error) {
         console.error('Error:', error);
-        return; // Hata durumunda fonksiyondan çık
+        return; 
       }
     }
     

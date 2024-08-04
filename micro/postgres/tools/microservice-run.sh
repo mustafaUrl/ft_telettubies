@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# PostgreSQL veritabanı ve kullanıcı oluşturma işlemleri
 if [ -z "$(psql -tAc "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB'")" ]; then
     echo "Database does not exist. Creating now..."
     psql -U postgres <<EOF
@@ -20,5 +19,4 @@ else
     echo "User already exists."
 fi
 
-# PostgreSQL'i başlat
 exec postgres

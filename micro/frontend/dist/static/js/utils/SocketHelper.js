@@ -1,4 +1,3 @@
-//import { sendPostUserRequest } from './RequestHelper.js';
 
 function joinRoom(friendUsername) {
     if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
@@ -12,7 +11,6 @@ function joinRoom(friendUsername) {
     }
   }
   
-  // Odayı terk etme komutunu gönder
   function leaveRoom(friendUsername) {
     if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
@@ -25,7 +23,6 @@ function joinRoom(friendUsername) {
     }
   }
   
-  // Mesaj gönderme komutunu gönder
   function sendMessage(text) {
     if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
       const message = {
@@ -48,17 +45,7 @@ function joinRoom(friendUsername) {
 
   function checkBlocked(friendUsername) {
 
-    /* return new Promise((resolve, reject) => {
-      sendPostUserRequest('check_blocked', friendUsername)
-        .then(data => {
-          resolve(data);
-        })
-        .catch(error => {
-          console.error('Processing error:', error);
-          reject(error);
-        });
-    }
-    ); */
+    
   }
 
   export { closeSocket, sendMessage, joinRoom, leaveRoom, checkBlocked };

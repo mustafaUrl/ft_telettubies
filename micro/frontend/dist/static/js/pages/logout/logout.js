@@ -21,13 +21,11 @@ export default function logout() {
         return response.json();
       })
       .then(() => {
-        // Gerekli temizlik işlemlerini yapın
         deleteCookie('accessToken');
         deleteCookie('refreshToken');
         deleteCookie('username');
         closeSocket();
   
-        // Kullanıcıyı giriş sayfasına yönlendir
         changeContent('sign-in');
       })
       .catch(error => {
@@ -36,7 +34,6 @@ export default function logout() {
         deleteCookie('username');
         closeSocket();
   
-        // Kullanıcıyı giriş sayfasına yönlendir
         changeContent('sign-in');
         console.error('There has been a problem with your fetch operation:', error);
       });

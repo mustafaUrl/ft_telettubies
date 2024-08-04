@@ -122,6 +122,7 @@ function listFriends() {
   }
 
   
+  
   function pendingFriendRequests() {
     sendPostUserRequest('list_pending_friend_requests')
     .then(data => {
@@ -141,6 +142,13 @@ function listFriends() {
         acceptBtn.className = 'btn btn-success btn-sm';
         acceptBtn.textContent = 'Accept';
         acceptBtn.onclick = function() { acceptFriendRequest(request.from_user);
+          if (window.chatSocket) {
+            window.chatSocket.send(JSON.stringify({
+              'username': "test",
+              'room': 'test',
+              'command': 'online_players'
+            }));
+          }
          if (window.chatSocketPrivate && window.chatSocketPrivate.readyState === WebSocket.OPEN) {
           const message = {
             command: 'update'

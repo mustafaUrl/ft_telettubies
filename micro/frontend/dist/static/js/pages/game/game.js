@@ -11,7 +11,7 @@ export default function game() {
     const canvas = document.createElement('canvas');
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    canvas.id = 'gameCanvas'; // Canvas'a id ekleyin
+    canvas.id = 'gameCanvas'; 
     canvas.style.display = 'block';
     canvas.style.margin = 'auto';
     canvas.style.position = 'absolute';
@@ -27,81 +27,71 @@ export default function game() {
 
     // Your Three.js setup code here...
 
-    // Sahne oluşturma
     const scene = new THREE.Scene();
 
-    // Kamera oluşturma
+
     const aspectRatio = canvasWidth / canvasHeight;
     const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 2000);
-    camera.position.set(800, 21, 800); // Kamerayı daha uzak bir noktaya konumlandır
+    camera.position.set(800, 21, 800); 
     camera.lookAt(0, 0, 0);
 
  
    const transparentMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, transparent: true });
    const neonEdgeMaterial = new THREE.LineBasicMaterial({ color: 0xff00ff });
 
-   // Oyun alanını boyamak için bir plane oluşturun
+
    const playAreaGeometry = new THREE.PlaneGeometry(canvasWidth, canvasHeight / 2 + 100);
    const playArea = new THREE.Mesh(playAreaGeometry, transparentMaterial);
-   playArea.rotation.x = -Math.PI / 2; // X ekseni etrafında 90 derece döndür, böylece yatay olur
-   playArea.position.y = canvasHeight / 2 + 5; // Oyun alanını biraz aşağıya koy, böylece paddle'lar üstünde durur
-   playArea.position.z = 200; // Oyun alanının ortasında
+   playArea.rotation.x = -Math.PI / 2;
+   playArea.position.y = canvasHeight / 2 + 5; 
+   playArea.position.z = 200; 
 
-   // Kenarlarını ekle
    const playAreaEdges = new THREE.EdgesGeometry(playAreaGeometry);
    const playAreaLines = new THREE.LineSegments(playAreaEdges, neonEdgeMaterial);
    playArea.add(playAreaLines);
 
    scene.add(playArea);
 
-   // Sol kenara zemin eklemek için bir plane oluşturun
    const leftWallGeometry = new THREE.PlaneGeometry(canvasHeight / 2 + 100, canvasHeight);
    const leftWall = new THREE.Mesh(leftWallGeometry, transparentMaterial);
-   leftWall.rotation.y = Math.PI / 2; // Y ekseni etrafında 90 derece döndür, böylece dikey olur
-   leftWall.position.x = -canvasWidth / 2; // Oyun alanının sol tarafında
-   leftWall.position.y = 1; // Y ekseni boyunca merkezde
-   leftWall.position.z = 200; // Oyun alanının ortasında
+   leftWall.rotation.y = Math.PI / 2; 
+   leftWall.position.x = -canvasWidth / 2; 
+   leftWall.position.y = 1; 
+   leftWall.position.z = 200; 
 
-   // Kenarlarını ekle
    const leftWallEdges = new THREE.EdgesGeometry(leftWallGeometry);
    const leftWallLines = new THREE.LineSegments(leftWallEdges, neonEdgeMaterial);
    leftWall.add(leftWallLines);
 
    scene.add(leftWall);
 
-   // Sağ kenara zemin eklemek için bir plane oluşturun
    const rightWallGeometry = new THREE.PlaneGeometry(canvasHeight / 2 + 100, canvasHeight);
    const rightWall = new THREE.Mesh(rightWallGeometry, transparentMaterial);
-   rightWall.rotation.y = -Math.PI / 2; // Y ekseni etrafında -90 derece döndür, böylece dikey olur
-   rightWall.position.x = canvasWidth / 2; // Oyun alanının sağ tarafında
-   rightWall.position.y = 1; // Y ekseni boyunca merkezde
-   rightWall.position.z = 200; // Oyun alanının ortasında
+   rightWall.rotation.y = -Math.PI / 2; 
+   rightWall.position.x = canvasWidth / 2; 
+   rightWall.position.y = 1; 
+   rightWall.position.z = 200; 
 
-   // Kenarlarını ekle
    const rightWallEdges = new THREE.EdgesGeometry(rightWallGeometry);
    const rightWallLines = new THREE.LineSegments(rightWallEdges, neonEdgeMaterial);
    rightWall.add(rightWallLines);
 
    scene.add(rightWall);
 
-   // Ortada bir zemin oluşturun
    const centerGroundGeometry = new THREE.PlaneGeometry(canvasWidth, canvasHeight);
    const centerGround = new THREE.Mesh(centerGroundGeometry, transparentMaterial);
-   centerGround.position.y = 1; // Y ekseni boyunca merkezde
-   centerGround.position.z = -30; // Oyun alanının ortasında
-   centerGround.position.x = 1; // Oyun alanının ortasında
+   centerGround.position.y = 1; 
+   centerGround.position.z = -30; 
+   centerGround.position.x = 1;
 
-   // Kenarlarını ekle
    const centerGroundEdges = new THREE.EdgesGeometry(centerGroundGeometry);
    const centerGroundLines = new THREE.LineSegments(centerGroundEdges, neonEdgeMaterial);
    centerGround.add(centerGroundLines);
 
    scene.add(centerGround);
 
-  // Paddle material
   const neonBlueMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
 
-  // Paddle geometry
   const paddleWidth = 30;
   const paddleHeight = 150;
   const paddleDepth = 40;
@@ -148,15 +138,14 @@ export default function game() {
  ball.position.set(0, 0, 0);
  scene.add(ball);
 
-    // Topun hızını ve yönünü ayarla (ilk olarak topu hareket ettir)
+ 
     let ballSpeed = 10;
     let ballDirection = new THREE.Vector3(1, 1, 0).normalize();
 
-    // Hareket miktarını ve klavye olaylarını sıklaştırma
-    const paddleMoveStep = 10; // Her klavye olayında paddle'ın hareket edeceği adım miktarı
-
-    // Klavye olaylarını dinle
-    // Maintain a set of pressed keys
+    
+    const paddleMoveStep = 10;
+    
+    
     const pressedKeys = new Set();
     let isCameraRotated = false; // Initialize camera rotation state
     let gameRunning = false; // Initialize game running state
@@ -179,25 +168,25 @@ export default function game() {
     // Define the game loop
     function gameLoop() {
         if (pressedKeys.has('w')) {
-            // Sol paddle'ı yukarı hareket ettir
+            
             if (paddle1.position.y < canvasHeight / 2 - paddleHeight / 2) {
                 paddle1.position.y += paddleMoveStep;
             }
         }
         if (pressedKeys.has('s')) {
-            // Sol paddle'ı aşağı hareket ettir
+            
             if (paddle1.position.y > -canvasHeight / 2 + paddleHeight / 2) {
                 paddle1.position.y -= paddleMoveStep;
             }
         }
         if (pressedKeys.has('ArrowUp')) {
-            // Sağ paddle'ı yukarı hareket ettir
+            
             if (paddle2.position.y < canvasHeight / 2 - paddleHeight / 2) {
                 paddle2.position.y += paddleMoveStep;
             }
         }
         if (pressedKeys.has('ArrowDown')) {
-            // Sağ paddle'ı aşağı hareket ettir
+            
             if (paddle2.position.y > -canvasHeight / 2 + paddleHeight / 2) {
                 paddle2.position.y -= paddleMoveStep;
             }
@@ -206,7 +195,7 @@ export default function game() {
         requestAnimationFrame(gameLoop);
     }
 
-    // Skorları tutmak için değişkenler
+   
     let scoreP1 = 0;
     let scoreP2 = 0;
 
@@ -249,25 +238,25 @@ export default function game() {
     // Define the game loop
     function gameLoop() {
         if (pressedKeys.has('w')) {
-            // Sol paddle'ı yukarı hareket ettir
+            
             if (paddle1.position.y < canvasHeight / 2 - paddleHeight / 2) {
                 paddle1.position.y += paddleMoveStep;
             }
         }
         if (pressedKeys.has('s')) {
-            // Sol paddle'ı aşağı hareket ettir
+            
             if (paddle1.position.y > -canvasHeight / 2 + paddleHeight / 2) {
                 paddle1.position.y -= paddleMoveStep;
             }
         }
         if (pressedKeys.has('ArrowUp')) {
-            // Sağ paddle'ı yukarı hareket ettir
+            
             if (paddle2.position.y < canvasHeight / 2 - paddleHeight / 2) {
                 paddle2.position.y += paddleMoveStep;
             }
         }
         if (pressedKeys.has('ArrowDown')) {
-            // Sağ paddle'ı aşağı hareket ettir
+            
             if (paddle2.position.y > -canvasHeight / 2 + paddleHeight / 2) {
                 paddle2.position.y -= paddleMoveStep;
             }
@@ -275,13 +264,12 @@ export default function game() {
         // Call the game loop again on the next frame
         gameLoopId = requestAnimationFrame(gameLoop);
     }
-    let winScore = 1;
-    // Animasyon döngüsü
+    let winScore = 3;
+
     function animate() {
         if (!gameRunning) return;
         animateId = requestAnimationFrame(animate);
 
-        // Change camera angle
         if (isCameraRotated) {
             camera.position.set(0, -900, 150); // Rotate the camera
             camera.lookAt(0, 0, 0);

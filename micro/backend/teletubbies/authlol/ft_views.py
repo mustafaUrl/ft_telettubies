@@ -109,7 +109,7 @@ def ft_auth(request):
         user = User.objects.create_user(
             username=username, 
             email= user_info.get('email'), 
-            password=password, #hashli şifre için <3 
+            password=password, 
             first_name=user_info.get('first_name'), 
             last_name= user_info.get('last_name'),
             is_active=True
@@ -118,38 +118,30 @@ def ft_auth(request):
    
     
 
-    # Resmi URL'den çekme
         response = requests.get(imageUrl)
         
         if response.status_code == 200:
-            # Resmi ContentFile olarak kaydetme
             image_content = ContentFile(response.content)
             
-            # FileSystemStorage nesnesi oluşturma
             fs = FileSystemStorage()
             
-            # Dosya adını belirleme (örneğin: 'profile_picture.jpg')
             picture_name = username +'.jpg'
             filename = fs.save('profile_pictures/' + picture_name , image_content)
             
-            # Kaydedilen dosyanın URL'sini almak
             uploaded_file_url = fs.url(filename)
 
-            # 'MEDIA_URL' değerini kaldır
             if uploaded_file_url.startswith(settings.MEDIA_URL):
-                # 'MEDIA_URL' uzunluğu kadar baştan kes
                 uploaded_file_url = uploaded_file_url[len(settings.MEDIA_URL):]
             
-            # UserProfile modeline kaydedilen dosya yolunu ilişkilendirme
             UserProfile.objects.create(
             user=user,
-            profile_picture= uploaded_file_url  # Varsayılan resmin yolu
+            profile_picture= uploaded_file_url
             )
             
         else:
             UserProfile.objects.create(
             user=user,
-            profile_picture='profile_pictures/pp.jpeg'  # Varsayılan resmin yolu
+            profile_picture='profile_pictures/pp.jpeg'  
             )
 
         user.save()

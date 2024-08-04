@@ -23,14 +23,11 @@ export default async function sendPostUserRequest(action, friend_username = null
       });
   
       if (response.status === 401) {
-        // Eğer yanıt 401 ise, token yenileme fonksiyonunu çağır
         const newAccessToken = await refreshAccessToken();
-        // Yeni access token ile headerları güncelle
         headers = new Headers({
           'Authorization': 'Bearer ' + newAccessToken,
           'Content-Type': 'application/json'
         });
-        // İsteği yeni token ile tekrar gönder
         response = await fetch('api/user/user_actions/', {
           method: 'POST',
           headers: headers,
@@ -38,12 +35,10 @@ export default async function sendPostUserRequest(action, friend_username = null
         });
       }
   
-      // İkinci isteğin sonucunu al
       const data = await response.json();
-      return data; // İşlem başarılıysa veriyi dön
+      return data; 
     } catch (error) {
-      // Hata oluşursa burada ele al
       console.error('An error occurred during the request:', error);
-      throw error; // Hata bilgisini dışarı fırlat
+      throw error; 
     }
   }

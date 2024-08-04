@@ -104,7 +104,7 @@ export default function lobby() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Winner</h5>
+          <h5 class="modal-title">Pong Match</h5>
         </div>
         <div class="modal-body">
           <p id="PlayerMessage"></p>
@@ -230,10 +230,10 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   const now = new Date();
   const minStartTime = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
   
- /*  if (startTime < minStartTime) {
+   if (startTime < minStartTime) {
     alert('Start time must be at least 2 minutes from now.');
     return;
-  }  */
+  }  
 
   if (numPlayers > 15 || numPlayers < 2) {
     alert('The number of players must be between 2 and 15.');
@@ -263,7 +263,7 @@ document.getElementById('submitTournament').addEventListener('click', () => {
   }
 
   const localDateTime = new Date(startTimeInput);
-  const utcDateTime = localDateTime.toISOString(); // UTC'ye dönüştür
+  const utcDateTime = localDateTime.toISOString(); 
 
   if (window.chatSocket) {
     window.chatSocket.send(JSON.stringify({
