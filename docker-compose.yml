@@ -20,7 +20,6 @@ services:
       - backend_network
       - frontend_network
     volumes:
-      - ./backend/teletubbies/:/code/
       - media_volume:/code/media
     ports:
       - "8000:8000"

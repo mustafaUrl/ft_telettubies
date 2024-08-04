@@ -1,9 +1,3 @@
-myenv
-testlol/media/profile_pictures/*
-!testlol/media/profile_pictures/.gitkeep
 *.pyc
 frontend/dist/static/img/
-others
-micro/data
-micro/backend/teletubbies/db.sqlite3
-envmy
+backend/teletubbies/media/profile_pictures/
